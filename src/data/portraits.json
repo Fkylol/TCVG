@@ -1,0 +1,623 @@
+{
+  "generatedAt": "2026-10-22T19:54:25.989Z",
+  "source": "en.wikipedia.org",
+  "note": "Visuels hotlinkés depuis upload.wikimedia.org. Projet de fan non officiel : la plupart de ces images sont en fair use sur Wikipédia (voir README).",
+  "items": {
+    "2b": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/7/77/2B_Nier_Automata.png",
+      "wikiTitle": "2B",
+      "page": "https://en.wikipedia.org/wiki/2B",
+      "file": "2B Nier Automata.png",
+      "width": 228,
+      "height": 439,
+      "credit": "NieR: Automata World Guide Volume 1",
+      "license": "Fair use"
+    },
+    "aerith": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/2/2f/Aerith_Gainsborough.png",
+      "wikiTitle": "Aerith Gainsborough",
+      "page": "https://en.wikipedia.org/wiki/Aerith_Gainsborough",
+      "file": "Aerith Gainsborough.png",
+      "width": 259,
+      "height": 385,
+      "license": "Fair use"
+    },
+    "alucard": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/e/eb/Alucard-sotn.png",
+      "wikiTitle": "Alucard (Castlevania)",
+      "page": "https://en.wikipedia.org/wiki/Alucard_(Castlevania)",
+      "file": "Alucard-sotn.png",
+      "width": 269,
+      "height": 371,
+      "license": "Fair use"
+    },
+    "arbiter": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/3/37/Arbiter_H5.png",
+      "wikiTitle": "Arbiter (Halo)",
+      "page": "https://en.wikipedia.org/wiki/Arbiter_(Halo)",
+      "file": "Arbiter H5.png",
+      "width": 269,
+      "height": 370,
+      "credit": "343 Industries",
+      "license": "Fair use"
+    },
+    "banjo-kazooie": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/c/cd/Banjo_and_Kazooie_2000.png",
+      "wikiTitle": "Banjo & Kazooie",
+      "page": "https://en.wikipedia.org/wiki/Banjo_%26_Kazooie",
+      "file": "Banjo and Kazooie 2000.png",
+      "width": 306,
+      "height": 326,
+      "credit": "Rare / Nintendo / Microsoft",
+      "license": "Fair use"
+    },
+    "bison": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/e/e4/Bison_%28Super_Street_Fighter_II%29.png",
+      "wikiTitle": "M. Bison",
+      "page": "https://en.wikipedia.org/wiki/M._Bison",
+      "file": "Bison (Super Street Fighter II).png",
+      "width": 217,
+      "height": 459,
+      "license": "Fair use"
+    },
+    "bowser": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/d/d1/Bowser_by_Shigehisa_Nakaue.png",
+      "wikiTitle": "Bowser",
+      "page": "https://en.wikipedia.org/wiki/Bowser",
+      "file": "Bowser by Shigehisa Nakaue.png",
+      "width": 357,
+      "height": 279,
+      "credit": "Shigehisa Nakaue (artist) / Nintendo (owner)",
+      "license": "Fair use"
+    },
+    "charizard": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/1/1f/Pok%C3%A9mon_Charizard_art.png",
+      "wikiTitle": "Charizard",
+      "page": "https://en.wikipedia.org/wiki/Charizard",
+      "file": "Pokémon Charizard art.png",
+      "width": 326,
+      "height": 256,
+      "license": "Fair use"
+    },
+    "chell": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/4/40/Chell.png",
+      "wikiTitle": "Chell (Portal)",
+      "page": "https://en.wikipedia.org/wiki/Chell_(Portal)",
+      "file": "Chell.png",
+      "width": 191,
+      "height": 385,
+      "license": "Fair use"
+    },
+    "cloud": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/9/9e/Cloud_Strife.png",
+      "wikiTitle": "Cloud Strife",
+      "page": "https://en.wikipedia.org/wiki/Cloud_Strife",
+      "file": "Cloud Strife.png",
+      "width": 287,
+      "height": 347,
+      "license": "Fair use"
+    },
+    "cortana": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/7/75/Cortana_h5.png",
+      "wikiTitle": "Cortana (Halo)",
+      "page": "https://en.wikipedia.org/wiki/Cortana_(Halo)",
+      "file": "Cortana h5.png",
+      "width": 228,
+      "height": 438,
+      "license": "Fair use"
+    },
+    "cortex": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/8/87/IAT_Neo_Cortex.png",
+      "wikiTitle": "Doctor Neo Cortex",
+      "page": "https://en.wikipedia.org/wiki/Doctor_Neo_Cortex",
+      "file": "IAT Neo Cortex.png",
+      "width": 286,
+      "height": 349,
+      "credit": "Toys For Bob",
+      "license": "Fair use"
+    },
+    "crash": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/a/a3/IAT_Crash_Bandicoot.png",
+      "wikiTitle": "Crash Bandicoot (character)",
+      "page": "https://en.wikipedia.org/wiki/Crash_Bandicoot_(character)",
+      "file": "IAT Crash Bandicoot.png",
+      "width": 272,
+      "height": 367,
+      "credit": "Toys For Bob",
+      "license": "Fair use"
+    },
+    "creeper": {
+      "url": "https://upload.wikimedia.org/wikipedia/commons/a/a9/Minecraft_Creeper_%28Crop%29.png",
+      "wikiTitle": "Creeper (Minecraft)",
+      "page": "https://en.wikipedia.org/wiki/Creeper_(Minecraft)",
+      "file": "Minecraft Creeper (Crop).png",
+      "width": 239,
+      "height": 461,
+      "credit": "Xbox México",
+      "license": "CC BY 3.0"
+    },
+    "cuphead": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/5/5a/CupheadCharacterPose.png",
+      "wikiTitle": "Cuphead (character)",
+      "page": "https://en.wikipedia.org/wiki/Cuphead_(character)",
+      "file": "CupheadCharacterPose.png",
+      "width": 193,
+      "height": 275,
+      "credit": "Studio MDHR",
+      "license": "Fair use"
+    },
+    "dante": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/0/0e/Dante_%28DMC%29.png",
+      "wikiTitle": "Dante (Devil May Cry)",
+      "page": "https://en.wikipedia.org/wiki/Dante_(Devil_May_Cry)",
+      "file": "Dante (DMC).png",
+      "width": 268,
+      "height": 371,
+      "credit": "Capcom",
+      "license": "Fair use"
+    },
+    "doom-slayer": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/f/fc/Doom_Slayer.png",
+      "wikiTitle": "Doomguy",
+      "page": "https://en.wikipedia.org/wiki/Doomguy",
+      "file": "Doom Slayer.png",
+      "width": 236,
+      "height": 423,
+      "credit": "Sundown_Ageha",
+      "license": "Fair use"
+    },
+    "dracula": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/d/d1/Dracula-sotn.png",
+      "wikiTitle": "Dracula (Castlevania)",
+      "page": "https://en.wikipedia.org/wiki/Dracula_(Castlevania)",
+      "file": "Dracula-sotn.png",
+      "width": 265,
+      "height": 377,
+      "license": "Fair use"
+    },
+    "eggman": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/7/72/Doctor_EggmanSDT.png",
+      "wikiTitle": "Doctor Eggman",
+      "page": "https://en.wikipedia.org/wiki/Doctor_Eggman",
+      "file": "Doctor EggmanSDT.png",
+      "width": 405,
+      "height": 246,
+      "credit": "Original work: Naoto Ohshima , Yuji Uekawa Depiction: Sega",
+      "license": "Fair use"
+    },
+    "flowey": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/7/75/Flowey_Undertale.png",
+      "wikiTitle": "Flowey",
+      "page": "https://en.wikipedia.org/wiki/Flowey",
+      "file": "Flowey Undertale.png",
+      "width": 255,
+      "height": 390,
+      "credit": "Toby Fox , Fangamer",
+      "license": "Fair use"
+    },
+    "ganondorf": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/0/04/Ganondorf_Ocarina_of_Time.png",
+      "wikiTitle": "Ganon",
+      "page": "https://en.wikipedia.org/wiki/Ganon",
+      "file": "Ganondorf Ocarina of Time.png",
+      "width": 225,
+      "height": 442,
+      "credit": "Nintendo",
+      "license": "Fair use"
+    },
+    "geralt": {
+      "url": "https://upload.wikimedia.org/wikipedia/commons/8/87/Geralt.jpg",
+      "wikiTitle": "Geralt of Rivia",
+      "page": "https://en.wikipedia.org/wiki/Geralt_of_Rivia",
+      "file": "Geralt.jpg",
+      "width": 698,
+      "height": 1024,
+      "credit": "Александр Степченков (Alexandr Stepchenkov)",
+      "license": "CC BY-SA 2.0"
+    },
+    "glados": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/b/bf/Glados.png",
+      "wikiTitle": "GLaDOS",
+      "page": "https://en.wikipedia.org/wiki/GLaDOS",
+      "file": "Glados.png",
+      "width": 256,
+      "height": 302,
+      "license": "Fair use"
+    },
+    "gordon": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/2/20/Gordon_Freeman.png",
+      "wikiTitle": "Gordon Freeman",
+      "page": "https://en.wikipedia.org/wiki/Gordon_Freeman",
+      "file": "Gordon Freeman.png",
+      "width": 256,
+      "height": 365,
+      "license": "Fair use"
+    },
+    "hornet": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/4/4a/Hornet_%28Hollow_Knight%29.png",
+      "wikiTitle": "Hornet (Hollow Knight)",
+      "page": "https://en.wikipedia.org/wiki/Hornet_(Hollow_Knight)",
+      "file": "Hornet (Hollow Knight).png",
+      "width": 360,
+      "height": 277,
+      "credit": "Team Cherry",
+      "license": "Fair use"
+    },
+    "joker": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/f/f7/Joker_Persona.png",
+      "wikiTitle": "Joker (Persona)",
+      "page": "https://en.wikipedia.org/wiki/Joker_(Persona)",
+      "file": "Joker Persona.png",
+      "width": 344,
+      "height": 290,
+      "credit": "Atlus",
+      "license": "Fair use"
+    },
+    "king-dice": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/0/02/Cuphead-KingDice.png",
+      "wikiTitle": "King Dice",
+      "page": "https://en.wikipedia.org/wiki/King_Dice",
+      "file": "Cuphead-KingDice.png",
+      "width": 212,
+      "height": 377,
+      "license": "Fair use"
+    },
+    "kirby": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/4/4e/Kirby_Nintendo.png",
+      "wikiTitle": "Kirby (character)",
+      "page": "https://en.wikipedia.org/wiki/Kirby_(character)",
+      "file": "Kirby Nintendo.png",
+      "width": 336,
+      "height": 297,
+      "credit": "Nintendo",
+      "license": "Fair use"
+    },
+    "knuckles": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/0/06/Knuckles_the_Echidna.png",
+      "wikiTitle": "Knuckles the Echidna",
+      "page": "https://en.wikipedia.org/wiki/Knuckles_the_Echidna",
+      "file": "Knuckles the Echidna.png",
+      "width": 371,
+      "height": 269,
+      "license": "Fair use"
+    },
+    "kratos": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/2/2f/Kratos_PS4.png",
+      "wikiTitle": "Kratos (God of War)",
+      "page": "https://en.wikipedia.org/wiki/Kratos_(God_of_War)",
+      "file": "Kratos PS4.png",
+      "width": 231,
+      "height": 430,
+      "license": "Fair use"
+    },
+    "le-chevalier": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/d/de/Hollow_Knight_2026_cover_art.jpg",
+      "wikiTitle": "Hollow Knight",
+      "page": "https://en.wikipedia.org/wiki/Hollow_Knight",
+      "file": "Hollow Knight 2026 cover art.jpg",
+      "width": 316,
+      "height": 316,
+      "credit": "Team Cherry",
+      "license": "Fair use"
+    },
+    "link": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/9/9d/Link_%28Hyrule_Historia%29.png",
+      "wikiTitle": "Link (The Legend of Zelda)",
+      "page": "https://en.wikipedia.org/wiki/Link_(The_Legend_of_Zelda)",
+      "file": "Link (Hyrule Historia).png",
+      "width": 264,
+      "height": 377,
+      "license": "Fair use"
+    },
+    "luigi": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/b/be/Luigi_by_Shigehisa_Nakaue.png",
+      "wikiTitle": "Luigi (character)",
+      "page": "https://en.wikipedia.org/wiki/Luigi_(character)",
+      "file": "Luigi by Shigehisa Nakaue.png",
+      "width": 260,
+      "height": 384,
+      "credit": "Shigehisa Nakaue (artist) / Nintendo (owner)",
+      "license": "Fair use"
+    },
+    "madeline": {
+      "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/42/Celeste_character_Madeline.png/960px-Celeste_character_Madeline.png",
+      "wikiTitle": "Madeline (Celeste)",
+      "page": "https://en.wikipedia.org/wiki/Madeline_(Celeste)",
+      "file": "Celeste character Madeline.png",
+      "width": 720,
+      "height": 905,
+      "credit": "Maddy Makes Games",
+      "license": "CC BY-SA 4.0"
+    },
+    "malenia": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/b/b8/Malenia_Elden_Ring.png",
+      "wikiTitle": "Malenia",
+      "page": "https://en.wikipedia.org/wiki/Malenia",
+      "file": "Malenia Elden Ring.png",
+      "width": 267,
+      "height": 374,
+      "credit": "FromSoftware",
+      "license": "Fair use"
+    },
+    "mario": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/5/5c/Mario_by_Shigehisa_Nakaue.png",
+      "wikiTitle": "Mario",
+      "page": "https://en.wikipedia.org/wiki/Mario",
+      "file": "Mario by Shigehisa Nakaue.png",
+      "width": 275,
+      "height": 362,
+      "credit": "Shigehisa Nakaue (artist) / Nintendo (owner)",
+      "license": "Fair use"
+    },
+    "master-chief": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/4/42/Master_chief_halo_infinite.png",
+      "wikiTitle": "Master Chief (Halo)",
+      "page": "https://en.wikipedia.org/wiki/Master_Chief_(Halo)",
+      "file": "Master chief halo infinite.png",
+      "width": 244,
+      "height": 504,
+      "license": "Fair use"
+    },
+    "mercy": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/1/15/Mercy_Overwatch.png",
+      "wikiTitle": "Mercy (Overwatch)",
+      "page": "https://en.wikipedia.org/wiki/Mercy_(Overwatch)",
+      "file": "Mercy Overwatch.png",
+      "width": 206,
+      "height": 483,
+      "license": "Fair use"
+    },
+    "meta-knight": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/3/32/Meta_Knight_Super_Star.png",
+      "wikiTitle": "Meta Knight",
+      "page": "https://en.wikipedia.org/wiki/Meta_Knight",
+      "file": "Meta Knight Super Star.png",
+      "width": 365,
+      "height": 273,
+      "credit": "HAL Laboratory",
+      "license": "Fair use"
+    },
+    "mewtwo": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/4/43/Pok%C3%A9mon_Mewtwo_art.png",
+      "wikiTitle": "Mewtwo",
+      "page": "https://en.wikipedia.org/wiki/Mewtwo",
+      "file": "Pokémon Mewtwo art.png",
+      "width": 285,
+      "height": 350,
+      "license": "Fair use"
+    },
+    "nemesis": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/2/2b/Nemesis0.png",
+      "wikiTitle": "Nemesis (Resident Evil)",
+      "page": "https://en.wikipedia.org/wiki/Nemesis_(Resident_Evil)",
+      "file": "Nemesis0.png",
+      "width": 226,
+      "height": 441,
+      "license": "Fair use"
+    },
+    "papyrus": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/0/0e/Undertale_Papyrus.png",
+      "wikiTitle": "Papyrus (Undertale)",
+      "page": "https://en.wikipedia.org/wiki/Papyrus_(Undertale)",
+      "file": "Undertale Papyrus.png",
+      "width": 204,
+      "height": 329,
+      "credit": "Toby Fox , Fangamer",
+      "license": "Fair use"
+    },
+    "peach": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/1/16/Princess_Peach_Stock_Art.png",
+      "wikiTitle": "Princess Peach",
+      "page": "https://en.wikipedia.org/wiki/Princess_Peach",
+      "file": "Princess Peach Stock Art.png",
+      "width": 243,
+      "height": 410,
+      "credit": "Shigehisa Nakaue",
+      "license": "Fair use"
+    },
+    "pikachu": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/a/a6/Pok%C3%A9mon_Pikachu_art.png",
+      "wikiTitle": "Pikachu",
+      "page": "https://en.wikipedia.org/wiki/Pikachu",
+      "file": "Pokémon Pikachu art.png",
+      "width": 316,
+      "height": 316,
+      "credit": "Game Freak",
+      "license": "Fair use"
+    },
+    "radahn": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/d/dc/Starscourge_Radahn_concept_art.png",
+      "wikiTitle": "Starscourge Radahn",
+      "page": "https://en.wikipedia.org/wiki/Starscourge_Radahn",
+      "file": "Starscourge Radahn concept art.png",
+      "width": 301,
+      "height": 331,
+      "credit": "FromSoftware",
+      "license": "Fair use"
+    },
+    "reaper": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/f/f1/Overwatch-Reaper.png",
+      "wikiTitle": "Reaper (Overwatch)",
+      "page": "https://en.wikipedia.org/wiki/Reaper_(Overwatch)",
+      "file": "Overwatch-Reaper.png",
+      "width": 278,
+      "height": 357,
+      "license": "Fair use"
+    },
+    "ridley": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/9/93/Ridley_Super_Smash_Bros_Ultimate.png",
+      "wikiTitle": "Ridley (Metroid)",
+      "page": "https://en.wikipedia.org/wiki/Ridley_(Metroid)",
+      "file": "Ridley Super Smash Bros Ultimate.png",
+      "width": 316,
+      "height": 315,
+      "credit": "Nintendo",
+      "license": "Fair use"
+    },
+    "ryu": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/5/50/RyuStreetFighterTwoHadoken.png",
+      "wikiTitle": "Ryu (Street Fighter)",
+      "page": "https://en.wikipedia.org/wiki/Ryu_(Street_Fighter)",
+      "file": "RyuStreetFighterTwoHadoken.png",
+      "width": 267,
+      "height": 374,
+      "credit": "Namco, Capcom",
+      "license": "Fair use"
+    },
+    "samus": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/d/d6/Samus_Aran.png",
+      "wikiTitle": "Samus Aran",
+      "page": "https://en.wikipedia.org/wiki/Samus_Aran",
+      "file": "Samus Aran.png",
+      "width": 214,
+      "height": 467,
+      "license": "Fair use"
+    },
+    "sans": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/3/3e/Undertale_Sans.png",
+      "wikiTitle": "Sans (Undertale)",
+      "page": "https://en.wikipedia.org/wiki/Sans_(Undertale)",
+      "file": "Undertale Sans.png",
+      "width": 206,
+      "height": 307,
+      "credit": "Toby Fox , Fangamer",
+      "license": "Fair use"
+    },
+    "sephiroth": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/c/c4/Sephiroth.png",
+      "wikiTitle": "Sephiroth (Final Fantasy)",
+      "page": "https://en.wikipedia.org/wiki/Sephiroth_(Final_Fantasy)",
+      "file": "Sephiroth.png",
+      "width": 271,
+      "height": 367,
+      "license": "Fair use"
+    },
+    "shadow": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/4/41/ShadowTheHedgehogSA2.png",
+      "wikiTitle": "Shadow the Hedgehog",
+      "page": "https://en.wikipedia.org/wiki/Shadow_the_Hedgehog",
+      "file": "ShadowTheHedgehogSA2.png",
+      "width": 270,
+      "height": 370,
+      "credit": "Yuji Uekawa (author), Sonic Team/Sega (copyright owner)",
+      "license": "Fair use"
+    },
+    "simon": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/7/7d/CVGoS_Simon_Belmont.png",
+      "wikiTitle": "Simon Belmont",
+      "page": "https://en.wikipedia.org/wiki/Simon_Belmont",
+      "file": "CVGoS Simon Belmont.png",
+      "width": 331,
+      "height": 301,
+      "license": "Fair use"
+    },
+    "solaire": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/f/f5/Solaire_Concept_Art.png",
+      "wikiTitle": "Solaire of Astora",
+      "page": "https://en.wikipedia.org/wiki/Solaire_of_Astora",
+      "file": "Solaire Concept Art.png",
+      "width": 238,
+      "height": 418,
+      "credit": "From Software",
+      "license": "Fair use"
+    },
+    "sonic": {
+      "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1f/Sonic_The_Hedgehog.svg/960px-Sonic_The_Hedgehog.svg.png",
+      "wikiTitle": "Sonic the Hedgehog",
+      "page": "https://en.wikipedia.org/wiki/Sonic_the_Hedgehog",
+      "file": "Sonic The Hedgehog.svg",
+      "width": 720,
+      "height": 279,
+      "credit": "Sega",
+      "license": "Public domain"
+    },
+    "sora": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/5/59/Sora_%28Art%29_KH.png",
+      "wikiTitle": "Sora (Kingdom Hearts)",
+      "page": "https://en.wikipedia.org/wiki/Sora_(Kingdom_Hearts)",
+      "file": "Sora (Art) KH.png",
+      "width": 237,
+      "height": 420,
+      "credit": "Square Enix",
+      "license": "Fair use"
+    },
+    "spyro": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/5/53/Spyro.png",
+      "wikiTitle": "Spyro (character)",
+      "page": "https://en.wikipedia.org/wiki/Spyro_(character)",
+      "file": "Spyro.png",
+      "width": 296,
+      "height": 335,
+      "credit": "Activision",
+      "license": "Fair use"
+    },
+    "steve": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/e/e7/Steve_%28Minecraft%29.png",
+      "wikiTitle": "Steve (Minecraft)",
+      "page": "https://en.wikipedia.org/wiki/Steve_(Minecraft)",
+      "file": "Steve (Minecraft).png",
+      "width": 285,
+      "height": 350,
+      "credit": "Mojang Studios , Nintendo",
+      "license": "Fair use"
+    },
+    "tifa": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/6/61/Tifa_Lockhart_art.png",
+      "wikiTitle": "Tifa Lockhart",
+      "page": "https://en.wikipedia.org/wiki/Tifa_Lockhart",
+      "file": "Tifa Lockhart art.png",
+      "width": 218,
+      "height": 457,
+      "credit": "Tetsuya Nomura / Square Enix",
+      "license": "Fair use"
+    },
+    "vergil": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/d/d7/VergilDMC5.png",
+      "wikiTitle": "Vergil (Devil May Cry)",
+      "page": "https://en.wikipedia.org/wiki/Vergil_(Devil_May_Cry)",
+      "file": "VergilDMC5.png",
+      "width": 301,
+      "height": 332,
+      "credit": "Capcom",
+      "license": "Fair use"
+    },
+    "wheatley": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/9/94/Wheatley.png",
+      "wikiTitle": "Wheatley (Portal)",
+      "page": "https://en.wikipedia.org/wiki/Wheatley_(Portal)",
+      "file": "Wheatley.png",
+      "width": 256,
+      "height": 262,
+      "license": "Fair use"
+    },
+    "xehanort": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/7/77/Xehanortallversions.png",
+      "wikiTitle": "Xehanort",
+      "page": "https://en.wikipedia.org/wiki/Xehanort",
+      "file": "Xehanortallversions.png",
+      "width": 334,
+      "height": 298,
+      "credit": "Square Enix",
+      "license": "Fair use"
+    },
+    "yoshi": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/d/db/Yoshi_%28Nintendo_character%29.png",
+      "wikiTitle": "Yoshi",
+      "page": "https://en.wikipedia.org/wiki/Yoshi",
+      "file": "Yoshi (Nintendo character).png",
+      "width": 252,
+      "height": 395,
+      "license": "Fair use"
+    },
+    "zelda": {
+      "url": "https://upload.wikimedia.org/wikipedia/en/6/6e/Link_to_the_Past_Zelda.png",
+      "wikiTitle": "Princess Zelda",
+      "page": "https://en.wikipedia.org/wiki/Princess_Zelda",
+      "file": "Link to the Past Zelda.png",
+      "width": 236,
+      "height": 423,
+      "credit": "Nintendo",
+      "license": "Fair use"
+    }
+  }
+}
