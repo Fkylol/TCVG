@@ -376,30 +376,34 @@ body {
   box-shadow: 0 24px 60px -30px rgba(0, 0, 0, 0.95);
 }
 
-/* Dos de carte fourni par le joueur, teinté par la rareté. */
+/* Dos de carte fourni par le joueur. Tant que la carte n'est pas préparée,
+   il reste neutre : aucune lueur ne trahit la rareté. */
 .reveal-back {
   display: flex;
   align-items: center;
   justify-content: center;
   background: #08090a;
   border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow:
-    0 26px 60px -30px rgba(0, 0, 0, 0.95),
-    0 0 0 1px var(--aura),
-    0 0 var(--aura-blur) var(--aura-soft),
-    inset 0 0 calc(var(--aura-blur) * 0.8) var(--aura-soft);
-  transition: border-color 200ms ease, box-shadow 200ms ease;
+  box-shadow: 0 26px 60px -30px rgba(0, 0, 0, 0.95);
+  transition: border-color 320ms ease, box-shadow 320ms ease;
 }
 
-/* Lueur interne : elle pulse plus ou moins fort selon la rareté. */
+/* Lueur interne : elle n'apparaît qu'une fois la carte préparée, et pulse
+   plus ou moins fort selon la rareté. */
 .reveal-glow {
   position: absolute;
   inset: 0;
   background: radial-gradient(54% 44% at 50% 41%, var(--aura-soft), transparent 74%);
   mix-blend-mode: screen;
+  opacity: 0;
+  transition: opacity 320ms ease;
+  pointer-events: none;
+}
+
+.reveal-stage[data-ready="true"] .reveal-glow,
+.reveal-stage[data-charging="true"] .reveal-glow {
   opacity: var(--aura-opacity);
   animation: back-breathe 3.4s ease-in-out infinite;
-  pointer-events: none;
 }
 
 @keyframes back-breathe {
@@ -412,7 +416,8 @@ body {
   }
 }
 
-/* Halo autour de la carte, visible avant le retournement. */
+/* Halo autour de la carte : éteint au départ, il ne s'allume qu'au premier
+   clic pour laisser deviner la rareté. */
 .reveal-aura {
   position: absolute;
   inset: -12%;
@@ -420,18 +425,21 @@ body {
   border-radius: 1.6rem;
   background: radial-gradient(circle, var(--aura-soft), transparent 66%);
   filter: blur(16px);
-  opacity: var(--aura-opacity);
-  transition: opacity 280ms ease;
+  opacity: 0;
+  transition: opacity 320ms ease;
   pointer-events: none;
 }
 
 .reveal-stage[data-open="true"] .reveal-aura {
   opacity: 0;
+  animation: none;
 }
 
-/* Carte préparée : le dos pulse et la lueur monte d'un cran, sans se
-   retourner. Il faut un second clic pour la révéler. */
-.reveal-stage[data-ready="true"] .reveal-aura {
+/* Carte préparée : la lueur s'allume et pulse, sans se retourner. Il faut un
+   second clic pour la révéler. */
+.reveal-stage[data-ready="true"] .reveal-aura,
+.reveal-stage[data-charging="true"] .reveal-aura {
+  opacity: var(--aura-opacity);
   animation: ready-pulse 2.4s ease-in-out infinite;
 }
 

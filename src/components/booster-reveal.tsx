@@ -303,7 +303,7 @@ export function BoosterReveal({
                     {phase === "charging"
                       ? "Ça se dévoile…"
                       : phase === "ready"
-                        ? "Touche encore la carte pour la retourner"
+                        ? "La lueur trahit sa rareté — touche encore pour la retourner"
                         : "Touche la carte pour commencer"}
                   </p>
                 )}
