@@ -93,6 +93,8 @@ La route `src/app/auth/confirm/route.ts` échange le code OAuth contre une sessi
 - **Collection** : une ligne par personnage possédé (`quantity` pour les doublons). La table est en
   lecture seule côté client : la seule écriture possible passe par la fonction SQL.
 - **Fiche perso** : stats, pouvoir, citation, bio, et les autres cartes du même univers.
+- **Marché** : annonces de doublons (normales ou holos), achat atomique en Pixels avec 5 % de
+  commission, prix encadrés par les ventes récentes et les garde-fous de rareté.
 
 ## Visuels des personnages
 
@@ -131,7 +133,8 @@ src/
     (game)/               routes protégées (layout = garde de session)
       boosters/           ouverture de booster
       collection/         album filtrable
-      card/[id]/          fiche wiki d'un personnage
+      card/[id]/          fiche wiki + mise en vente
+      marche/             annonces et achats entre joueurs
   components/             cartes, booster, filtres, formulaires
   lib/
     cards.ts              ← catalogue des personnages (source de vérité)

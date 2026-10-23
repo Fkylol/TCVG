@@ -5,8 +5,9 @@ _Mis à jour le 23 octobre 2026._
 ## Où en est le site
 
 - Production : <https://tcvg.fkylol.workers.dev> — version déployée `b1b39a8c` (recyclage + Discord uniquement).
-- Base : projet Supabase `jvmozjfibkbkzzpafoos`, migrations `002` à `010` appliquées.
-- Code : `tsc` propre, `lint` propre, `npm test` 9/9, `npm run build` OK.
+- Base : projet Supabase `jvmozjfibkbkzzpafoos`, migrations `002` à `011` appliquées.
+- Code local : `tsc` propre, `lint` propre, `npm test` 9/9, `npm run build` OK.
+- **Pas encore déployé** : marché entre joueurs et visuels de boosters par thème.
 
 ### Étapes livrées
 
@@ -16,49 +17,45 @@ _Mis à jour le 23 octobre 2026._
 | 2 · Pixels | fait | Solde dans l'en-tête, bonus quotidien de **10 Pixels / 24 h**, registre `pixel_transactions` |
 | 3 · Boosters payants | fait | Mix 20 P · 5 cartes, 3 boosters de genre à 30 P, pity 10 / 50, holo 2 % |
 | 4 · Recyclage des doublons | fait | `recycle_card` / `recycle_all_duplicates`, boutons collection + fiche carte, 21/21 vérifications en base |
+| 5 · Marché entre joueurs | fait (code) | Annonces normales et holos, achat atomique, commission 5 %, bornes dynamiques, `/marche` + vente depuis la fiche carte |
 | Connexion Discord | fait | Discord seul : plus de formulaire email, `/login` et `/signup` limités à l'OAuth |
 | Pied de page | fait | Six entrées : Raretés, Règles, Infos, Nouveautés, Classement, Avis et bugs |
 | Pages publiques | fait | `/regles`, `/infos`, `/nouveautes`, `/classement`, `/avis-et-bugs` |
-| Visuel du booster | fait | Image découpée de `booster1.jpg` → `public/booster/mix.jpg` |
+| Visuels des boosters | fait (code) | 11 visuels dans `public/booster/`, Mix en pack vitrine, un visuel par thème dans la boutique |
 
 ### Choses à faire côté tableaux de bord (pas dans le code)
 
 1. **Supabase → Authentication → URL Configuration** : Site URL = `https://tcvg.fkylol.workers.dev`, Redirect URLs = `https://tcvg.fkylol.workers.dev/**`. Tant que `localhost:3000` est la Site URL, la connexion renvoie sur `localhost:3000/?code=…` et la session n'est jamais créée.
 2. **Discord Developer Portal** : redirect `https://jvmozjfibkbkzzpafoos.supabase.co/auth/v1/callback`, puis fournisseur activé dans Supabase (déjà fait, l'erreur `Unsupported provider` a disparu).
-3. **Supabase → Authentication → Providers → Email** : désactiver le fournisseur, pour que Discord soit réellement la seule connexion possible côté serveur. Les comptes créés avec un email ne pourront plus se connecter.
+3. **Supabase → Authentication → Providers → Email** : fait — vérifié (« Email logins are disabled »). Seule la connexion Discord fonctionne.
 4. Vérifier après reconnexion que le solde `◆ N` apparaît dans l'en-tête.
 
 ---
 
 ## Ce qui reste
 
-### A. Étape 4 — recyclage des doublons · livrée
+### A. Étape 5 — marché entre joueurs · livrée (code, pas déployée)
 
-Migration `supabase/migrations/010_recyclage.sql` appliquée et code déployé le 23 octobre 2026.
+Migration `supabase/migrations/011_marche.sql` appliquée et testée le 23 octobre 2026 (39/39).
 
-- `recycle_values` : C 1 · R 3 · SR 10 · UR 40 · L 150 (modifiable en base).
-- Règle retenue : **une copie normale est toujours conservée** ; avec 1 normale + 1 holo, la normale n'est pas recyclable et l'holo l'est (3 ×).
-- `recycle_card(card_id, holo)` : une copie à la fois, holo à 3 × la valeur.
-- `recycle_all_duplicates()` : tous les doublons normaux en une instruction, holos intactes.
-- Interface : bouton « Recycler · +N ◆ » sous chaque carte de `/collection`, bouton « Recycler les doublons » avec total et confirmation, recyclage de holo sur `/card/[id]` avec confirmation. Le solde de l'en-tête et le compteur de doublons se rafraîchissent après l'action.
-- Vérifié en base sur un compte de test (21/21) : crédit unique, garde d'exemplaire, holo à 3 ×, tout-recycler sur 5 doublons, registre `pixel_transactions`, double clic simultané = un seul crédit. Compte supprimé ensuite.
+- `market_listings` : une ligne par copie mise en vente, statut active / sold / cancelled, traces de commission (`fee_pixels`) et du net vendeur (`seller_payout`).
+- **Escrow** : une copie quitte la collection à la mise en vente et y revient à l'annulation. Une normale reste toujours au vendeur ; une holo ne part que s'il reste une autre copie.
+- **Achat atomique** (`buy_listing`) : verrou de l'annonce, verrous de profils ordonnés, débit acheteur, crédit vendeur, transfert de la copie, deux lignes `pixel_transactions` (`achat_marche`, `vente_marche`). Achat de sa propre annonce interdit.
+- **Commission** : 5 % arrondis au supérieur, versés à personne (puits). Exemple : 400 P → 20 de commission, 380 au vendeur.
+- **Prix dynamiques** (`market_quote`) : médiane des ventes des 30 derniers jours dès 3 ventes, sinon base de la rareté. Fourchette = référence × 0,5 à × 2, encadrée par un plancher/plafond par rareté (`market_prices` : C 2–25 · R 5–75 · SR 15–250 · UR 60–1000 · L 200–3000). Holos : base et garde-fous × 3.
+- Limite : 10 annonces actives par joueur (`market_max_active`), annulation réservée au vendeur.
+- Interface : `/marche` (filtres rareté / genre / prix, tri, onglets « Annonces » et « Mes annonces »), formulaire de mise en vente sur `/card/[id]` avec prix conseillé, fourchette et net vendeur.
+- Vérifié en base sur des comptes de test : crédit unique, achat holo, commission, annulation, double achat concurrent (une seule réussite), devis dynamique après 3 ventes, visibilité des annonces. Comptes supprimés ensuite.
+- Vérifié sur le serveur de dev avec une session réelle : `/marche` affiche l'annonce et le bouton d'achat, `/card/kratos` affiche le formulaire, `/boosters` sert les 11 visuels.
 
-### B. Étape 5 — marché entre joueurs (uniquement en Pixels)
-
-Rien n'est commencé. Cadre déjà validé :
-
-- `listings` (vendeur, carte, prix, statut active/sold/cancelled) ; seuls les doublons sont vendables, carte réservée pendant la vente.
-- Achat atomique : débit acheteur, crédit vendeur moins 5 %, transfert, marquage, deux transactions `pixel_transactions`.
-- Interdiction d'acheter sa propre annonce, prix minimum et maximum par rareté, annulation possible.
-- Page Marché : filtres rareté / genre / prix, tri par prix, onglet « Mes annonces ».
-
-### C. Points mineurs laissés de côté
+### B. Points mineurs laissés de côté
 
 - Les holos ne sont visibles que dans la révélation d'achat et par un `✦n` dans la collection (pas sur la fiche de la carte).
 - Pas de compteur de pity affiché à l'acheteur (la garantie existe en base, elle n'est pas montrée).
 - Le bonus quotidien est réclamé automatiquement mais rien ne l'annonce visuellement.
 - `open_boosters()` (boosters gratuits) reçoit encore les cartes du client ; `buy_booster()` ne fait plus confiance au client. À aligner plus tard.
-- Les étapes 2 (Pixels) et 3 (boosters payants) restent encore listées dans « en préparation » sur `/nouveautes`.
+- Les étapes 2 (Pixels), 3 (boosters payants) et 5 (marché) restent à ajouter à `/nouveautes` au moment du déploiement. Le marché n'a ni expiration d'annonce ni édition de prix ; les holos se vendent dans le même formulaire que les normales.
+- Les prix dynamiques restent plafonnés par la rareté : une carte SR ne peut pas dépasser 250 P, même si ses ventes montent.
 
 ---
 
@@ -76,7 +73,7 @@ npm run cf:build && npm run cf:deploy         # mise en ligne
 
 ## Fichiers de référence
 
-- Migrations : `supabase/migrations/` (`005` franchises, `007` pixels, `009` boosters, `010` recyclage).
+- Migrations : `supabase/migrations/` (`005` franchises, `007` pixels, `009` boosters, `010` recyclage, `011` marché).
 - Catalogue des cartes : `src/lib/cards.ts` (seule source de vérité du contenu).
 - Raretés et poids : `src/lib/game.ts`.
 - Accès base côté serveur : `src/lib/data.ts` ; actions : `src/app/actions.ts`.

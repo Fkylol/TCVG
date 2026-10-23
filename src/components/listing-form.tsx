@@ -94,8 +94,8 @@ export function ListingForm({
 
       {!sellable ? (
         <p className="mt-3 rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-[11px] leading-relaxed text-white/40">
-          Aucune copie vendable pour le moment : il faut garder un exemplaire normal de chaque
-          carte. Ouvre d&apos;autres boosters pour vendre un doublon.
+          Aucune copie vendable pour le moment : une copie normale reste toujours dans ta
+          collection. Ouvre d&apos;autres boosters ou attends la vente d&apos;une annonce.
         </p>
       ) : (
         <>
@@ -170,15 +170,16 @@ export function ListingForm({
             </>
           )}
 
-          {note && (
-            <p
-              role="status"
-              className={`mt-2 text-[11px] ${note.tone === "ok" ? "text-emerald-300" : "text-amber-300"}`}
-            >
-              {note.text}
-            </p>
-          )}
         </>
+      )}
+
+      {note && (
+        <p
+          role="status"
+          className={`mt-2 text-[11px] ${note.tone === "ok" ? "text-emerald-300" : "text-amber-300"}`}
+        >
+          {note.text}
+        </p>
       )}
     </section>
   );
