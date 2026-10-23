@@ -2,6 +2,14 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "tcvg",
   "main": ".open-next/worker.js",
+  "workers_dev": true,
+  "routes": [
+    {
+      "pattern": "tcvg.fun",
+      "zone_name": "tcvg.fun",
+      "custom_domain": true
+    }
+  ],
   "compatibility_date": "2026-10-01",
   "compatibility_flags": ["nodejs_compat"],
   "assets": {

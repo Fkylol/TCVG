@@ -20,7 +20,9 @@ const geistMono = Geist_Mono({
 });
 
 // URL publique, utilisée pour rendre absolus les liens de partage (og:image).
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://tcvg.fkylol.workers.dev";
+// `tcvg.fun` est le domaine personnalisé du Worker ; l'adresse workers.dev
+// reste accessible en secours.
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://tcvg.fun";
 
 const description =
   "Collectionne les personnages de jeux vidéo : ouvre des boosters, complète ton album, découvre chaque carte. Projet de fan, non officiel.";

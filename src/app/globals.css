@@ -429,6 +429,32 @@ body {
   opacity: 0;
 }
 
+/* Carte préparée : le dos pulse et la lueur monte d'un cran, sans se
+   retourner. Il faut un second clic pour la révéler. */
+.reveal-stage[data-ready="true"] .reveal-aura {
+  animation: ready-pulse 2.4s ease-in-out infinite;
+}
+
+.reveal-stage[data-ready="true"] .reveal-back {
+  border-color: var(--aura);
+  box-shadow:
+    0 0 0 1px var(--aura),
+    0 0 calc(var(--aura-blur) * 1.15) var(--aura-soft),
+    inset 0 0 calc(var(--aura-blur)) var(--aura-soft);
+}
+
+@keyframes ready-pulse {
+  0%,
+  100% {
+    opacity: var(--aura-opacity);
+    transform: scale(1);
+  }
+  50% {
+    opacity: calc(var(--aura-opacity) * 1.35);
+    transform: scale(1.05);
+  }
+}
+
 /* Suspense : la carte vibre et s'illumine avant de se retourner. */
 .reveal-halo {
   position: absolute;
@@ -564,6 +590,7 @@ body {
   .card-face[data-rarity="L"].card-shine::after,
   .reveal-glow,
   .reveal-halo,
+  .reveal-stage[data-ready="true"] .reveal-aura,
   .reveal-stage[data-charging="true"] .reveal-halo,
   .reveal-stage[data-charging="true"] .reveal-back,
   .reveal-burst,

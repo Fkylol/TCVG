@@ -25,7 +25,11 @@ const BURST: Record<Rarity, string> = {
 /** Durée du suspense avant que la carte ne se retourne. */
 const CHARGE_MS = 620;
 
-type Phase = "closed" | "charging" | "open";
+/**
+ * `closed` → `ready` (le dos reste affiché) → `charging` (suspense) → `open`.
+ * Il faut donc deux gestes : préparer, puis retourner.
+ */
+type Phase = "closed" | "ready" | "charging" | "open";
 
 const REDUCED_MOTION = "(prefers-reduced-motion: reduce)";
 
@@ -82,7 +86,16 @@ export function BoosterReveal({
   );
 
   function reveal() {
-    if (finished || phase !== "closed") return;
+    if (finished) return;
+
+    // Premier geste : la carte reste face cachée, elle se prépare.
+    if (phase === "closed") {
+      setPhase("ready");
+      return;
+    }
+
+    // Deuxième geste : là seulement, elle se retourne.
+    if (phase !== "ready") return;
     if (reduced) {
       setPhase("open");
       return;
@@ -205,6 +218,7 @@ export function BoosterReveal({
                 onClick={phase === "open" ? advance : reveal}
                 disabled={phase === "charging"}
                 data-open={phase === "open"}
+                data-ready={phase === "ready"}
                 data-charging={phase === "charging"}
                 data-rarity={item.card.rarity}
                 aria-label={
@@ -212,7 +226,11 @@ export function BoosterReveal({
                     ? isLast
                       ? "Voir le récapitulatif"
                       : "Carte suivante"
-                    : "Révéler la carte"
+                    : phase === "ready"
+                      ? "Retourner la carte"
+                      : phase === "charging"
+                        ? "Révélation en cours"
+                        : "Préparer la carte"
                 }
                 className="reveal-stage relative w-[min(74vw,220px)] sm:w-[248px]"
               >
@@ -282,7 +300,11 @@ export function BoosterReveal({
                   </div>
                 ) : (
                   <p className="text-xs text-white/45" aria-live="polite">
-                    {phase === "charging" ? "Ça se dévoile…" : "Touche la carte pour révéler"}
+                    {phase === "charging"
+                      ? "Ça se dévoile…"
+                      : phase === "ready"
+                        ? "Touche encore la carte pour la retourner"
+                        : "Touche la carte pour commencer"}
                   </p>
                 )}
               </div>
@@ -303,7 +325,11 @@ export function BoosterReveal({
                     disabled={phase === "charging"}
                     className="rounded-full bg-acid px-5 py-2.5 text-sm font-semibold text-ink transition hover:brightness-110 disabled:cursor-wait disabled:bg-white/20 disabled:text-white/50"
                   >
-                    {phase === "charging" ? "Ouverture…" : "Révéler la carte"}
+                    {phase === "charging"
+                      ? "Ouverture…"
+                      : phase === "ready"
+                        ? "Retourner la carte"
+                        : "Préparer la carte"}
                   </button>
                 )}
               </div>
