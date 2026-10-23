@@ -20,7 +20,14 @@ export async function requireSession() {
 }
 
 export function displayName(user: { email?: string | null; user_metadata?: Record<string, unknown> }) {
-  const username = user.user_metadata?.username;
-  if (typeof username === "string" && username.trim()) return username.trim();
+  const metadata = user.user_metadata ?? {};
+
+  // `username` pour l'inscription maison ; `user_name` / `full_name` pour les
+  // fournisseurs OAuth (Discord, Google…).
+  for (const key of ["username", "user_name", "full_name", "name"] as const) {
+    const value = metadata[key];
+    if (typeof value === "string" && value.trim()) return value.trim();
+  }
+
   return user.email?.split("@")[0] ?? "Collectionneur";
 }

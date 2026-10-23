@@ -1,21 +1,30 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { openBooster } from "@/app/actions";
+import { openBoosters } from "@/app/actions";
 import { CardFace } from "@/components/card-face";
 import type { Card } from "@/lib/cards";
-import { BOOSTER_COOLDOWN_MS, CARDS_PER_BOOSTER, RARITY, formatCountdown } from "@/lib/game";
+import {
+  BOOSTER_COOLDOWN_MS,
+  BOOSTER_STOCK_MAX,
+  RARITY,
+  formatCountdown,
+  projectedStock,
+} from "@/lib/game";
 
 export function BoosterStation({
-  initialNextAt,
+  initialStock,
+  initialAnchor,
   serverNow,
   boostersOpened,
   uniqueOwned,
   totalCards,
 }: {
-  initialNextAt: string | null;
+  initialStock: number;
+  initialAnchor: string | null;
   /** Horodatage serveur : évite tout décalage d'hydratation avec le compte à rebours. */
   serverNow: number;
   boostersOpened: number;
@@ -23,10 +32,11 @@ export function BoosterStation({
   totalCards: number;
 }) {
   const router = useRouter();
-  const [nextAt, setNextAt] = useState(initialNextAt);
-  // Initialisé avec l'heure du serveur pour un premier rendu identique côté client.
+  const [stock, setStock] = useState(initialStock);
+  const [anchor, setAnchor] = useState(initialAnchor);
   const [now, setNow] = useState(serverNow);
   const [drawn, setDrawn] = useState<Card[] | null>(null);
+  const [openedCount, setOpenedCount] = useState(0);
   const [newIds, setNewIds] = useState<string[]>([]);
   const [opening, setOpening] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -36,27 +46,32 @@ export function BoosterStation({
     return () => clearInterval(timer);
   }, []);
 
-  const nextTs = nextAt ? new Date(nextAt).getTime() : 0;
-  const remaining = nextTs === 0 ? 0 : Math.max(0, nextTs - now);
-  const ready = remaining === 0;
+  const { stock: available, nextAt } = projectedStock(stock, anchor, now);
+  const nextIn = nextAt === null ? null : Math.max(0, nextAt - now);
+  const full = available >= BOOSTER_STOCK_MAX;
 
-  async function handleOpen() {
-    if (opening || !ready) return;
+  async function open(count: number) {
+    if (opening || count < 1) return;
     setOpening(true);
     setError(null);
 
     const [result] = await Promise.all([
-      openBooster(),
-      new Promise((resolve) => setTimeout(resolve, 650)),
+      openBoosters(count),
+      new Promise((resolve) => setTimeout(resolve, 550)),
     ]);
 
     if (result.status === "ok") {
       setDrawn(result.cards);
+      setOpenedCount(result.opened);
       setNewIds(result.newIds);
-      setNextAt(result.nextAt);
+      setStock(result.stock);
+      setAnchor(result.anchor);
       router.refresh();
+    } else if (result.status === "empty") {
+      setStock(result.stock);
+      setAnchor(result.anchor);
+      setError(result.message);
     } else {
-      if (result.status === "cooldown") setNextAt(result.nextAt);
       setError(result.message);
     }
 
@@ -70,31 +85,35 @@ export function BoosterStation({
           <div>
             <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
               <h2 className="text-lg font-semibold text-white/90">
-                {drawn.filter((c) => newIds.includes(c.id)).length > 0
-                  ? "Nouvelles cartes !"
-                  : "Booster ouvert"}
+                {openedCount} booster{openedCount > 1 ? "s" : ""} ouvert{openedCount > 1 ? "s" : ""} ·{" "}
+                {drawn.length} cartes
+                {newIds.length > 0 && (
+                  <span className="ml-2 text-sm font-normal text-emerald-300">
+                    dont {newIds.length} nouvelle{newIds.length > 1 ? "s" : ""}
+                  </span>
+                )}
               </h2>
               <button
                 type="button"
                 onClick={() => setDrawn(null)}
                 className="rounded-full border border-white/15 px-4 py-1.5 text-sm text-white/70 transition hover:border-white/30 hover:text-white"
               >
-                Retour au pack
+                Retour
               </button>
             </div>
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
               {drawn.map((card, index) => (
                 <Link
                   key={`${card.id}-${index}`}
                   href={`/card/${card.id}`}
                   className="card-deal block"
-                  style={{ animationDelay: `${index * 130}ms` }}
+                  style={{ animationDelay: `${Math.min(index, 12) * 70}ms` }}
                 >
                   <div className="relative">
-                    <CardFace card={card} size="md" className="aspect-[3/4]" />
+                    <CardFace card={card} size="sm" className="aspect-[3/4]" />
                     {newIds.includes(card.id) && (
-                      <span className="absolute -top-2 left-3 z-10 rounded-full bg-emerald-400 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-950 shadow-lg">
+                      <span className="absolute -top-1.5 left-2 z-10 rounded-full bg-emerald-400 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-emerald-950 shadow-lg">
                         Nouveau
                       </span>
                     )}
@@ -104,50 +123,83 @@ export function BoosterStation({
             </div>
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center rounded-3xl border border-white/10 bg-white/[0.03] px-6 py-12 text-center">
+          <div className="flex flex-col items-center justify-center rounded-3xl border border-white/10 bg-white/[0.03] px-6 py-10 text-center">
             <button
               type="button"
-              onClick={handleOpen}
-              disabled={!ready || opening}
+              onClick={() => open(1)}
+              disabled={available < 1 || opening}
               aria-label="Ouvrir un booster"
               className="group relative disabled:cursor-not-allowed"
             >
+              {/* Visuel du booster : découpé depuis `booster1.jpg`, ratio 0,6.
+                  `unoptimized` évite de dépendre de l'optimiseur d'images du Worker. */}
               <div
-                className={`relative grid h-64 w-44 place-items-center overflow-hidden rounded-2xl border border-white/25 shadow-2xl transition ${
-                  opening ? "scale-95 opacity-40" : ready ? "pack-float hover:scale-[1.03]" : "opacity-50 grayscale"
+                className={`relative h-60 w-36 overflow-hidden rounded-2xl border border-white/25 shadow-2xl transition ${
+                  opening
+                    ? "scale-95 opacity-40"
+                    : available > 0
+                      ? "pack-float hover:scale-[1.03]"
+                      : "opacity-50 grayscale"
                 }`}
-                style={{
-                  background:
-                    "linear-gradient(160deg, #6d28d9 0%, #4c1d95 40%, #1e1b4b 70%, #0ea5e9 100%)",
-                }}
               >
-                <div className="grain absolute inset-0 opacity-40" />
-                <div className="holo absolute inset-0" />
-                <div className="relative z-10 flex flex-col items-center gap-2">
-                  <span className="text-5xl">🎴</span>
-                  <span className="rarity-shine text-lg font-black tracking-[0.2em]">TCVG</span>
-                  <span className="text-[10px] uppercase tracking-[0.28em] text-white/60">
-                    Booster ×{CARDS_PER_BOOSTER}
+                <Image
+                  src="/booster/mix.jpg"
+                  alt="Booster TCVG"
+                  fill
+                  sizes="144px"
+                  unoptimized
+                  className="object-cover"
+                />
+                {available > 0 && (
+                  <span className="absolute right-2 top-2 z-10 rounded-full bg-black/60 px-2 py-0.5 text-[11px] font-bold text-white ring-1 ring-white/20">
+                    ×{available}
                   </span>
-                </div>
+                )}
               </div>
             </button>
 
-            <button
-              type="button"
-              onClick={handleOpen}
-              disabled={!ready || opening}
-              className="mt-8 rounded-full bg-white px-6 py-3 text-sm font-semibold text-violet-950 transition hover:bg-violet-100 disabled:cursor-not-allowed disabled:bg-white/25 disabled:text-white/50"
-            >
-              {opening
-                ? "Ouverture…"
-                : ready
-                  ? "Ouvrir un booster"
-                  : `Disponible dans ${formatCountdown(remaining)}`}
-            </button>
+            <div className="mt-6 flex items-center gap-1.5" aria-label={`Stock : ${available} sur ${BOOSTER_STOCK_MAX}`}>
+              {Array.from({ length: BOOSTER_STOCK_MAX }, (_, index) => (
+                <span
+                  key={index}
+                  className={`h-2 w-5 rounded-full transition ${
+                    index < available ? "bg-acid" : "bg-white/12"
+                  }`}
+                />
+              ))}
+            </div>
+            <p className="mt-2 text-xs text-white/45">
+              Stock {available}/{BOOSTER_STOCK_MAX}
+            </p>
 
-            <p className="mt-3 text-xs text-white/45">
-              Un booster gratuit toutes les {Math.round(BOOSTER_COOLDOWN_MS / 60000)} minutes.
+            <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
+              <button
+                type="button"
+                onClick={() => open(1)}
+                disabled={available < 1 || opening}
+                className="rounded-full bg-acid px-6 py-3 text-sm font-semibold text-ink transition hover:brightness-110 disabled:cursor-not-allowed disabled:bg-white/20 disabled:text-white/45"
+              >
+                {opening ? "Ouverture…" : available < 1 ? "Aucun booster" : "Ouvrir un booster"}
+              </button>
+
+              {available > 1 && (
+                <button
+                  type="button"
+                  onClick={() => open(available)}
+                  disabled={opening}
+                  className="rounded-full border border-acid/40 bg-acid/10 px-6 py-3 text-sm font-semibold text-acid transition hover:bg-acid/20 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Tout ouvrir ({available})
+                </button>
+              )}
+            </div>
+
+            <p className="mt-4 text-xs text-white/45">
+              {full
+                ? "Stock plein — ouvre avant de continuer à accumuler."
+                : nextIn !== null
+                  ? `Prochain booster dans ${formatCountdown(nextIn)}`
+                  : `Un booster toutes les ${Math.round(BOOSTER_COOLDOWN_MS / 60000)} minutes, jusqu'à ${BOOSTER_STOCK_MAX}.`}
             </p>
 
             {error && (
@@ -168,7 +220,7 @@ export function BoosterStation({
           </p>
           <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/10">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-violet-400 to-sky-400"
+              className="h-full rounded-full bg-gradient-to-r from-acid to-cyan"
               style={{ width: `${Math.min(100, Math.round((uniqueOwned / totalCards) * 100))}%` }}
             />
           </div>

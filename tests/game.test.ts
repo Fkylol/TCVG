@@ -1,15 +1,15 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { CARDS } from "../src/lib/cards";
+import { CARDS, findDuplicateCards, getCardNumber } from "../src/lib/cards";
 import {
   BOOSTER_COOLDOWN_MS,
+  BOOSTER_STOCK_MAX,
   CARDS_PER_BOOSTER,
   RARITY,
-  canOpenBooster,
   collectionCompletion,
   formatCountdown,
-  nextBoosterAt,
+  projectedStock,
   rollBooster,
   rollRarity,
 } from "../src/lib/game";
@@ -33,8 +33,6 @@ test("catalogue : identifiants uniques et données complètes", () => {
     assert.ok(card.name.trim().length > 0, `${card.id} sans nom`);
     assert.ok(card.emoji.trim().length > 0, `${card.id} sans emoji`);
     assert.ok(RARITY[card.rarity], `${card.id} a une rareté inconnue`);
-    assert.ok(card.atk >= 1000 && card.atk <= 9999, `${card.id} atk hors bornes`);
-    assert.ok(card.def >= 1000 && card.def <= 9999, `${card.id} def hors bornes`);
     assert.ok(card.bio.length > 20, `${card.id} bio trop courte`);
   }
   assert.ok(CARDS.length >= 50, "le catalogue doit proposer au moins 50 cartes");
@@ -99,16 +97,40 @@ test("rollBooster produit parfois des rares, mais rarement des mythiques", () =>
   assert.ok(epicRate > 0.15, `trop peu d'épiques+ : ${(epicRate * 100).toFixed(2)}%`);
 });
 
-test("cooldown : un booster est disponible après 10 minutes", () => {
-  const now = Date.now();
-  assert.equal(canOpenBooster(null, now), true);
+test("stock : +1 par tranche de 10 minutes, plafonné à 10", () => {
+  const anchorMs = Date.UTC(2026, 0, 1, 12, 0, 0);
+  const anchor = new Date(anchorMs).toISOString();
 
-  const justOpened = new Date(now - 1000).toISOString();
-  assert.equal(canOpenBooster(justOpened, now), false);
-  assert.ok(nextBoosterAt(justOpened)!.getTime() > now);
+  const nothing = projectedStock(3, anchor, anchorMs);
+  assert.equal(nothing.stock, 3);
+  assert.equal(nothing.nextAt, anchorMs + BOOSTER_COOLDOWN_MS);
 
-  const old = new Date(now - BOOSTER_COOLDOWN_MS - 1).toISOString();
-  assert.equal(canOpenBooster(old, now), true);
+  const twoTicks = projectedStock(3, anchor, anchorMs + 2 * BOOSTER_COOLDOWN_MS + 1000);
+  assert.equal(twoTicks.stock, 5);
+  assert.equal(twoTicks.nextAt, anchorMs + 3 * BOOSTER_COOLDOWN_MS);
+
+  const capped = projectedStock(BOOSTER_STOCK_MAX - 1, anchor, anchorMs + 5 * BOOSTER_COOLDOWN_MS);
+  assert.equal(capped.stock, BOOSTER_STOCK_MAX);
+  assert.equal(capped.nextAt, null, "stock plein : plus de compte à rebours");
+
+  const empty = projectedStock(0, anchor, anchorMs + 60 * BOOSTER_COOLDOWN_MS);
+  assert.equal(empty.stock, BOOSTER_STOCK_MAX, "une longue absence remplit le stock sans le dépasser");
+
+  const noAnchor = projectedStock(1, null, anchorMs);
+  assert.equal(noAnchor.stock, 1);
+  assert.equal(noAnchor.nextAt, null);
+});
+
+test("numérotation d'album : chaque carte a un numéro unique de 1 à N", () => {
+  const numbers = CARDS.map((card) => getCardNumber(card.id));
+  assert.ok(
+    numbers.every((value) => typeof value === "number"),
+    "une carte n'a pas de numéro",
+  );
+  assert.equal(new Set(numbers).size, CARDS.length, "numéros dupliqués");
+
+  const expected = Array.from({ length: CARDS.length }, (_, index) => index + 1);
+  assert.deepEqual([...numbers].sort((a, b) => (a as number) - (b as number)), expected);
 });
 
 test("formatCountdown et completion", () => {
@@ -119,4 +141,20 @@ test("formatCountdown et completion", () => {
 
   assert.equal(collectionCompletion(0), 0);
   assert.equal(collectionCompletion(CARDS.length), 100);
+});
+
+test("le catalogue refuse les doublons d'identifiant et de personnage", () => {
+  const cards = CARDS;
+  assert.deepEqual(findDuplicateCards(cards), [], "le catalogue contient un doublon");
+
+  // Même identifiant, même personnage écrit autrement : les deux doivent ressortir.
+  const broken = [
+    { ...cards[0], id: "doublon" },
+    { ...cards[1], id: "doublon" },
+    { ...cards[2], id: "meme-personnage", name: `  ${cards[0].name.toUpperCase()} `, universe: cards[0].universe },
+  ];
+  const problems = findDuplicateCards(broken as typeof cards);
+  assert.equal(problems.length, 2, `problèmes détectés : ${problems.join(" | ")}`);
+  assert.match(problems[0], /identifiant/);
+  assert.match(problems[1], /personnage/);
 });

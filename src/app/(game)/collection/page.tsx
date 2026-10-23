@@ -1,6 +1,6 @@
 import { CollectionBrowser } from "@/components/collection-browser";
 import { requireSession } from "@/lib/auth";
-import { getCollection } from "@/lib/data";
+import { getCollection, getRecycleValues } from "@/lib/data";
 import { CARDS, RARITY, RARITY_ORDER, collectionCompletion } from "@/lib/game";
 import { getCard } from "@/lib/cards";
 
@@ -8,7 +8,10 @@ export const metadata = { title: "Collection — TCVG" };
 
 export default async function CollectionPage() {
   const { supabase, user } = await requireSession();
-  const collection = await getCollection(supabase, user.id);
+  const [collection, recycleValues] = await Promise.all([
+    getCollection(supabase, user.id),
+    getRecycleValues(supabase),
+  ]);
 
   const copies = collection.reduce((sum, row) => sum + row.quantity, 0);
   const completion = collectionCompletion(collection.length);
@@ -22,10 +25,12 @@ export default async function CollectionPage() {
     <div>
       <div className="mb-7 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Collection</h1>
+          <span className="eyebrow">Collection</span>
+          <h1 className="display mt-2 text-4xl">Collection</h1>
           <p className="mt-1 text-sm text-white/50">
             {collection.length} personnage{collection.length > 1 ? "s" : ""} sur {CARDS.length} ·{" "}
-            {copies} carte{copies > 1 ? "s" : ""} au total
+            {copies} carte{copies > 1 ? "s" : ""} · {copies - collection.length} doublon
+            {copies - collection.length > 1 ? "s" : ""}
           </p>
         </div>
 
@@ -36,7 +41,7 @@ export default async function CollectionPage() {
           </div>
           <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-white/10">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-violet-400 to-sky-400 transition-all"
+              className="h-full rounded-full bg-gradient-to-r from-acid to-cyan transition-all"
               style={{ width: `${completion}%` }}
             />
           </div>
@@ -59,9 +64,11 @@ export default async function CollectionPage() {
       </div>
 
       <CollectionBrowser
+        recycleValues={recycleValues}
         entries={collection.map((row) => ({
           cardId: row.cardId,
           quantity: row.quantity,
+          holoQuantity: row.holoQuantity,
           firstObtainedAt: row.firstObtainedAt,
         }))}
       />

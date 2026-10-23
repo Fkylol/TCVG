@@ -8,7 +8,12 @@
     "start": "next start",
     "lint": "eslint",
     "test": "node --import tsx --test \"tests/**/*.test.ts\"",
-    "portraits": "tsx scripts/fetch-portraits.ts"
+    "portraits": "tsx scripts/fetch-portraits.ts",
+    "db:migrate": "node --env-file=.env --import tsx scripts/db-migrate.ts",
+    "cf:build": "opennextjs-cloudflare build",
+    "cf:preview": "opennextjs-cloudflare preview",
+    "cf:deploy": "opennextjs-cloudflare deploy",
+    "db:cards": "node --env-file=.env --import tsx scripts/db-cards.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
@@ -18,14 +23,18 @@
     "react-dom": "19.3.0"
   },
   "devDependencies": {
+    "@opennextjs/cloudflare": "^1.20.13",
     "@tailwindcss/turbopack": "^4",
     "@types/node": "^20",
+    "@types/pg": "^8.23.1",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.4.2",
+    "pg": "^8.23.1",
     "tailwindcss": "^4",
     "tsx": "^4.23.15",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wrangler": "^4.152.0"
   }
 }

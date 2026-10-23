@@ -17,7 +17,7 @@ Kratos, Mario, Spyro, Link, Samus, Ganon… Ouvre des boosters gratuits, complè
 
 - **Next.js 16** (App Router, Server Actions), React 19, TypeScript
 - **Tailwind CSS 4**
-- **Supabase** (Auth email/mot de passe + Postgres + RLS)
+- **Supabase** (Auth Discord + Postgres + RLS)
 
 ## Démarrage
 
@@ -56,16 +56,23 @@ npm run dev
 
 → http://localhost:3000
 
-### 4. (Optionnel) Confirmation d'email
+### 4. Activer la connexion Discord
 
-Par défaut Supabase exige de confirmer son adresse avant de pouvoir se connecter.
-Deux choix :
+Le site ne propose que la connexion Discord : un compte est créé automatiquement à la première
+connexion.
 
-- **Pour tester tout de suite** : Authentication → Sign In / Providers → Email → désactive
-  *Confirm email*.
-- **Pour garder la confirmation** : Authentication → Emails → *Confirm signup*, remplace le lien par
-  `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=signup`
-  (la route `src/app/auth/confirm/route.ts` échange le token contre une session).
+1. [Discord Developer Portal](https://discord.com/developers/applications) → **New Application** →
+   **OAuth2** → ajoute l'URL de retour
+   `https://<reference-projet>.supabase.co/auth/v1/callback`, puis récupère le **Client ID** et le
+   **Client Secret**.
+2. Supabase → **Authentication → Providers → Discord** : active le fournisseur et colle les deux
+   valeurs.
+3. Supabase → **Authentication → URL Configuration** : Site URL = l'URL publique du site, et
+   Redirect URLs = `<url-du-site>/**` (dont `<url-du-site>/auth/confirm`).
+4. Supabase → **Authentication → Providers → Email** : désactive le fournisseur pour n'autoriser
+   que Discord côté serveur aussi.
+
+La route `src/app/auth/confirm/route.ts` échange le code OAuth contre une session.
 
 ## Scripts
 
@@ -80,8 +87,9 @@ Deux choix :
 
 - **Booster** : 3 cartes, une rareté tirée par carte selon des poids (60 % / 25 % / 10 % / 4 % / 1 %),
   puis une carte au hasard dans cette rareté, sans doublon dans le pack.
-- **Cooldown** : 10 minutes entre deux boosters, vérifié **en base** par `open_booster()` dans une
-  transaction avec verrou de ligne — impossible à contourner en rejouant la requête.
+- **Stock** : un booster toutes les 10 minutes, **cumulables jusqu'à 10** (ouverts un par un ou tous
+  d'un coup). L'accumulation et la consommation sont calculées **en base** par `open_boosters()` dans
+  une transaction avec verrou de ligne — impossible à contourner en rejouant la requête.
 - **Collection** : une ligne par personnage possédé (`quantity` pour les doublons). La table est en
   lecture seule côté client : la seule écriture possible passe par la fonction SQL.
 - **Fiche perso** : stats, pouvoir, citation, bio, et les autres cartes du même univers.
@@ -102,6 +110,12 @@ npm run portraits   # réécrit src/data/portraits.json
   ramenait des pages hors sujet (Baldur → *Baldur's Gate*, le Chevalier → *Cagliostro*). Une carte
   absente de la table garde le dégradé + emoji.
 - Le crédit du fichier s'affiche sous la carte, sur la fiche du personnage.
+- Les **20 cartes sans visuel** (Ripto, Hunter, Gruntilda, Artorias, Yennefer…) n'ont pas
+  d'article Wikipédia avec image dédié. Les wikis **Fandom** ont été testés puis écartés : leur CDN
+  (`static.wikia.nocookie.net`) est derrière un challenge Cloudflare et renvoie **403 sans `Referer`
+  du domaine Fandom**, donc le hotlink depuis le site est impossible. Ces cartes gardent le rendu
+  généré (dégradé, anneaux, emoji). Pour du 84/84, il faudrait télécharger ces 20 fichiers dans
+  `public/` — ce qui revient à héberger des copies, donc à assumer le risque correspondant.
 - Si un visuel casse (fichier renommé, page supprimée), il suffit d'éditer `src/data/portraits.json`
   pour retirer l'entrée : la carte retombe automatiquement sur le rendu généré.
 
@@ -111,9 +125,9 @@ npm run portraits   # réécrit src/data/portraits.json
 src/
   app/
     page.tsx              landing publique
-    login/ signup/        auth (Server Actions + useActionState)
-    actions.ts            signIn, signUp, signOut, openBooster
-    auth/confirm/route.ts confirmation email -> session
+    login/ signup/        connexion Discord uniquement (Server Action OAuth)
+    actions.ts            signInWithDiscord, signOut, achats, recyclage
+    auth/confirm/route.ts code OAuth -> session
     (game)/               routes protégées (layout = garde de session)
       boosters/           ouverture de booster
       collection/         album filtrable
@@ -154,15 +168,17 @@ et, dans Supabase (Authentication → URL Configuration), l'URL de production da
 
 **Vercel** — import du repo, variables d'environnement, c'est tout.
 
-**Cloudflare** — Cloudflare ne sert pas Next.js nativement : il faut l'adaptateur OpenNext
-(`@opennextjs/cloudflare`) et Wrangler ≥ 3.99. En résumé :
+**Cloudflare** — l'adaptateur est déjà installé et configuré (`wrangler.jsonc`, `open-next.config.ts`,
+`nodejs_compat`). Il ne reste que l'authentification :
 
 ```bash
-npm i -D @opennextjs/cloudflare wrangler
-npx opennextjs-cloudflare build
-npx opennextjs-cloudflare deploy
+npx wrangler login     # une seule fois, ouvre le navigateur
+npm run cf:build       # bundle le worker (relance next build)
+npm run cf:deploy      # publie sur Workers
 ```
 
-Le fichier `wrangler.jsonc` doit activer `nodejs_compat` et fixer une `compatibility_date` récente
-(Supabase et les Server Actions ont besoin du runtime Node). Le projet n'utilise pas `proxy.ts` / le
-middleware, ce qui évite les limitations connues de l'adaptateur sur Next.js 16.
+Sans navigateur (CI), exporte `CLOUDFLARE_API_TOKEN` (template « Edit Cloudflare Workers ») et
+`CLOUDFLARE_ACCOUNT_ID` puis lance `npm run cf:deploy`.
+
+⚠️ Les `NEXT_PUBLIC_*` sont **inlinées au build** : elles doivent être présentes dans l'environnement
+au moment de `cf:build`, pas seulement au runtime.

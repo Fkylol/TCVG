@@ -1,14 +1,27 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
+import { recycleAllDuplicates } from "@/app/actions";
 import { CardFace } from "@/components/card-face";
-import { UNIVERSES, getCard, type Card, type Rarity, type UniverseKey } from "@/lib/cards";
+import { RecycleButton } from "@/components/recycle-button";
+import {
+  CARDS,
+  UNIVERSES,
+  getCard,
+  getCardNumber,
+  type Card,
+  type Rarity,
+  type UniverseKey,
+} from "@/lib/cards";
 import { RARITY, RARITY_ORDER } from "@/lib/game";
 
 export type CollectionEntry = {
   cardId: string;
   quantity: number;
+  /** Copies brillantes parmi `quantity`. */
+  holoQuantity: number;
   firstObtainedAt: string;
 };
 
@@ -21,11 +34,31 @@ const sorters: Record<"recent" | "rarete" | "nom", Sorter> = {
   nom: (a, b) => a.name.localeCompare(b.name, "fr"),
 };
 
-export function CollectionBrowser({ entries }: { entries: CollectionEntry[] }) {
+type Album = {
+  key: UniverseKey;
+  label: string;
+  from: string;
+  to: string;
+  owned: number;
+  total: number;
+};
+
+export function CollectionBrowser({
+  entries,
+  recycleValues,
+}: {
+  entries: CollectionEntry[];
+  /** Pixels gagnés par rareté, lus en base. */
+  recycleValues: Record<Rarity, number>;
+}) {
+  const router = useRouter();
+  const [view, setView] = useState<"cards" | "albums">("cards");
   const [query, setQuery] = useState("");
   const [rarity, setRarity] = useState<Rarity | "all">("all");
   const [universe, setUniverse] = useState<UniverseKey | "all">("all");
   const [sort, setSort] = useState<keyof typeof sorters>("recent");
+  const [bulkBusy, setBulkBusy] = useState(false);
+  const [bulkNote, setBulkNote] = useState<string | null>(null);
 
   const owned = useMemo(
     () =>
@@ -36,6 +69,76 @@ export function CollectionBrowser({ entries }: { entries: CollectionEntry[] }) {
   );
 
   const totalCopies = owned.reduce((sum, { entry }) => sum + entry.quantity, 0);
+  const duplicates = totalCopies - owned.length;
+
+  // Doublons normaux recyclables : les holos et la première copie normale sont
+  // toujours conservées, comme dans `recycle_all_duplicates()`.
+  const bulk = useMemo(() => {
+    let cards = 0;
+    let amount = 0;
+    for (const { card, entry } of owned) {
+      const extra = Math.max(0, entry.quantity - entry.holoQuantity - 1);
+      if (extra === 0) continue;
+      cards += extra;
+      amount += extra * (recycleValues[card.rarity] ?? 0);
+    }
+    return { cards, amount };
+  }, [owned, recycleValues]);
+
+  async function recycleAll() {
+    if (bulkBusy || bulk.cards === 0) return;
+    if (
+      !window.confirm(
+        `Recycler ${bulk.cards} doublon${bulk.cards > 1 ? "s" : ""} normal${bulk.cards > 1 ? "aux" : ""} pour ◆ ${bulk.amount} ? Les holos ne sont pas touchées.`,
+      )
+    ) {
+      return;
+    }
+
+    setBulkBusy(true);
+    setBulkNote(null);
+    try {
+      const result = await recycleAllDuplicates();
+      if (result.status === "ok") {
+        setBulkNote(
+          result.amount > 0
+            ? `+${result.amount} ◆ · ${result.cards} doublon${result.cards > 1 ? "s" : ""} recyclé${result.cards > 1 ? "s" : ""}`
+            : "Aucun doublon à recycler.",
+        );
+        router.refresh();
+      } else {
+        setBulkNote(result.message);
+      }
+    } finally {
+      setBulkBusy(false);
+    }
+  }
+
+  const albums = useMemo<Album[]>(() => {
+    const ownedByUniverse = new Map<UniverseKey, number>();
+    for (const { card } of owned) {
+      ownedByUniverse.set(card.universe, (ownedByUniverse.get(card.universe) ?? 0) + 1);
+    }
+
+    const totals = new Map<UniverseKey, number>();
+    for (const card of CARDS) totals.set(card.universe, (totals.get(card.universe) ?? 0) + 1);
+
+    return Array.from(totals.entries())
+      .map(([key, total]) => ({
+        key,
+        total,
+        owned: ownedByUniverse.get(key) ?? 0,
+        label: UNIVERSES[key].label,
+        from: UNIVERSES[key].from,
+        to: UNIVERSES[key].to,
+      }))
+      .sort(
+        (a, b) =>
+          b.owned / b.total - a.owned / a.total ||
+          b.owned - a.owned ||
+          a.label.localeCompare(b.label, "fr"),
+      );
+  }, [owned]);
 
   const filtered = useMemo(() => {
     const needle = query.trim().toLowerCase();
@@ -55,81 +158,183 @@ export function CollectionBrowser({ entries }: { entries: CollectionEntry[] }) {
   }, [owned, query, rarity, universe, sort]);
 
   const universesInCollection = useMemo(
-    () => Array.from(new Set(owned.map(({ card }) => card.universe))).sort((a, b) =>
-      UNIVERSES[a].label.localeCompare(UNIVERSES[b].label, "fr"),
-    ),
+    () =>
+      Array.from(new Set(owned.map(({ card }) => card.universe))).sort((a, b) =>
+        UNIVERSES[a].label.localeCompare(UNIVERSES[b].label, "fr"),
+      ),
     [owned],
   );
+
+  function openAlbum(key: UniverseKey) {
+    setUniverse(key);
+    setRarity("all");
+    setQuery("");
+    setView("cards");
+  }
 
   return (
     <div>
       <div className="mb-6 flex flex-wrap items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-        <input
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          placeholder="Rechercher un personnage, un univers…"
-          className="min-w-[220px] flex-1 rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm outline-none placeholder:text-white/35 focus:border-violet-400/60"
-        />
+        {view === "cards" ? (
+          <>
+            <input
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Rechercher un personnage, un univers…"
+              className="min-w-[220px] flex-1 rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm outline-none placeholder:text-white/35 focus:border-acid/60"
+            />
 
-        <select
-          value={universe}
-          onChange={(event) => setUniverse(event.target.value as UniverseKey | "all")}
-          className="rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm outline-none focus:border-violet-400/60"
-        >
-          <option value="all">Tous les univers</option>
-          {universesInCollection.map((key) => (
-            <option key={key} value={key}>
-              {UNIVERSES[key].label}
-            </option>
-          ))}
-        </select>
+            <select
+              value={universe}
+              onChange={(event) => setUniverse(event.target.value as UniverseKey | "all")}
+              className="rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm outline-none focus:border-acid/60"
+            >
+              <option value="all">Tous les univers</option>
+              {universesInCollection.map((key) => (
+                <option key={key} value={key}>
+                  {UNIVERSES[key].label}
+                </option>
+              ))}
+            </select>
 
-        <select
-          value={sort}
-          onChange={(event) => setSort(event.target.value as keyof typeof sorters)}
-          className="rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm outline-none focus:border-violet-400/60"
-        >
-          <option value="recent">Plus récentes</option>
-          <option value="rarete">Rareté</option>
-          <option value="nom">Nom</option>
-        </select>
+            <select
+              value={sort}
+              onChange={(event) => setSort(event.target.value as keyof typeof sorters)}
+              className="rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm outline-none focus:border-acid/60"
+            >
+              <option value="recent">Plus récentes</option>
+              <option value="rarete">Rareté</option>
+              <option value="nom">Nom</option>
+            </select>
+          </>
+        ) : (
+          <p className="flex-1 text-sm text-white/45">
+            Progression par album — clique sur un univers pour l&apos;ouvrir.
+          </p>
+        )}
+
+        <div className="flex rounded-xl border border-white/10 bg-black/30 p-1 text-xs">
+          <button
+            type="button"
+            onClick={() => setView("albums")}
+            className={`rounded-lg px-3 py-1.5 transition ${
+              view === "albums" ? "bg-acid text-ink" : "text-white/55 hover:text-white"
+            }`}
+          >
+            Albums
+          </button>
+          <button
+            type="button"
+            onClick={() => setView("cards")}
+            className={`rounded-lg px-3 py-1.5 transition ${
+              view === "cards" ? "bg-acid text-ink" : "text-white/55 hover:text-white"
+            }`}
+          >
+            Cartes
+          </button>
+        </div>
       </div>
 
-      <div className="mb-5 flex flex-wrap items-center gap-2">
-        <button
-          type="button"
-          onClick={() => setRarity("all")}
-          className={`rounded-full px-3 py-1.5 text-xs font-medium transition ${
-            rarity === "all" ? "bg-white text-violet-950" : "border border-white/15 text-white/60 hover:text-white"
+      {view === "cards" && (
+        <div className="mb-5 flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setRarity("all")}
+            className={`rounded-full px-3 py-1.5 text-xs font-medium transition ${
+              rarity === "all" ? "bg-acid text-ink" : "border border-white/15 text-white/60 hover:text-white"
+            }`}
+          >
+            Toutes ({owned.length})
+          </button>
+          {RARITY_ORDER.map((key) => {
+            const info = RARITY[key];
+            const count = owned.filter(({ card }) => card.rarity === key).length;
+            return (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setRarity(key)}
+                className={`rounded-full px-3 py-1.5 text-xs font-medium transition ${
+                  rarity === key ? "bg-acid text-ink" : `${info.badge} hover:brightness-125`
+                }`}
+              >
+                {info.label} ({count})
+              </button>
+            );
+          })}
+
+          <span className="ml-auto text-xs text-white/40">
+            {totalCopies} carte{totalCopies > 1 ? "s" : ""} · {duplicates} doublon
+            {duplicates > 1 ? "s" : ""} · {filtered.length} affichée{filtered.length > 1 ? "s" : ""}
+          </span>
+
+          {bulk.cards > 0 && (
+            <button
+              type="button"
+              onClick={recycleAll}
+              disabled={bulkBusy}
+              className="rounded-full border border-acid/30 bg-acid/10 px-3 py-1.5 text-xs font-semibold text-acid transition hover:bg-acid/20 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {bulkBusy
+                ? "Recyclage…"
+                : `Recycler les doublons · +${bulk.amount} ◆`}
+            </button>
+          )}
+        </div>
+      )}
+
+      {bulkNote && (
+        <p
+          role="status"
+          className={`mb-5 rounded-lg border px-3 py-2 text-xs ${
+            bulkNote.startsWith("+")
+              ? "border-emerald-400/30 bg-emerald-500/10 text-emerald-200"
+              : "border-amber-400/30 bg-amber-500/10 text-amber-200"
           }`}
         >
-          Toutes ({owned.length})
-        </button>
-        {RARITY_ORDER.map((key) => {
-          const info = RARITY[key];
-          const count = owned.filter(({ card }) => card.rarity === key).length;
-          return (
-            <button
-              key={key}
-              type="button"
-              onClick={() => setRarity(key)}
-              className={`rounded-full px-3 py-1.5 text-xs font-medium transition ${
-                rarity === key
-                  ? "bg-white text-violet-950"
-                  : `${info.badge} hover:brightness-125`
-              }`}
-            >
-              {info.label} ({count})
-            </button>
-          );
-        })}
+          {bulkNote}
+        </p>
+      )}
 
-        <span className="ml-auto text-xs text-white/40">
-          {totalCopies} exemplaire{totalCopies > 1 ? "s" : ""} · {filtered.length} affichée(s)
-        </span>
-      </div>
-
-      {filtered.length === 0 ? (
+      {view === "albums" ? (
+        <div className="grid gap-2 sm:grid-cols-2">
+          {albums.map((album) => {
+            const percent = (album.owned / album.total) * 100;
+            const started = album.owned > 0;
+            return (
+              <button
+                key={album.key}
+                type="button"
+                onClick={() => openAlbum(album.key)}
+                className={`flex items-center gap-3 rounded-xl border p-3 text-left transition ${
+                  started
+                    ? "border-white/10 bg-white/[0.03] hover:border-white/25"
+                    : "border-white/5 bg-white/[0.01] opacity-55 hover:border-white/15 hover:opacity-90"
+                }`}
+              >
+                <span
+                  className="h-9 w-9 shrink-0 rounded-lg ring-1 ring-white/15"
+                  style={{ background: `linear-gradient(150deg, ${album.from}, ${album.to})` }}
+                />
+                <span className="min-w-0 flex-1">
+                  <span className="flex items-baseline justify-between gap-2 text-sm">
+                    <span className="truncate font-medium">{album.label}</span>
+                    <span className="shrink-0 font-mono text-xs text-white/45">
+                      {album.owned}/{album.total}
+                    </span>
+                  </span>
+                  <span className="mt-1.5 block h-1 overflow-hidden rounded-full bg-white/10">
+                    <span
+                      className="block h-full rounded-full bg-gradient-to-r from-acid to-cyan transition-all"
+                      style={{ width: `${percent}%` }}
+                    />
+                  </span>
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      ) : filtered.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-white/15 px-6 py-16 text-center text-white/50">
           {owned.length === 0
             ? "Ta collection est vide. Ouvre ton premier booster pour commencer."
@@ -137,16 +342,48 @@ export function CollectionBrowser({ entries }: { entries: CollectionEntry[] }) {
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
-          {filtered.map(({ card, entry }) => (
-            <Link key={card.id} href={`/card/${card.id}`} className="group relative block">
-              <CardFace card={card} size="sm" className="aspect-[3/4] transition group-hover:-translate-y-1" />
-              {entry.quantity > 1 && (
-                <span className="absolute right-2 top-2 z-10 rounded-full bg-black/70 px-2 py-0.5 text-[10px] font-bold text-white ring-1 ring-white/20">
-                  ×{entry.quantity}
-                </span>
-              )}
-            </Link>
-          ))}
+          {filtered.map(({ card, entry }) => {
+            const number = getCardNumber(card.id) ?? 0;
+            const value = recycleValues[card.rarity] ?? 0;
+            const recyclable = Math.max(0, entry.quantity - entry.holoQuantity - 1);
+            return (
+              <div key={card.id} className="group flex flex-col">
+                <Link href={`/card/${card.id}`} className="block">
+                  <CardFace
+                    card={card}
+                    size="sm"
+                    className="aspect-[3/4] transition group-hover:-translate-y-1"
+                  />
+                  <div className="mt-1.5 flex items-center justify-between px-0.5 text-[10px] text-white/40">
+                    <span className="font-mono">#{String(number).padStart(2, "0")}</span>
+                    <span className="flex items-center gap-1.5">
+                      {entry.holoQuantity > 0 && (
+                        <span
+                          className="font-semibold text-amber-300"
+                          title={`${entry.holoQuantity} exemplaire(s) holo`}
+                        >
+                          ✦{entry.holoQuantity}
+                        </span>
+                      )}
+                      {entry.quantity > 1 && (
+                        <span className="font-semibold text-white/60">×{entry.quantity}</span>
+                      )}
+                    </span>
+                  </div>
+                </Link>
+
+                {recyclable > 0 && (
+                  <div className="mt-1 flex flex-col items-stretch gap-1 text-center">
+                    <RecycleButton
+                      cardId={card.id}
+                      label={`Recycler · +${value} ◆`}
+                      className="rounded-full border border-acid/25 bg-acid/[0.07] px-2 py-1 text-[10px] font-semibold text-acid transition hover:border-acid/50 hover:bg-acid/15 disabled:cursor-not-allowed disabled:opacity-50"
+                    />
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

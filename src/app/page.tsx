@@ -1,6 +1,9 @@
 import Link from "next/link";
+import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { CardFace } from "@/components/card-face";
+import { getSession } from "@/lib/auth";
+import { getProfile } from "@/lib/data";
 import { CARDS } from "@/lib/cards";
 import { BOOSTER_COOLDOWN_MS, CARDS_PER_BOOSTER, RARITY, RARITY_ORDER } from "@/lib/game";
 
@@ -8,21 +11,30 @@ const SHOWCASE = ["kratos", "mario", "sonic", "link", "samus", "kirby"]
   .map((id) => CARDS.find((card) => card.id === id))
   .filter((card): card is NonNullable<typeof card> => Boolean(card));
 
-export default function Home() {
+export default async function Home() {
+  // La landing est publique, mais elle doit refléter la session : sinon le header
+  // affiche « Connexion » à un joueur connecté venu cliquer sur le logo.
+  const session = await getSession();
+  const profile = session ? await getProfile(session.supabase, session.user) : null;
+
   return (
     <div className="flex min-h-screen flex-col">
-      <SiteHeader />
+      <SiteHeader
+        username={profile?.username}
+        avatarCardId={profile?.avatarCardId}
+        frame={profile?.frame}
+      />
 
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-12 sm:py-16">
         <section className="grid items-center gap-10 lg:grid-cols-[1.1fr_1fr]">
           <div>
-            <span className="inline-flex items-center gap-2 rounded-full border border-violet-400/30 bg-violet-500/10 px-3 py-1 text-xs uppercase tracking-[0.2em] text-violet-200">
+            <span className="eyebrow">
               Projet de fan · {CARDS.length} cartes
             </span>
 
-            <h1 className="mt-5 text-4xl font-black leading-[1.05] sm:text-6xl">
+            <h1 className="display mt-4 text-5xl sm:text-7xl">
               Le TCG des
-              <span className="rarity-shine"> héros de jeux vidéo</span>.
+              <span className="text-acid"> héros de jeux vidéo</span>.
             </h1>
 
             <p className="mt-5 max-w-xl text-lg text-white/65">
@@ -32,18 +44,37 @@ export default function Home() {
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link
-                href="/signup"
-                className="rounded-full bg-white px-6 py-3 text-sm font-semibold text-violet-950 transition hover:bg-violet-100"
-              >
-                Créer mon compte — gratuit
-              </Link>
-              <Link
-                href="/login"
-                className="rounded-full border border-white/20 px-6 py-3 text-sm font-medium text-white/80 transition hover:border-white/40 hover:text-white"
-              >
-                Se connecter
-              </Link>
+              {profile ? (
+                <>
+                  <Link
+                    href="/boosters"
+                    className="rounded-full bg-acid px-6 py-3 text-sm font-semibold text-ink transition hover:brightness-110"
+                  >
+                    Continuer ma collection
+                  </Link>
+                  <Link
+                    href="/collection"
+                    className="rounded-full border border-white/20 px-6 py-3 text-sm font-medium text-white/80 transition hover:border-white/40 hover:text-white"
+                  >
+                    Voir mes cartes
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/signup"
+                    className="rounded-full bg-acid px-6 py-3 text-sm font-semibold text-ink transition hover:brightness-110"
+                  >
+                    Créer mon compte — gratuit
+                  </Link>
+                  <Link
+                    href="/login"
+                    className="rounded-full border border-white/20 px-6 py-3 text-sm font-medium text-white/80 transition hover:border-white/40 hover:text-white"
+                  >
+                    Se connecter
+                  </Link>
+                </>
+              )}
             </div>
 
             <p className="mt-6 text-xs text-white/35">
@@ -82,23 +113,42 @@ export default function Home() {
           />
         </section>
 
-        <section className="mt-16 rounded-3xl border border-white/10 bg-white/[0.03] p-6 sm:p-8">
-          <h2 className="text-lg font-semibold">Les raretés</h2>
-          <p className="mt-1 text-sm text-white/50">
-            Chances d&apos;apparition par carte, dans un booster.
-          </p>
-          <ul className="mt-5 grid gap-3 sm:grid-cols-5">
+        <section
+          id="raretes"
+          className="mt-16 scroll-mt-20 rounded-3xl border border-white/10 bg-white/[0.02] p-6 sm:p-8"
+        >
+          <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-2">
+            <div>
+              <span className="eyebrow">Raretés</span>
+              <h2 className="display mt-2 text-2xl sm:text-3xl">De commune à mythique</h2>
+            </div>
+            <p className="max-w-xs text-sm leading-relaxed text-white/45">
+              Chances d&apos;apparition par carte, dans un booster.
+            </p>
+          </div>
+
+          <ul className="mt-6 grid gap-3 sm:grid-cols-5">
             {RARITY_ORDER.map((key) => {
               const info = RARITY[key];
               const count = CARDS.filter((card) => card.rarity === key).length;
               return (
-                <li key={key} className="rounded-2xl border border-white/10 bg-black/25 p-4">
-                  <span className={`inline-block rounded px-1.5 py-0.5 text-[10px] font-bold ${info.badge}`}>
-                    {info.short}
-                  </span>
-                  <p className={`mt-2 text-sm font-semibold ${info.text}`}>{info.label}</p>
-                  <p className="text-xs text-white/40">
-                    {count} cartes · {(info.weight / 10).toFixed(1)} %
+                <li
+                  key={key}
+                  className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/30 p-4"
+                >
+                  {/* Filet de rareté : rappelle le liseré des cartes. */}
+                  <span className={`absolute inset-x-0 top-0 h-0.5 ${info.bar}`} aria-hidden />
+                  <div className="flex items-center justify-between gap-2">
+                    <span className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${info.badge}`}>
+                      {info.short}
+                    </span>
+                    <span className="font-mono text-[11px] whitespace-nowrap text-white/35">
+                      {count} cartes
+                    </span>
+                  </div>
+                  <p className={`display mt-3 text-base ${info.text}`}>{info.label}</p>
+                  <p className="mt-1 font-mono text-xs text-white/45">
+                    {(info.weight / 10).toFixed(1)} %
                   </p>
                 </li>
               );
@@ -107,16 +157,7 @@ export default function Home() {
         </section>
       </main>
 
-      <footer className="border-t border-white/10 px-4 py-8 text-center text-xs leading-relaxed text-white/35">
-        <p>
-          TCVG est un projet de fan, non officiel et non affilié à Nintendo, Sony, Microsoft, Sega,
-          Square Enix, Capcom, Bandai Namco, Activision ou à leurs ayants droit.
-        </p>
-        <p className="mt-2">
-          Tous les personnages et marques cités appartiennent à leurs propriétaires respectifs.
-          Aucune illustration officielle n&apos;est utilisée ni hébergée.
-        </p>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }
@@ -124,10 +165,10 @@ export default function Home() {
 function Step({ n, title, text }: { n: string; title: string; text: string }) {
   return (
     <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
-      <span className="grid h-8 w-8 place-items-center rounded-full bg-violet-500/20 text-sm font-bold text-violet-200">
+      <span className="grid h-8 w-8 place-items-center rounded-full bg-acid/15 text-sm font-bold text-acid">
         {n}
       </span>
-      <h3 className="mt-3 font-semibold">{title}</h3>
+      <h3 className="display mt-3 text-base">{title}</h3>
       <p className="mt-1.5 text-sm text-white/55">{text}</p>
     </div>
   );

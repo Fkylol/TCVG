@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Packs générés (OpenNext / Wrangler) : ce sont des bundles, pas du code source.
+    ".open-next/**",
+    ".wrangler/**",
   ]),
 ]);
 

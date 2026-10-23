@@ -2,10 +2,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { CardFace } from "@/components/card-face";
-import { getCard, getUniverseLabel } from "@/lib/cards";
+import { getCard, getCardNumber, getUniverseLabel } from "@/lib/cards";
+import { ListingForm } from "@/components/listing-form";
+import { RecycleButton } from "@/components/recycle-button";
 import { requireSession } from "@/lib/auth";
+import { getMarketQuote, getRecycleValues } from "@/lib/data";
 import { CARDS, RARITY } from "@/lib/game";
-import { filePageUrl, getPortrait } from "@/lib/portraits";
+import { getPortrait, sourceLabel } from "@/lib/portraits";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -15,23 +18,33 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   return { title: card ? `${card.name} — TCVG` : "Carte introuvable — TCVG" };
 }
 
-const MAX_STAT = 9420;
-
 export default async function CardPage({ params }: Params) {
   const { id } = await params;
   const card = getCard(id);
   if (!card) notFound();
 
   const { supabase, user } = await requireSession();
-  const { data } = await supabase
-    .from("collection")
-    .select("quantity, first_obtained_at")
-    .eq("user_id", user.id)
-    .eq("card_id", card.id)
-    .maybeSingle();
+  const [{ data }, recycleValues, normalQuote, holoQuote] = await Promise.all([
+    supabase
+      .from("collection")
+      .select("quantity, holo_quantity, first_obtained_at")
+      .eq("user_id", user.id)
+      .eq("card_id", card.id)
+      .maybeSingle(),
+    getRecycleValues(supabase),
+    getMarketQuote(supabase, card.id, false),
+    getMarketQuote(supabase, card.id, true),
+  ]);
 
   const quantity = (data?.quantity as number | undefined) ?? 0;
+  const holoQuantity = (data?.holo_quantity as number | null | undefined) ?? 0;
   const firstObtained = data?.first_obtained_at as string | undefined;
+  const normalValue = recycleValues[card.rarity] ?? 0;
+  const holoValue = normalValue * 3;
+  const recyclableNormals = Math.max(0, quantity - holoQuantity - 1);
+  const recyclableHolo = holoQuantity > 0 && quantity > 1;
+  const canSellNormal = quantity - holoQuantity >= 2;
+  const canSellHolo = holoQuantity > 0 && quantity > 1;
   const rarity = RARITY[card.rarity];
   const portrait = getPortrait(card.id);
   const sameUniverse = CARDS.filter((c) => c.universe === card.universe && c.id !== card.id);
@@ -50,14 +63,15 @@ export default async function CardPage({ params }: Params) {
             <p className="mt-3 text-[11px] leading-relaxed text-white/35">
               Visuel{" : "}
               <a
-                href={filePageUrl(portrait)}
+                href={portrait.page}
                 target="_blank"
                 rel="noreferrer noopener"
                 className="underline underline-offset-2 transition hover:text-white/60"
               >
-                {portrait.file || portrait.wikiTitle}
+                {portrait.source === "fandom" ? portrait.wikiTitle : portrait.file || portrait.wikiTitle}
               </a>{" "}
-              via Wikipédia{portrait.credit ? ` — ${portrait.credit}` : ""}
+              via {sourceLabel(portrait)}
+              {portrait.credit ? ` — ${portrait.credit}` : ""}
               {portrait.license ? ` · ${portrait.license}` : ""}
             </p>
           )}
@@ -68,6 +82,14 @@ export default async function CardPage({ params }: Params) {
                 <p className="text-emerald-300">Dans ta collection</p>
                 <p className="mt-1 text-white/60">
                   {quantity} exemplaire{quantity > 1 ? "s" : ""}
+                  {holoQuantity > 0 && (
+                    <>
+                      {" · "}
+                      <span className="font-semibold text-amber-300" title="Exemplaires holo">
+                        ✦ {holoQuantity} holo
+                      </span>
+                    </>
+                  )}
                   {firstObtained && (
                     <>
                       {" · obtenu le "}
@@ -79,6 +101,31 @@ export default async function CardPage({ params }: Params) {
                     </>
                   )}
                 </p>
+
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  {recyclableNormals > 0 && (
+                    <RecycleButton
+                      cardId={card.id}
+                      label={`Recycler un doublon · +${normalValue} ◆`}
+                    />
+                  )}
+                  {recyclableHolo && (
+                    <RecycleButton
+                      cardId={card.id}
+                      holo
+                      label={`Recycler une holo · +${holoValue} ◆`}
+                      confirmMessage={`Recycler une copie holo de ${card.name} pour ◆ ${holoValue} ? Une holo vaut 3 × la valeur de la carte.`}
+                      className="rounded-full border border-amber-300/30 bg-amber-300/10 px-3 py-1.5 text-xs font-semibold text-amber-200 transition hover:bg-amber-300/20 disabled:cursor-not-allowed disabled:opacity-50"
+                    />
+                  )}
+                </div>
+
+                {recyclableNormals === 0 && !recyclableHolo && (
+                  <p className="mt-2 text-[11px] text-white/35">
+                    Il faut garder au moins un exemplaire : ouvre d&apos;autres boosters pour pouvoir
+                    recycler un doublon.
+                  </p>
+                )}
               </>
             ) : (
               <>
@@ -87,12 +134,22 @@ export default async function CardPage({ params }: Params) {
                   Cette carte peut sortir dans n&apos;importe quel booster ({(rarity.weight / 10).toFixed(1)} %
                   par carte tirée).
                 </p>
-                <Link href="/boosters" className="mt-3 inline-block text-violet-200 hover:underline">
+                <Link href="/boosters" className="mt-3 inline-block text-acid hover:underline">
                   Ouvrir un booster →
                 </Link>
               </>
             )}
           </div>
+
+          {quantity > 0 && (normalQuote || holoQuote) && (
+            <ListingForm
+              cardId={card.id}
+              normal={normalQuote}
+              holo={holoQuote}
+              canSellNormal={canSellNormal}
+              canSellHolo={canSellHolo}
+            />
+          )}
         </div>
 
         <div>
@@ -101,22 +158,20 @@ export default async function CardPage({ params }: Params) {
               {rarity.label}
             </span>
             <span className="text-sm text-white/50">{getUniverseLabel(card.universe)}</span>
+            <span className="ml-auto font-mono text-xs text-white/35">
+              N° {String(getCardNumber(card.id) ?? 0).padStart(2, "0")} / {CARDS.length}
+            </span>
           </div>
 
-          <h1 className="mt-3 text-4xl font-black">{card.name}</h1>
+          <h1 className="display mt-3 text-4xl">{card.name}</h1>
           <p className="mt-1 text-white/55">{card.tagline}</p>
 
-          <div className="mt-6 grid gap-3 sm:grid-cols-2">
-            <Stat label="Attaque" value={card.atk} gradient="from-rose-400 to-orange-300" />
-            <Stat label="Défense" value={card.def} gradient="from-sky-400 to-emerald-300" />
-          </div>
-
-          <blockquote className="mt-6 border-l-2 border-violet-400/50 pl-4 text-lg italic text-white/75">
+          <blockquote className="mt-6 border-l-2 border-acid/50 pl-4 text-lg italic text-white/75">
             « {card.quote} »
           </blockquote>
 
-          <div className="mt-6 rounded-2xl border border-violet-400/20 bg-violet-500/[0.07] p-4">
-            <p className="text-xs uppercase tracking-[0.2em] text-violet-200/70">Pouvoir</p>
+          <div className="mt-6 rounded-2xl border border-acid/20 bg-acid/[0.06] p-4">
+            <p className="text-xs uppercase tracking-[0.2em] text-acid/70">Pouvoir</p>
             <p className="mt-1.5 font-medium">{card.power}</p>
           </div>
 
@@ -137,21 +192,6 @@ export default async function CardPage({ params }: Params) {
             </div>
           )}
         </div>
-      </div>
-    </div>
-  );
-}
-
-function Stat({ label, value, gradient }: { label: string; value: number; gradient: string }) {
-  const percent = Math.min(100, Math.round((value / MAX_STAT) * 100));
-  return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-      <div className="flex items-baseline justify-between">
-        <span className="text-xs uppercase tracking-[0.18em] text-white/40">{label}</span>
-        <span className="font-mono text-xl font-semibold">{value.toLocaleString("fr-FR")}</span>
-      </div>
-      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10">
-        <div className={`h-full rounded-full bg-gradient-to-r ${gradient}`} style={{ width: `${percent}%` }} />
       </div>
     </div>
   );

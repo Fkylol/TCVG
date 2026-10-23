@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-10-22T19:54:25.989Z",
-  "source": "en.wikipedia.org",
-  "note": "Visuels hotlinkés depuis upload.wikimedia.org. Projet de fan non officiel : la plupart de ces images sont en fair use sur Wikipédia (voir README).",
+  "generatedAt": "2026-10-22T20:53:14.738Z",
+  "note": "Visuels hotlinkés (Wikipédia, puis Fandom pour les personnages sans article). Projet de fan non officiel : la plupart de ces images sont en fair use (voir README).",
   "items": {
     "2b": {
       "url": "https://upload.wikimedia.org/wikipedia/en/7/77/2B_Nier_Automata.png",
+      "source": "wikipedia",
       "wikiTitle": "2B",
       "page": "https://en.wikipedia.org/wiki/2B",
       "file": "2B Nier Automata.png",
@@ -15,6 +15,7 @@
     },
     "aerith": {
       "url": "https://upload.wikimedia.org/wikipedia/en/2/2f/Aerith_Gainsborough.png",
+      "source": "wikipedia",
       "wikiTitle": "Aerith Gainsborough",
       "page": "https://en.wikipedia.org/wiki/Aerith_Gainsborough",
       "file": "Aerith Gainsborough.png",
@@ -24,6 +25,7 @@
     },
     "alucard": {
       "url": "https://upload.wikimedia.org/wikipedia/en/e/eb/Alucard-sotn.png",
+      "source": "wikipedia",
       "wikiTitle": "Alucard (Castlevania)",
       "page": "https://en.wikipedia.org/wiki/Alucard_(Castlevania)",
       "file": "Alucard-sotn.png",
@@ -33,6 +35,7 @@
     },
     "arbiter": {
       "url": "https://upload.wikimedia.org/wikipedia/en/3/37/Arbiter_H5.png",
+      "source": "wikipedia",
       "wikiTitle": "Arbiter (Halo)",
       "page": "https://en.wikipedia.org/wiki/Arbiter_(Halo)",
       "file": "Arbiter H5.png",
@@ -41,8 +44,39 @@
       "credit": "343 Industries",
       "license": "Fair use"
     },
+    "artorias": {
+      "url": "https://static.wikia.nocookie.net/darksouls/images/b/ba/Knight_Artorias_Model.png/revision/latest/scale-to-width-down/389?cb=20210810060149",
+      "source": "fandom",
+      "wikiHost": "darksouls.fandom.com",
+      "wikiTitle": "Knight Artorias",
+      "page": "https://darksouls.fandom.com/wiki/Knight_Artorias",
+      "file": "Knight Artorias Model.png",
+      "width": 389,
+      "height": 720
+    },
+    "atreus": {
+      "url": "https://static.wikia.nocookie.net/godofwar/images/a/a8/Capture_d%E2%80%99%C3%A9cran_2023-01-27_%C3%A0_15.54.20.png/revision/latest/scale-to-width-down/369?cb=20230127152503",
+      "source": "fandom",
+      "wikiHost": "godofwar.fandom.com",
+      "wikiTitle": "Atreus",
+      "page": "https://godofwar.fandom.com/wiki/Atreus",
+      "file": "Capture d’écran 2023-01-27 à 15.54.20.png",
+      "width": 369,
+      "height": 720
+    },
+    "baldur": {
+      "url": "https://static.wikia.nocookie.net/godofwar/images/f/f0/Baldur2.png/revision/latest/scale-to-width-down/492?cb=20230219143256",
+      "source": "fandom",
+      "wikiHost": "godofwar.fandom.com",
+      "wikiTitle": "Baldur",
+      "page": "https://godofwar.fandom.com/wiki/Baldur",
+      "file": "Baldur2.png",
+      "width": 492,
+      "height": 720
+    },
     "banjo-kazooie": {
       "url": "https://upload.wikimedia.org/wikipedia/en/c/cd/Banjo_and_Kazooie_2000.png",
+      "source": "wikipedia",
       "wikiTitle": "Banjo & Kazooie",
       "page": "https://en.wikipedia.org/wiki/Banjo_%26_Kazooie",
       "file": "Banjo and Kazooie 2000.png",
@@ -53,6 +87,7 @@
     },
     "bison": {
       "url": "https://upload.wikimedia.org/wikipedia/en/e/e4/Bison_%28Super_Street_Fighter_II%29.png",
+      "source": "wikipedia",
       "wikiTitle": "M. Bison",
       "page": "https://en.wikipedia.org/wiki/M._Bison",
       "file": "Bison (Super Street Fighter II).png",
@@ -62,6 +97,7 @@
     },
     "bowser": {
       "url": "https://upload.wikimedia.org/wikipedia/en/d/d1/Bowser_by_Shigehisa_Nakaue.png",
+      "source": "wikipedia",
       "wikiTitle": "Bowser",
       "page": "https://en.wikipedia.org/wiki/Bowser",
       "file": "Bowser by Shigehisa Nakaue.png",
@@ -72,6 +108,7 @@
     },
     "charizard": {
       "url": "https://upload.wikimedia.org/wikipedia/en/1/1f/Pok%C3%A9mon_Charizard_art.png",
+      "source": "wikipedia",
       "wikiTitle": "Charizard",
       "page": "https://en.wikipedia.org/wiki/Charizard",
       "file": "Pokémon Charizard art.png",
@@ -81,6 +118,7 @@
     },
     "chell": {
       "url": "https://upload.wikimedia.org/wikipedia/en/4/40/Chell.png",
+      "source": "wikipedia",
       "wikiTitle": "Chell (Portal)",
       "page": "https://en.wikipedia.org/wiki/Chell_(Portal)",
       "file": "Chell.png",
@@ -88,8 +126,29 @@
       "height": 385,
       "license": "Fair use"
     },
+    "chun-li": {
+      "url": "https://static.wikia.nocookie.net/streetfighter/images/5/5b/Chun-Li_SF6_Render.png/revision/latest/scale-to-width-down/451?cb=20220603005535",
+      "source": "fandom",
+      "wikiHost": "streetfighter.fandom.com",
+      "wikiTitle": "Chun-Li",
+      "page": "https://streetfighter.fandom.com/wiki/Chun-Li",
+      "file": "Chun-Li SF6 Render.png",
+      "width": 451,
+      "height": 720
+    },
+    "ciri": {
+      "url": "https://static.wikia.nocookie.net/witcher/images/1/1f/Tw3_ciri_by_ivances-d7v55z5.png/revision/latest/scale-to-width-down/193?cb=20160527143845",
+      "source": "fandom",
+      "wikiHost": "witcher.fandom.com",
+      "wikiTitle": "Ciri",
+      "page": "https://witcher.fandom.com/wiki/Ciri",
+      "file": "Tw3 ciri by ivances-d7v55z5.png",
+      "width": 193,
+      "height": 720
+    },
     "cloud": {
       "url": "https://upload.wikimedia.org/wikipedia/en/9/9e/Cloud_Strife.png",
+      "source": "wikipedia",
       "wikiTitle": "Cloud Strife",
       "page": "https://en.wikipedia.org/wiki/Cloud_Strife",
       "file": "Cloud Strife.png",
@@ -99,6 +158,7 @@
     },
     "cortana": {
       "url": "https://upload.wikimedia.org/wikipedia/en/7/75/Cortana_h5.png",
+      "source": "wikipedia",
       "wikiTitle": "Cortana (Halo)",
       "page": "https://en.wikipedia.org/wiki/Cortana_(Halo)",
       "file": "Cortana h5.png",
@@ -108,6 +168,7 @@
     },
     "cortex": {
       "url": "https://upload.wikimedia.org/wikipedia/en/8/87/IAT_Neo_Cortex.png",
+      "source": "wikipedia",
       "wikiTitle": "Doctor Neo Cortex",
       "page": "https://en.wikipedia.org/wiki/Doctor_Neo_Cortex",
       "file": "IAT Neo Cortex.png",
@@ -118,6 +179,7 @@
     },
     "crash": {
       "url": "https://upload.wikimedia.org/wikipedia/en/a/a3/IAT_Crash_Bandicoot.png",
+      "source": "wikipedia",
       "wikiTitle": "Crash Bandicoot (character)",
       "page": "https://en.wikipedia.org/wiki/Crash_Bandicoot_(character)",
       "file": "IAT Crash Bandicoot.png",
@@ -128,6 +190,7 @@
     },
     "creeper": {
       "url": "https://upload.wikimedia.org/wikipedia/commons/a/a9/Minecraft_Creeper_%28Crop%29.png",
+      "source": "wikipedia",
       "wikiTitle": "Creeper (Minecraft)",
       "page": "https://en.wikipedia.org/wiki/Creeper_(Minecraft)",
       "file": "Minecraft Creeper (Crop).png",
@@ -138,6 +201,7 @@
     },
     "cuphead": {
       "url": "https://upload.wikimedia.org/wikipedia/en/5/5a/CupheadCharacterPose.png",
+      "source": "wikipedia",
       "wikiTitle": "Cuphead (character)",
       "page": "https://en.wikipedia.org/wiki/Cuphead_(character)",
       "file": "CupheadCharacterPose.png",
@@ -148,6 +212,7 @@
     },
     "dante": {
       "url": "https://upload.wikimedia.org/wikipedia/en/0/0e/Dante_%28DMC%29.png",
+      "source": "wikipedia",
       "wikiTitle": "Dante (Devil May Cry)",
       "page": "https://en.wikipedia.org/wiki/Dante_(Devil_May_Cry)",
       "file": "Dante (DMC).png",
@@ -158,6 +223,7 @@
     },
     "doom-slayer": {
       "url": "https://upload.wikimedia.org/wikipedia/en/f/fc/Doom_Slayer.png",
+      "source": "wikipedia",
       "wikiTitle": "Doomguy",
       "page": "https://en.wikipedia.org/wiki/Doomguy",
       "file": "Doom Slayer.png",
@@ -168,6 +234,7 @@
     },
     "dracula": {
       "url": "https://upload.wikimedia.org/wikipedia/en/d/d1/Dracula-sotn.png",
+      "source": "wikipedia",
       "wikiTitle": "Dracula (Castlevania)",
       "page": "https://en.wikipedia.org/wiki/Dracula_(Castlevania)",
       "file": "Dracula-sotn.png",
@@ -176,17 +243,28 @@
       "license": "Fair use"
     },
     "eggman": {
-      "url": "https://upload.wikimedia.org/wikipedia/en/7/72/Doctor_EggmanSDT.png",
+      "url": "https://static.wikia.nocookie.net/sonic/images/2/23/SRCWEggman.png/revision/latest/scale-to-width-down/459?cb=20250921210717",
+      "source": "fandom",
+      "wikiHost": "sonic.fandom.com",
       "wikiTitle": "Doctor Eggman",
-      "page": "https://en.wikipedia.org/wiki/Doctor_Eggman",
-      "file": "Doctor EggmanSDT.png",
-      "width": 405,
-      "height": 246,
-      "credit": "Original work: Naoto Ohshima , Yuji Uekawa Depiction: Sega",
-      "license": "Fair use"
+      "page": "https://sonic.fandom.com/wiki/Doctor_Eggman",
+      "file": "SRCWEggman.png",
+      "width": 459,
+      "height": 720
+    },
+    "ender-dragon": {
+      "url": "https://static.wikia.nocookie.net/minecraft_gamepedia/images/0/0a/Ender_Dragon.gif/revision/latest?cb=20210107043116",
+      "source": "fandom",
+      "wikiHost": "minecraft.fandom.com",
+      "wikiTitle": "Ender Dragon",
+      "page": "https://minecraft.fandom.com/wiki/Ender_Dragon",
+      "file": "Ender Dragon.gif",
+      "width": 706,
+      "height": 720
     },
     "flowey": {
       "url": "https://upload.wikimedia.org/wikipedia/en/7/75/Flowey_Undertale.png",
+      "source": "wikipedia",
       "wikiTitle": "Flowey",
       "page": "https://en.wikipedia.org/wiki/Flowey",
       "file": "Flowey Undertale.png",
@@ -195,8 +273,29 @@
       "credit": "Toby Fox , Fangamer",
       "license": "Fair use"
     },
+    "freya": {
+      "url": "https://static.wikia.nocookie.net/godofwar/images/9/95/Capture_d%E2%80%99%C3%A9cran_2023-01-27_%C3%A0_15.03.43.png/revision/latest/scale-to-width-down/344?cb=20230127142223",
+      "source": "fandom",
+      "wikiHost": "godofwar.fandom.com",
+      "wikiTitle": "Freya",
+      "page": "https://godofwar.fandom.com/wiki/Freya",
+      "file": "Capture d’écran 2023-01-27 à 15.03.43.png",
+      "width": 344,
+      "height": 720
+    },
+    "g-man": {
+      "url": "https://static.wikia.nocookie.net/half-life/images/4/41/G-Man_Alyx_Trailer.jpg/revision/latest/scale-to-width-down/720?cb=20191122020607&path-prefix=en",
+      "source": "fandom",
+      "wikiHost": "half-life.fandom.com",
+      "wikiTitle": "The G-Man",
+      "page": "https://half-life.fandom.com/wiki/The_G-Man",
+      "file": "G-Man Alyx Trailer.jpg",
+      "width": 720,
+      "height": 720
+    },
     "ganondorf": {
       "url": "https://upload.wikimedia.org/wikipedia/en/0/04/Ganondorf_Ocarina_of_Time.png",
+      "source": "wikipedia",
       "wikiTitle": "Ganon",
       "page": "https://en.wikipedia.org/wiki/Ganon",
       "file": "Ganondorf Ocarina of Time.png",
@@ -207,6 +306,7 @@
     },
     "geralt": {
       "url": "https://upload.wikimedia.org/wikipedia/commons/8/87/Geralt.jpg",
+      "source": "wikipedia",
       "wikiTitle": "Geralt of Rivia",
       "page": "https://en.wikipedia.org/wiki/Geralt_of_Rivia",
       "file": "Geralt.jpg",
@@ -216,16 +316,18 @@
       "license": "CC BY-SA 2.0"
     },
     "glados": {
-      "url": "https://upload.wikimedia.org/wikipedia/en/b/bf/Glados.png",
-      "wikiTitle": "GLaDOS",
-      "page": "https://en.wikipedia.org/wiki/GLaDOS",
-      "file": "Glados.png",
-      "width": 256,
-      "height": 302,
-      "license": "Fair use"
+      "url": "https://static.wikia.nocookie.net/half-life/images/d/d7/GladosArms2_TRANSPARENT.png/revision/latest/scale-to-width-down/720?cb=20260830054127&path-prefix=en",
+      "source": "fandom",
+      "wikiHost": "half-life.fandom.com",
+      "wikiTitle": "GladosArms2 TRANSPARENT.png",
+      "page": "https://half-life.fandom.com/wiki/File%3AGladosArms2_TRANSPARENT.png",
+      "file": "GladosArms2 TRANSPARENT.png",
+      "width": 1440,
+      "height": 2560
     },
     "gordon": {
       "url": "https://upload.wikimedia.org/wikipedia/en/2/20/Gordon_Freeman.png",
+      "source": "wikipedia",
       "wikiTitle": "Gordon Freeman",
       "page": "https://en.wikipedia.org/wiki/Gordon_Freeman",
       "file": "Gordon Freeman.png",
@@ -233,8 +335,39 @@
       "height": 365,
       "license": "Fair use"
     },
+    "grimm": {
+      "url": "https://static.wikia.nocookie.net/hollowknight/images/b/ba/Grimm_Idle.png/revision/latest?cb=20181201000031",
+      "source": "fandom",
+      "wikiHost": "hollowknight.fandom.com",
+      "wikiTitle": "Grimm Idle.png",
+      "page": "https://hollowknight.fandom.com/wiki/File%3AGrimm_Idle.png",
+      "file": "Grimm Idle.png",
+      "width": 197,
+      "height": 403
+    },
+    "gruntilda": {
+      "url": "https://static.wikia.nocookie.net/banjokazooie/images/7/73/Gruntilda.png/revision/latest/scale-to-width-down/478?cb=20260314171054",
+      "source": "fandom",
+      "wikiHost": "banjokazooie.fandom.com",
+      "wikiTitle": "Gruntilda Winkybunion",
+      "page": "https://banjokazooie.fandom.com/wiki/Gruntilda_Winkybunion",
+      "file": "Gruntilda.png",
+      "width": 478,
+      "height": 720
+    },
+    "gwyn": {
+      "url": "https://static.wikia.nocookie.net/darksouls/images/b/b4/Gwyn_Lord_of_Cinder.png/revision/latest/scale-to-width-down/459?cb=20181028080820",
+      "source": "fandom",
+      "wikiHost": "darksouls.fandom.com",
+      "wikiTitle": "Gwyn, Lord of Cinder",
+      "page": "https://darksouls.fandom.com/wiki/Gwyn%2C_Lord_of_Cinder",
+      "file": "Gwyn Lord of Cinder.png",
+      "width": 459,
+      "height": 720
+    },
     "hornet": {
       "url": "https://upload.wikimedia.org/wikipedia/en/4/4a/Hornet_%28Hollow_Knight%29.png",
+      "source": "wikipedia",
       "wikiTitle": "Hornet (Hollow Knight)",
       "page": "https://en.wikipedia.org/wiki/Hornet_(Hollow_Knight)",
       "file": "Hornet (Hollow Knight).png",
@@ -243,8 +376,29 @@
       "credit": "Team Cherry",
       "license": "Fair use"
     },
+    "hunter": {
+      "url": "https://static.wikia.nocookie.net/spyro/images/a/a7/Hunter_PS1.jpg/revision/latest?cb=20180824200042",
+      "source": "fandom",
+      "wikiHost": "spyro.fandom.com",
+      "wikiTitle": "Hunter",
+      "page": "https://spyro.fandom.com/wiki/Hunter",
+      "file": "Hunter PS1.jpg",
+      "width": 488,
+      "height": 720
+    },
+    "inkling": {
+      "url": "https://static.wikia.nocookie.net/splatoon/images/9/97/S3_Inkling_Girl.png/revision/latest/scale-to-width-down/493?cb=20230403161708",
+      "source": "fandom",
+      "wikiHost": "splatoon.fandom.com",
+      "wikiTitle": "Inklings",
+      "page": "https://splatoon.fandom.com/wiki/Inklings",
+      "file": "S3 Inkling Girl.png",
+      "width": 493,
+      "height": 720
+    },
     "joker": {
       "url": "https://upload.wikimedia.org/wikipedia/en/f/f7/Joker_Persona.png",
+      "source": "wikipedia",
       "wikiTitle": "Joker (Persona)",
       "page": "https://en.wikipedia.org/wiki/Joker_(Persona)",
       "file": "Joker Persona.png",
@@ -253,8 +407,19 @@
       "credit": "Atlus",
       "license": "Fair use"
     },
+    "king-dedede": {
+      "url": "https://static.wikia.nocookie.net/kirby/images/9/9c/DededeAirRidersRender.png/revision/latest/scale-to-width-down/720?cb=20250819185651&path-prefix=en",
+      "source": "fandom",
+      "wikiHost": "kirby.fandom.com",
+      "wikiTitle": "King Dedede",
+      "page": "https://kirby.fandom.com/wiki/King_Dedede",
+      "file": "DededeAirRidersRender.png",
+      "width": 720,
+      "height": 626
+    },
     "king-dice": {
       "url": "https://upload.wikimedia.org/wikipedia/en/0/02/Cuphead-KingDice.png",
+      "source": "wikipedia",
       "wikiTitle": "King Dice",
       "page": "https://en.wikipedia.org/wiki/King_Dice",
       "file": "Cuphead-KingDice.png",
@@ -264,6 +429,7 @@
     },
     "kirby": {
       "url": "https://upload.wikimedia.org/wikipedia/en/4/4e/Kirby_Nintendo.png",
+      "source": "wikipedia",
       "wikiTitle": "Kirby (character)",
       "page": "https://en.wikipedia.org/wiki/Kirby_(character)",
       "file": "Kirby Nintendo.png",
@@ -273,16 +439,18 @@
       "license": "Fair use"
     },
     "knuckles": {
-      "url": "https://upload.wikimedia.org/wikipedia/en/0/06/Knuckles_the_Echidna.png",
+      "url": "https://static.wikia.nocookie.net/sonic/images/2/2c/SRCKnuckles.png/revision/latest/scale-to-width-down/712?cb=20250826092333",
+      "source": "fandom",
+      "wikiHost": "sonic.fandom.com",
       "wikiTitle": "Knuckles the Echidna",
-      "page": "https://en.wikipedia.org/wiki/Knuckles_the_Echidna",
-      "file": "Knuckles the Echidna.png",
-      "width": 371,
-      "height": 269,
-      "license": "Fair use"
+      "page": "https://sonic.fandom.com/wiki/Knuckles_the_Echidna",
+      "file": "SRCKnuckles.png",
+      "width": 712,
+      "height": 720
     },
     "kratos": {
       "url": "https://upload.wikimedia.org/wikipedia/en/2/2f/Kratos_PS4.png",
+      "source": "wikipedia",
       "wikiTitle": "Kratos (God of War)",
       "page": "https://en.wikipedia.org/wiki/Kratos_(God_of_War)",
       "file": "Kratos PS4.png",
@@ -291,26 +459,38 @@
       "license": "Fair use"
     },
     "le-chevalier": {
-      "url": "https://upload.wikimedia.org/wikipedia/en/d/de/Hollow_Knight_2026_cover_art.jpg",
-      "wikiTitle": "Hollow Knight",
-      "page": "https://en.wikipedia.org/wiki/Hollow_Knight",
-      "file": "Hollow Knight 2026 cover art.jpg",
-      "width": 316,
-      "height": 316,
-      "credit": "Team Cherry",
-      "license": "Fair use"
+      "url": "https://static.wikia.nocookie.net/hollowknight/images/6/60/The_Knight_Shade.png/revision/latest?cb=20190507173407",
+      "source": "fandom",
+      "wikiHost": "hollowknight.fandom.com",
+      "wikiTitle": "Knight",
+      "page": "https://hollowknight.fandom.com/wiki/Knight",
+      "file": "The Knight Shade.png",
+      "width": 600,
+      "height": 720
+    },
+    "leon": {
+      "url": "https://static.wikia.nocookie.net/residentevil/images/7/7d/RE9_-_Leon_Render.png/revision/latest/scale-to-width-down/279?cb=20251212111407",
+      "source": "fandom",
+      "wikiHost": "residentevil.fandom.com",
+      "wikiTitle": "Leon Scott Kennedy",
+      "page": "https://residentevil.fandom.com/wiki/Leon_Scott_Kennedy",
+      "file": "RE9 - Leon Render.png",
+      "width": 279,
+      "height": 720
     },
     "link": {
-      "url": "https://upload.wikimedia.org/wikipedia/en/9/9d/Link_%28Hyrule_Historia%29.png",
-      "wikiTitle": "Link (The Legend of Zelda)",
-      "page": "https://en.wikipedia.org/wiki/Link_(The_Legend_of_Zelda)",
-      "file": "Link (Hyrule Historia).png",
-      "width": 264,
-      "height": 377,
-      "license": "Fair use"
+      "url": "https://static.wikia.nocookie.net/zelda_gamepedia_en/images/4/47/TLoZ_Series_Link_Render.png/revision/latest/scale-to-width-down/470?cb=20210220213135",
+      "source": "fandom",
+      "wikiHost": "zelda.fandom.com",
+      "wikiTitle": "Link",
+      "page": "https://zelda.fandom.com/wiki/Link",
+      "file": "TLoZ Series Link Render.png",
+      "width": 470,
+      "height": 720
     },
     "luigi": {
       "url": "https://upload.wikimedia.org/wikipedia/en/b/be/Luigi_by_Shigehisa_Nakaue.png",
+      "source": "wikipedia",
       "wikiTitle": "Luigi (character)",
       "page": "https://en.wikipedia.org/wiki/Luigi_(character)",
       "file": "Luigi by Shigehisa Nakaue.png",
@@ -321,6 +501,7 @@
     },
     "madeline": {
       "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/42/Celeste_character_Madeline.png/960px-Celeste_character_Madeline.png",
+      "source": "wikipedia",
       "wikiTitle": "Madeline (Celeste)",
       "page": "https://en.wikipedia.org/wiki/Madeline_(Celeste)",
       "file": "Celeste character Madeline.png",
@@ -329,8 +510,19 @@
       "credit": "Maddy Makes Games",
       "license": "CC BY-SA 4.0"
     },
+    "majora": {
+      "url": "https://static.wikia.nocookie.net/zelda_gamepedia_en/images/6/6b/TLoZ_Series_Majora%27s_Mask_Render.png/revision/latest?cb=20210315025921",
+      "source": "fandom",
+      "wikiHost": "zelda.fandom.com",
+      "wikiTitle": "Majora's Mask (item)",
+      "page": "https://zelda.fandom.com/wiki/Majora's_Mask_(item)",
+      "file": "TLoZ Series Majora's Mask Render.png",
+      "width": 720,
+      "height": 639
+    },
     "malenia": {
       "url": "https://upload.wikimedia.org/wikipedia/en/b/b8/Malenia_Elden_Ring.png",
+      "source": "wikipedia",
       "wikiTitle": "Malenia",
       "page": "https://en.wikipedia.org/wiki/Malenia",
       "file": "Malenia Elden Ring.png",
@@ -341,6 +533,7 @@
     },
     "mario": {
       "url": "https://upload.wikimedia.org/wikipedia/en/5/5c/Mario_by_Shigehisa_Nakaue.png",
+      "source": "wikipedia",
       "wikiTitle": "Mario",
       "page": "https://en.wikipedia.org/wiki/Mario",
       "file": "Mario by Shigehisa Nakaue.png",
@@ -351,6 +544,7 @@
     },
     "master-chief": {
       "url": "https://upload.wikimedia.org/wikipedia/en/4/42/Master_chief_halo_infinite.png",
+      "source": "wikipedia",
       "wikiTitle": "Master Chief (Halo)",
       "page": "https://en.wikipedia.org/wiki/Master_Chief_(Halo)",
       "file": "Master chief halo infinite.png",
@@ -360,6 +554,7 @@
     },
     "mercy": {
       "url": "https://upload.wikimedia.org/wikipedia/en/1/15/Mercy_Overwatch.png",
+      "source": "wikipedia",
       "wikiTitle": "Mercy (Overwatch)",
       "page": "https://en.wikipedia.org/wiki/Mercy_(Overwatch)",
       "file": "Mercy Overwatch.png",
@@ -369,6 +564,7 @@
     },
     "meta-knight": {
       "url": "https://upload.wikimedia.org/wikipedia/en/3/32/Meta_Knight_Super_Star.png",
+      "source": "wikipedia",
       "wikiTitle": "Meta Knight",
       "page": "https://en.wikipedia.org/wiki/Meta_Knight",
       "file": "Meta Knight Super Star.png",
@@ -379,6 +575,7 @@
     },
     "mewtwo": {
       "url": "https://upload.wikimedia.org/wikipedia/en/4/43/Pok%C3%A9mon_Mewtwo_art.png",
+      "source": "wikipedia",
       "wikiTitle": "Mewtwo",
       "page": "https://en.wikipedia.org/wiki/Mewtwo",
       "file": "Pokémon Mewtwo art.png",
@@ -386,8 +583,19 @@
       "height": 350,
       "license": "Fair use"
     },
+    "mumbo": {
+      "url": "https://static.wikia.nocookie.net/banjokazooie/images/e/ea/Mumbo_Jumbo_%28Banjo-Tooie%29_Five.png/revision/latest/scale-to-width-down/576?cb=20120814175319",
+      "source": "fandom",
+      "wikiHost": "banjokazooie.fandom.com",
+      "wikiTitle": "Mumbo Jumbo",
+      "page": "https://banjokazooie.fandom.com/wiki/Mumbo_Jumbo",
+      "file": "Mumbo Jumbo (Banjo-Tooie) Five.png",
+      "width": 576,
+      "height": 720
+    },
     "nemesis": {
       "url": "https://upload.wikimedia.org/wikipedia/en/2/2b/Nemesis0.png",
+      "source": "wikipedia",
       "wikiTitle": "Nemesis (Resident Evil)",
       "page": "https://en.wikipedia.org/wiki/Nemesis_(Resident_Evil)",
       "file": "Nemesis0.png",
@@ -397,6 +605,7 @@
     },
     "papyrus": {
       "url": "https://upload.wikimedia.org/wikipedia/en/0/0e/Undertale_Papyrus.png",
+      "source": "wikipedia",
       "wikiTitle": "Papyrus (Undertale)",
       "page": "https://en.wikipedia.org/wiki/Papyrus_(Undertale)",
       "file": "Undertale Papyrus.png",
@@ -407,6 +616,7 @@
     },
     "peach": {
       "url": "https://upload.wikimedia.org/wikipedia/en/1/16/Princess_Peach_Stock_Art.png",
+      "source": "wikipedia",
       "wikiTitle": "Princess Peach",
       "page": "https://en.wikipedia.org/wiki/Princess_Peach",
       "file": "Princess Peach Stock Art.png",
@@ -417,6 +627,7 @@
     },
     "pikachu": {
       "url": "https://upload.wikimedia.org/wikipedia/en/a/a6/Pok%C3%A9mon_Pikachu_art.png",
+      "source": "wikipedia",
       "wikiTitle": "Pikachu",
       "page": "https://en.wikipedia.org/wiki/Pikachu",
       "file": "Pokémon Pikachu art.png",
@@ -427,6 +638,7 @@
     },
     "radahn": {
       "url": "https://upload.wikimedia.org/wikipedia/en/d/dc/Starscourge_Radahn_concept_art.png",
+      "source": "wikipedia",
       "wikiTitle": "Starscourge Radahn",
       "page": "https://en.wikipedia.org/wiki/Starscourge_Radahn",
       "file": "Starscourge Radahn concept art.png",
@@ -437,6 +649,7 @@
     },
     "reaper": {
       "url": "https://upload.wikimedia.org/wikipedia/en/f/f1/Overwatch-Reaper.png",
+      "source": "wikipedia",
       "wikiTitle": "Reaper (Overwatch)",
       "page": "https://en.wikipedia.org/wiki/Reaper_(Overwatch)",
       "file": "Overwatch-Reaper.png",
@@ -446,6 +659,7 @@
     },
     "ridley": {
       "url": "https://upload.wikimedia.org/wikipedia/en/9/93/Ridley_Super_Smash_Bros_Ultimate.png",
+      "source": "wikipedia",
       "wikiTitle": "Ridley (Metroid)",
       "page": "https://en.wikipedia.org/wiki/Ridley_(Metroid)",
       "file": "Ridley Super Smash Bros Ultimate.png",
@@ -454,8 +668,19 @@
       "credit": "Nintendo",
       "license": "Fair use"
     },
+    "ripto": {
+      "url": "https://static.wikia.nocookie.net/spyro/images/3/34/Ripto_Ripto%27s_Rage.png/revision/latest?cb=20180709173303",
+      "source": "fandom",
+      "wikiHost": "spyro.fandom.com",
+      "wikiTitle": "Ripto",
+      "page": "https://spyro.fandom.com/wiki/Ripto",
+      "file": "Ripto Ripto's Rage.png",
+      "width": 624,
+      "height": 720
+    },
     "ryu": {
       "url": "https://upload.wikimedia.org/wikipedia/en/5/50/RyuStreetFighterTwoHadoken.png",
+      "source": "wikipedia",
       "wikiTitle": "Ryu (Street Fighter)",
       "page": "https://en.wikipedia.org/wiki/Ryu_(Street_Fighter)",
       "file": "RyuStreetFighterTwoHadoken.png",
@@ -466,6 +691,7 @@
     },
     "samus": {
       "url": "https://upload.wikimedia.org/wikipedia/en/d/d6/Samus_Aran.png",
+      "source": "wikipedia",
       "wikiTitle": "Samus Aran",
       "page": "https://en.wikipedia.org/wiki/Samus_Aran",
       "file": "Samus Aran.png",
@@ -475,6 +701,7 @@
     },
     "sans": {
       "url": "https://upload.wikimedia.org/wikipedia/en/3/3e/Undertale_Sans.png",
+      "source": "wikipedia",
       "wikiTitle": "Sans (Undertale)",
       "page": "https://en.wikipedia.org/wiki/Sans_(Undertale)",
       "file": "Undertale Sans.png",
@@ -485,6 +712,7 @@
     },
     "sephiroth": {
       "url": "https://upload.wikimedia.org/wikipedia/en/c/c4/Sephiroth.png",
+      "source": "wikipedia",
       "wikiTitle": "Sephiroth (Final Fantasy)",
       "page": "https://en.wikipedia.org/wiki/Sephiroth_(Final_Fantasy)",
       "file": "Sephiroth.png",
@@ -494,6 +722,7 @@
     },
     "shadow": {
       "url": "https://upload.wikimedia.org/wikipedia/en/4/41/ShadowTheHedgehogSA2.png",
+      "source": "wikipedia",
       "wikiTitle": "Shadow the Hedgehog",
       "page": "https://en.wikipedia.org/wiki/Shadow_the_Hedgehog",
       "file": "ShadowTheHedgehogSA2.png",
@@ -504,6 +733,7 @@
     },
     "simon": {
       "url": "https://upload.wikimedia.org/wikipedia/en/7/7d/CVGoS_Simon_Belmont.png",
+      "source": "wikipedia",
       "wikiTitle": "Simon Belmont",
       "page": "https://en.wikipedia.org/wiki/Simon_Belmont",
       "file": "CVGoS Simon Belmont.png",
@@ -513,6 +743,7 @@
     },
     "solaire": {
       "url": "https://upload.wikimedia.org/wikipedia/en/f/f5/Solaire_Concept_Art.png",
+      "source": "wikipedia",
       "wikiTitle": "Solaire of Astora",
       "page": "https://en.wikipedia.org/wiki/Solaire_of_Astora",
       "file": "Solaire Concept Art.png",
@@ -522,17 +753,18 @@
       "license": "Fair use"
     },
     "sonic": {
-      "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1f/Sonic_The_Hedgehog.svg/960px-Sonic_The_Hedgehog.svg.png",
+      "url": "https://static.wikia.nocookie.net/sonic/images/1/10/SRCSonic.png/revision/latest/scale-to-width-down/509?cb=20251202132714",
+      "source": "fandom",
+      "wikiHost": "sonic.fandom.com",
       "wikiTitle": "Sonic the Hedgehog",
-      "page": "https://en.wikipedia.org/wiki/Sonic_the_Hedgehog",
-      "file": "Sonic The Hedgehog.svg",
-      "width": 720,
-      "height": 279,
-      "credit": "Sega",
-      "license": "Public domain"
+      "page": "https://sonic.fandom.com/wiki/Sonic_the_Hedgehog",
+      "file": "SRCSonic.png",
+      "width": 509,
+      "height": 720
     },
     "sora": {
       "url": "https://upload.wikimedia.org/wikipedia/en/5/59/Sora_%28Art%29_KH.png",
+      "source": "wikipedia",
       "wikiTitle": "Sora (Kingdom Hearts)",
       "page": "https://en.wikipedia.org/wiki/Sora_(Kingdom_Hearts)",
       "file": "Sora (Art) KH.png",
@@ -543,6 +775,7 @@
     },
     "spyro": {
       "url": "https://upload.wikimedia.org/wikipedia/en/5/53/Spyro.png",
+      "source": "wikipedia",
       "wikiTitle": "Spyro (character)",
       "page": "https://en.wikipedia.org/wiki/Spyro_(character)",
       "file": "Spyro.png",
@@ -553,6 +786,7 @@
     },
     "steve": {
       "url": "https://upload.wikimedia.org/wikipedia/en/e/e7/Steve_%28Minecraft%29.png",
+      "source": "wikipedia",
       "wikiTitle": "Steve (Minecraft)",
       "page": "https://en.wikipedia.org/wiki/Steve_(Minecraft)",
       "file": "Steve (Minecraft).png",
@@ -563,6 +797,7 @@
     },
     "tifa": {
       "url": "https://upload.wikimedia.org/wikipedia/en/6/61/Tifa_Lockhart_art.png",
+      "source": "wikipedia",
       "wikiTitle": "Tifa Lockhart",
       "page": "https://en.wikipedia.org/wiki/Tifa_Lockhart",
       "file": "Tifa Lockhart art.png",
@@ -571,8 +806,19 @@
       "credit": "Tetsuya Nomura / Square Enix",
       "license": "Fair use"
     },
+    "tracer": {
+      "url": "https://static.wikia.nocookie.net/overwatch_gamepedia/images/6/63/OW2_Tracer.png/revision/latest/scale-to-width-down/253?cb=20241102134907",
+      "source": "fandom",
+      "wikiHost": "overwatch.fandom.com",
+      "wikiTitle": "Tracer",
+      "page": "https://overwatch.fandom.com/wiki/Tracer",
+      "file": "OW2 Tracer.png",
+      "width": 253,
+      "height": 720
+    },
     "vergil": {
       "url": "https://upload.wikimedia.org/wikipedia/en/d/d7/VergilDMC5.png",
+      "source": "wikipedia",
       "wikiTitle": "Vergil (Devil May Cry)",
       "page": "https://en.wikipedia.org/wiki/Vergil_(Devil_May_Cry)",
       "file": "VergilDMC5.png",
@@ -583,6 +829,7 @@
     },
     "wheatley": {
       "url": "https://upload.wikimedia.org/wikipedia/en/9/94/Wheatley.png",
+      "source": "wikipedia",
       "wikiTitle": "Wheatley (Portal)",
       "page": "https://en.wikipedia.org/wiki/Wheatley_(Portal)",
       "file": "Wheatley.png",
@@ -591,17 +838,28 @@
       "license": "Fair use"
     },
     "xehanort": {
-      "url": "https://upload.wikimedia.org/wikipedia/en/7/77/Xehanortallversions.png",
-      "wikiTitle": "Xehanort",
-      "page": "https://en.wikipedia.org/wiki/Xehanort",
-      "file": "Xehanortallversions.png",
-      "width": 334,
-      "height": 298,
-      "credit": "Square Enix",
-      "license": "Fair use"
+      "url": "https://static.wikia.nocookie.net/kingdomhearts/images/1/17/Xehanort_KHIII.png/revision/latest/scale-to-width-down/702?cb=20181216184554",
+      "source": "fandom",
+      "wikiHost": "kingdomhearts.fandom.com",
+      "wikiTitle": "Master Xehanort",
+      "page": "https://kingdomhearts.fandom.com/wiki/Master_Xehanort",
+      "file": "Xehanort KHIII.png",
+      "width": 702,
+      "height": 720
+    },
+    "yennefer": {
+      "url": "https://static.wikia.nocookie.net/witcher/images/f/f0/The_Witcher_3_Wild_Hunt-Yennefer_of_Vengerberg.png/revision/latest/scale-to-width-down/258?cb=20160326134030",
+      "source": "fandom",
+      "wikiHost": "witcher.fandom.com",
+      "wikiTitle": "Yennefer of Vengerberg",
+      "page": "https://witcher.fandom.com/wiki/Yennefer_of_Vengerberg",
+      "file": "The Witcher 3 Wild Hunt-Yennefer of Vengerberg.png",
+      "width": 258,
+      "height": 720
     },
     "yoshi": {
       "url": "https://upload.wikimedia.org/wikipedia/en/d/db/Yoshi_%28Nintendo_character%29.png",
+      "source": "wikipedia",
       "wikiTitle": "Yoshi",
       "page": "https://en.wikipedia.org/wiki/Yoshi",
       "file": "Yoshi (Nintendo character).png",
@@ -611,6 +869,7 @@
     },
     "zelda": {
       "url": "https://upload.wikimedia.org/wikipedia/en/6/6e/Link_to_the_Past_Zelda.png",
+      "source": "wikipedia",
       "wikiTitle": "Princess Zelda",
       "page": "https://en.wikipedia.org/wiki/Princess_Zelda",
       "file": "Link to the Past Zelda.png",

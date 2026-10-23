@@ -17,8 +17,10 @@ export function supabaseEnv() {
 
 /** Client Supabase lié aux cookies de la requête (Server Components, Actions, Route Handlers). */
 export async function createClient() {
-  const { url, anonKey } = supabaseEnv();
+  // `cookies()` d'abord : la route devient dynamique, et la vérification des
+  // variables d'environnement n'intervient qu'à l'exécution (pas au build).
   const cookieStore = await cookies();
+  const { url, anonKey } = supabaseEnv();
 
   return createServerClient(url, anonKey, {
     cookies: {

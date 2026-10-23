@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       { protocol: "https", hostname: "upload.wikimedia.org" },
       { protocol: "https", hostname: "thumb.wikimedia.org" },
+      { protocol: "https", hostname: "static.wikia.nocookie.net" },
     ],
   },
   turbopack: {
