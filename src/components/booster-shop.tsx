@@ -1,11 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { buyBooster, type PurchaseCard } from "@/app/actions";
-import { CardFace } from "@/components/card-face";
+import { buyBooster } from "@/app/actions";
+import { BoosterReveal, type RevealItem } from "@/components/booster-reveal";
 import { getCard } from "@/lib/cards";
 import type { BoosterOffer } from "@/lib/data";
 import { RARITY, RARITY_ORDER } from "@/lib/game";
@@ -26,7 +25,7 @@ export function BoosterShop({
   const [pixels, setPixels] = useState(initialPixels);
   const [buying, setBuying] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [reveal, setReveal] = useState<{ name: string; cards: PurchaseCard[] } | null>(null);
+  const [reveal, setReveal] = useState<{ name: string; items: RevealItem[] } | null>(null);
 
   async function buy(offer: BoosterOffer) {
     if (buying || !offer.available || pixels < offer.pricePixels) return;
@@ -40,8 +39,13 @@ export function BoosterShop({
     ]);
 
     if (result.status === "ok") {
+      const items: RevealItem[] = [];
+      for (const card of result.cards) {
+        const found = getCard(card.id);
+        if (found) items.push({ card: found, holo: card.holo, isNew: card.isNew });
+      }
       setPixels(result.pixels);
-      setReveal({ name: offer.name, cards: result.cards });
+      setReveal({ name: offer.name, items });
       router.refresh();
     } else if (result.status === "insufficient") {
       setPixels(result.pixels);
@@ -75,47 +79,14 @@ export function BoosterShop({
       </div>
 
       {reveal && (
-        <div className="mt-5 rounded-3xl border border-acid/30 bg-acid/[0.06] p-4">
-          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-            <p className="text-sm font-semibold text-white/90">
-              {reveal.name} · {reveal.cards.length} cartes
-            </p>
-            <button
-              type="button"
-              onClick={() => setReveal(null)}
-              className="rounded-full border border-white/15 px-3 py-1 text-xs text-white/70 transition hover:border-white/30 hover:text-white"
-            >
-              Fermer
-            </button>
-          </div>
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-5">
-            {reveal.cards.map((card, index) => {
-              const found = getCard(card.id);
-              if (!found) return null;
-              return (
-                <Link
-                  key={`${card.id}-${index}`}
-                  href={`/card/${card.id}`}
-                  className="card-deal block"
-                  style={{ animationDelay: `${Math.min(index, 8) * 60}ms` }}
-                >
-                  <div className="relative">
-                    <CardFace card={found} size="sm" className="aspect-[3/4]" />
-                    {card.isNew && (
-                      <span className="absolute -top-1.5 left-2 z-10 rounded-full bg-emerald-400 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-emerald-950 shadow-lg">
-                        Nouveau
-                      </span>
-                    )}
-                    {card.holo && (
-                      <span className="absolute -top-1.5 right-2 z-10 rounded-full bg-amber-300 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-amber-950 shadow-lg">
-                        Holo
-                      </span>
-                    )}
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
+        <div className="mt-5">
+          <BoosterReveal
+            title={reveal.name}
+            subtitle={`${reveal.items.length} carte${reveal.items.length > 1 ? "s" : ""}`}
+            items={reveal.items}
+            onClose={() => setReveal(null)}
+            closeLabel="Fermer"
+          />
         </div>
       )}
 
@@ -137,16 +108,16 @@ export function BoosterShop({
           {mix && (
             <article className="mt-5 overflow-hidden rounded-3xl border border-acid/30 bg-gradient-to-br from-acid/[0.08] via-white/[0.03] to-transparent p-4 sm:p-5">
               <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
-                <div className="relative mx-auto w-40 shrink-0 sm:mx-0 sm:w-52">
+                <div className="relative mx-auto flex w-28 shrink-0 justify-center sm:mx-0 sm:w-36">
                   <Image
                     src={offerImage(mix)}
                     alt={`Visuel du ${mix.name}`}
-                    width={512}
-                    height={512}
+                    width={520}
+                    height={760}
                     unoptimized
-                    className="aspect-square w-full rounded-2xl object-cover"
+                    className="h-48 w-auto rounded-xl object-contain sm:h-56"
                   />
-                  <span className="absolute left-2 top-2 rounded-full bg-acid px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-ink shadow-lg">
+                  <span className="absolute -top-2 left-0 rounded-full bg-acid px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-ink shadow-lg">
                     Pack vitrine
                   </span>
                 </div>
@@ -237,14 +208,14 @@ function OfferCard({
           : "border-white/5 bg-white/[0.01] opacity-60"
       }`}
     >
-      <div className="relative mb-3 overflow-hidden rounded-xl">
+      <div className="relative mb-3 flex h-44 items-center justify-center overflow-hidden rounded-xl bg-black/25">
         <Image
           src={offerImage(offer)}
           alt={`Visuel du ${offer.name}`}
-          width={512}
-          height={512}
+          width={520}
+          height={760}
           unoptimized
-          className={`aspect-square w-full object-cover ${offer.available ? "" : "grayscale"}`}
+          className={`h-full w-auto object-contain ${offer.available ? "" : "grayscale opacity-60"}`}
         />
         <span className="absolute bottom-2 left-2 rounded-full bg-ink/80 px-2 py-0.5 text-[10px] font-semibold text-white/80 backdrop-blur">
           {offer.genre ?? "Tout le catalogue"}

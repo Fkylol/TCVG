@@ -4,7 +4,8 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { getSession } from "@/lib/auth";
+import { displayName, getSession } from "@/lib/auth";
+import { sendFeedbackEmail } from "@/lib/email";
 import { BOOSTER_STOCK_MAX, rollBooster } from "@/lib/game";
 import type { Card } from "@/lib/cards";
 
@@ -405,6 +406,17 @@ export async function sendFeedback(
     console.error("sendFeedback", error);
     return { error: "L'envoi a échoué. Réessaie dans un instant." };
   }
+
+  // Notification email : le message est déjà enregistré, un échec d'envoi ne
+  // doit pas faire croire au joueur que son message est perdu.
+  await sendFeedbackEmail({
+    kind,
+    message,
+    page: page === "" ? null : page,
+    sender: session
+      ? `${displayName(session.user)}${session.user.email ? ` <${session.user.email}>` : ""}`
+      : "Visiteur non connecté",
+  });
 
   return { message: "Message envoyé, merci. Il sera lu rapidement." };
 }

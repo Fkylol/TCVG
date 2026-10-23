@@ -9,6 +9,7 @@ import { requireSession } from "@/lib/auth";
 import { getMarketQuote, getRecycleValues } from "@/lib/data";
 import { CARDS, RARITY } from "@/lib/game";
 import { getPortrait, sourceLabel } from "@/lib/portraits";
+import { cardStats } from "@/lib/stats";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -46,6 +47,7 @@ export default async function CardPage({ params }: Params) {
   const canSellNormal = quantity - holoQuantity >= 2;
   const canSellHolo = holoQuantity > 0 && quantity > 1;
   const rarity = RARITY[card.rarity];
+  const stats = cardStats(card);
   const portrait = getPortrait(card.id);
   const sameUniverse = CARDS.filter((c) => c.universe === card.universe && c.id !== card.id);
 
@@ -170,6 +172,26 @@ export default async function CardPage({ params }: Params) {
             « {card.quote} »
           </blockquote>
 
+          <div className="mt-6 grid gap-3 sm:grid-cols-3">
+            <StatBar label="Puissance" value={stats.power} color="text-acid" bar="bg-acid" />
+            <StatBar label="Aura" value={stats.aura} color="text-cyan" bar="bg-cyan" />
+            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+              <p className="text-xs uppercase tracking-[0.2em] text-white/40">Qualité</p>
+              <p className="mt-1 flex flex-wrap items-baseline gap-2">
+                <span className="font-mono text-2xl font-semibold">{stats.quality}</span>
+                <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${stats.grade.tone}`}>
+                  {stats.grade.label}
+                </span>
+              </p>
+            </div>
+          </div>
+
+          <p className="mt-2 text-[11px] leading-relaxed text-white/35">
+            La rareté fixe les chances de tirage ({rarity.label}). La puissance, l&apos;aura et la
+            qualité situent la carte dans cette rareté : elles comptent pour le score de collection,
+            les cadres de profil et le futur mode duel.
+          </p>
+
           <div className="mt-6 rounded-2xl border border-acid/20 bg-acid/[0.06] p-4">
             <p className="text-xs uppercase tracking-[0.2em] text-acid/70">Pouvoir</p>
             <p className="mt-1.5 font-medium">{card.power}</p>
@@ -192,6 +214,30 @@ export default async function CardPage({ params }: Params) {
             </div>
           )}
         </div>
+      </div>
+    </div>
+  );
+}
+
+function StatBar({
+  label,
+  value,
+  color,
+  bar,
+}: {
+  label: string;
+  value: number;
+  color: string;
+  bar: string;
+}) {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+      <div className="flex items-baseline justify-between gap-2">
+        <span className="text-xs uppercase tracking-[0.2em] text-white/40">{label}</span>
+        <span className={`font-mono text-2xl font-semibold ${color}`}>{value}</span>
+      </div>
+      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10">
+        <div className={`h-full rounded-full ${bar}`} style={{ width: `${value}%` }} />
       </div>
     </div>
   );

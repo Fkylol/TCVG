@@ -23,9 +23,15 @@ export function SiteHeader({
     <header className="sticky top-0 z-40 border-b border-white/10 bg-ink/85 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center gap-2 px-4 py-2.5">
         <Link href="/" className="flex items-center gap-2.5 pr-2">
-          <span className="grid h-9 w-9 place-items-center rounded-xl bg-acid text-base shadow-[0_0_26px_-6px_#b4ff39]">
-            🎴
-          </span>
+          {/* Logo fourni par le projet, découpé en pastille (public/logo.png). */}
+          <Image
+            src="/logo.png"
+            alt=""
+            width={36}
+            height={36}
+            priority
+            className="h-9 w-9 shrink-0 drop-shadow-[0_0_18px_rgba(180,255,57,0.35)]"
+          />
           <span className="display text-[17px] tracking-[0.14em] text-white">TCVG</span>
         </Link>
 

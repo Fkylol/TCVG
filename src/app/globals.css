@@ -299,6 +299,260 @@ body {
   animation: shimmer-text 4s linear infinite;
 }
 
+/* ————— Révélation d'un booster ————— */
+
+/* Scène : le clic retourne la carte, le dos garde le mystère. */
+.reveal-stage {
+  --aura: rgba(226, 232, 240, 0.5);
+  --aura-soft: rgba(226, 232, 240, 0.1);
+  --aura-opacity: 0.18;
+  --aura-blur: 24px;
+  appearance: none;
+  border: 0;
+  padding: 0;
+  background: none;
+  color: inherit;
+  perspective: 1400px;
+  cursor: pointer;
+  outline: none;
+}
+
+/* La lueur du dos monte avec la rareté : c'est la seule indiscrétion avant
+   le retournement. */
+.reveal-stage[data-rarity="R"] {
+  --aura: rgba(56, 189, 248, 0.55);
+  --aura-soft: rgba(56, 189, 248, 0.18);
+  --aura-opacity: 0.34;
+  --aura-blur: 42px;
+}
+
+.reveal-stage[data-rarity="SR"] {
+  --aura: rgba(167, 139, 250, 0.65);
+  --aura-soft: rgba(167, 139, 250, 0.24);
+  --aura-opacity: 0.52;
+  --aura-blur: 58px;
+}
+
+.reveal-stage[data-rarity="UR"] {
+  --aura: rgba(252, 211, 77, 0.75);
+  --aura-soft: rgba(252, 211, 77, 0.3);
+  --aura-opacity: 0.7;
+  --aura-blur: 74px;
+}
+
+.reveal-stage[data-rarity="L"] {
+  --aura: rgba(244, 114, 182, 0.8);
+  --aura-soft: rgba(244, 114, 182, 0.34);
+  --aura-opacity: 0.88;
+  --aura-blur: 88px;
+}
+
+.reveal-stage:focus-visible .reveal-back,
+.reveal-stage:focus-visible .reveal-front {
+  box-shadow: 0 0 0 2px rgba(180, 255, 57, 0.85);
+}
+
+.reveal-inner {
+  transform-style: preserve-3d;
+  transition: transform 620ms cubic-bezier(0.3, 0.9, 0.2, 1);
+}
+
+.reveal-stage[data-open="true"] .reveal-inner {
+  transform: rotateY(180deg);
+}
+
+.reveal-back,
+.reveal-front {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: 1rem;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.reveal-front {
+  transform: rotateY(180deg);
+  box-shadow: 0 24px 60px -30px rgba(0, 0, 0, 0.95);
+}
+
+/* Dos de carte fourni par le joueur, teinté par la rareté. */
+.reveal-back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #08090a;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    0 26px 60px -30px rgba(0, 0, 0, 0.95),
+    0 0 0 1px var(--aura),
+    0 0 var(--aura-blur) var(--aura-soft),
+    inset 0 0 calc(var(--aura-blur) * 0.8) var(--aura-soft);
+  transition: border-color 200ms ease, box-shadow 200ms ease;
+}
+
+/* Lueur interne : elle pulse plus ou moins fort selon la rareté. */
+.reveal-glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(54% 44% at 50% 41%, var(--aura-soft), transparent 74%);
+  mix-blend-mode: screen;
+  opacity: var(--aura-opacity);
+  animation: back-breathe 3.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes back-breathe {
+  0%,
+  100% {
+    opacity: calc(var(--aura-opacity) * 0.55);
+  }
+  50% {
+    opacity: var(--aura-opacity);
+  }
+}
+
+/* Halo autour de la carte, visible avant le retournement. */
+.reveal-aura {
+  position: absolute;
+  inset: -12%;
+  z-index: 0;
+  border-radius: 1.6rem;
+  background: radial-gradient(circle, var(--aura-soft), transparent 66%);
+  filter: blur(16px);
+  opacity: var(--aura-opacity);
+  transition: opacity 280ms ease;
+  pointer-events: none;
+}
+
+.reveal-stage[data-open="true"] .reveal-aura {
+  opacity: 0;
+}
+
+/* Suspense : la carte vibre et s'illumine avant de se retourner. */
+.reveal-halo {
+  position: absolute;
+  inset: -22%;
+  border-radius: 9999px;
+  background: radial-gradient(circle, var(--aura), transparent 62%);
+  opacity: 0;
+  transition: opacity 200ms ease;
+  pointer-events: none;
+}
+
+.reveal-stage[data-charging="true"] .reveal-halo {
+  opacity: 1;
+  animation: halo-pulse 620ms ease-out;
+}
+
+.reveal-stage[data-charging="true"] .reveal-back {
+  border-color: var(--aura);
+  box-shadow:
+    0 0 0 2px var(--aura),
+    0 0 calc(var(--aura-blur) * 1.5) var(--aura-soft),
+    inset 0 0 calc(var(--aura-blur) * 1.2) var(--aura-soft);
+  animation: reveal-charge 620ms cubic-bezier(0.35, 0, 0.2, 1) forwards;
+}
+
+@keyframes reveal-charge {
+  0% {
+    transform: scale(1) rotate(0deg);
+  }
+  18% {
+    transform: scale(1.015) rotate(-0.7deg);
+  }
+  42% {
+    transform: scale(1.025) rotate(0.8deg);
+  }
+  68% {
+    transform: scale(1.04) rotate(-0.5deg);
+  }
+  100% {
+    transform: scale(1.055) rotate(0deg);
+  }
+}
+
+@keyframes halo-pulse {
+  0% {
+    transform: scale(0.82);
+    opacity: 0;
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.12);
+    opacity: 0.85;
+  }
+}
+
+/* Éclat de révélation, teinté par la rareté. */
+.reveal-burst {
+  position: absolute;
+  inset: -14%;
+  z-index: 5;
+  border-radius: 9999px;
+  background: radial-gradient(circle, var(--burst, rgba(255, 255, 255, 0.2)) 0%, transparent 62%);
+  animation: reveal-burst 900ms ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes reveal-burst {
+  0% {
+    opacity: 0.85;
+    transform: scale(0.55);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.5);
+  }
+}
+
+.reveal-rays {
+  position: absolute;
+  inset: -32%;
+  z-index: 4;
+  background: repeating-conic-gradient(
+    from 0deg,
+    var(--burst) 0deg 2deg,
+    transparent 2deg 17deg
+  );
+  -webkit-mask-image: radial-gradient(circle, rgba(0, 0, 0, 0.9) 18%, transparent 66%);
+  mask-image: radial-gradient(circle, rgba(0, 0, 0, 0.9) 18%, transparent 66%);
+  opacity: 0;
+  animation: reveal-rays 900ms ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes reveal-rays {
+  0% {
+    opacity: 0;
+    transform: scale(0.7) rotate(0deg);
+  }
+  28% {
+    opacity: 0.4;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.12) rotate(40deg);
+  }
+}
+
+.reveal-pop {
+  animation: reveal-pop 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes reveal-pop {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .card-deal,
   .pack-float,
@@ -307,7 +561,18 @@ body {
   .card-face[data-rarity="L"],
   .card-face[data-rarity="L"] .holo,
   .card-face[data-rarity="UR"].card-shine::after,
-  .card-face[data-rarity="L"].card-shine::after {
+  .card-face[data-rarity="L"].card-shine::after,
+  .reveal-glow,
+  .reveal-halo,
+  .reveal-stage[data-charging="true"] .reveal-halo,
+  .reveal-stage[data-charging="true"] .reveal-back,
+  .reveal-burst,
+  .reveal-rays,
+  .reveal-pop {
     animation: none;
+  }
+
+  .reveal-inner {
+    transition: none;
   }
 }

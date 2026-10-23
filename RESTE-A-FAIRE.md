@@ -5,6 +5,7 @@ _Mis à jour le 23 octobre 2026._
 ## Où en est le site
 
 - Production : <https://tcvg.fkylol.workers.dev> — version déployée `69a52339` (marché + visuels de boosters).
+- En local, non déployé : révélation des boosters carte par carte et visuels recadrés sur le sachet.
 - Base : projet Supabase `jvmozjfibkbkzzpafoos`, migrations `002` à `011` appliquées.
 - Code : `tsc` propre, `lint` propre, `npm test` 9/9, `npm run build` OK.
 
@@ -20,7 +21,10 @@ _Mis à jour le 23 octobre 2026._
 | Connexion Discord | fait | Discord seul : plus de formulaire email, `/login` et `/signup` limités à l'OAuth |
 | Pied de page | fait | Six entrées : Raretés, Règles, Infos, Nouveautés, Classement, Avis et bugs |
 | Pages publiques | fait | `/regles`, `/infos`, `/nouveautes`, `/classement`, `/avis-et-bugs` |
-| Visuels des boosters | fait | 11 visuels dans `public/booster/`, Mix en pack vitrine, un visuel par thème dans la boutique |
+| Visuels des boosters | fait | 11 visuels recadrés sur le sachet (520 × 760) dans `public/booster/`, Mix en pack vitrine, un visuel par thème dans la boutique |
+| Ouverture carte par carte | fait | Dos de carte (`dos-carte.jpg`) dont la lueur change de couleur et d'intensité selon la rareté, retournement au clic, récapitulatif ; boosters gratuits et payants |
+| Avis et bugs par email | fait | Message enregistré dans `public.feedback`, puis notification Resend (`src/lib/email.ts`). Clé dans `.env` en local, secret Cloudflare en production ; destinataire à régler avec `FEEDBACK_EMAIL_TO` |
+| Puissance, aura et qualité | fait | Barème central `STAT_BANDS` + coefficient 0–1 par carte dans `src/lib/stats.ts`, qualité 60/40 (Standard → Relique), affichage fiche + vignette, score de collection sur `/profil`, section dans `/regles`, 9 tests |
 
 ### Choses à faire côté tableaux de bord (pas dans le code)
 
@@ -47,7 +51,27 @@ Migration `supabase/migrations/011_marche.sql` appliquée et testée le 23 octob
 - Vérifié en base sur des comptes de test : crédit unique, achat holo, commission, annulation, double achat concurrent (une seule réussite), devis dynamique après 3 ventes, visibilité des annonces. Comptes supprimés ensuite.
 - Vérifié sur le serveur de dev avec une session réelle : `/marche` affiche l'annonce et le bouton d'achat, `/card/kratos` affiche le formulaire, `/boosters` sert les 11 visuels.
 
-### B. Points mineurs laissés de côté
+### B. Suite des stats
+
+- **Classement** : `/classement` classe encore par nombre de cartes uniques. Passer au score de collection demande une migration (fonction `leaderboard` avec la somme des qualités).
+- **Cadres** : les paliers actuels (10 / 25 cartes, une Légendaire, une Mythique) doivent être remplacés par des conditions multiples, avec le score de collection et la progression affichée.
+- **Duel** : `duelScore()` est figé dans `src/lib/stats.ts` (70 % puissance, 30 % aura), aucun mode de combat ne l'utilise encore.
+- Le coefficient d'une carte se règle dans `CARD_COEFFICIENTS` ; un ajout de carte sans coefficient retombe à 0,5 et fait échouer le test de couverture.
+
+### C. Email des avis et bugs
+
+- **Destinataire manquant** : `FEEDBACK_EMAIL_TO` n'est pas encore défini. Sans domaine vérifié chez Resend, l'expéditeur est `onboarding@resend.dev` et le destinataire doit être l'adresse du compte Resend.
+- **Production** : `npx wrangler secret put RESEND_API_KEY` puis `npx wrangler secret put FEEDBACK_EMAIL_TO`. La clé ne doit jamais figurer dans `wrangler.jsonc`.
+- `FEEDBACK_EMAIL_FROM` permettra plus tard d'envoyer depuis un domaine vérifié.
+- Testé : clé valide (aucun domaine vérifié), envoi Resend 200 et `sendFeedbackEmail()` à `true`.
+
+### D. À déployer
+
+- `npm run build` passe, aucune migration nécessaire : cette livraison ne touche que l'interface (révélation et visuels).
+- Ajouter l'entrée de changelog « Ouverture carte par carte » au moment de la mise en ligne, pas avant.
+- Vérifié sur le serveur de dev avec une session réelle : ouverture gratuite et achat du Mix, dos de carte, lueur des 5 raretés, retournement, carte suivante, récapitulatif.
+
+### E. Points mineurs laissés de côté
 
 - Les holos ne sont visibles que dans la révélation d'achat et par un `✦n` dans la collection (pas sur la fiche de la carte).
 - Pas de compteur de pity affiché à l'acheteur (la garantie existe en base, elle n'est pas montrée).

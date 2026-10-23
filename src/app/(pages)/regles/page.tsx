@@ -7,6 +7,7 @@ import {
   RARITY,
   RARITY_ORDER,
 } from "@/lib/game";
+import { QUALITY_GRADES, STAT_BANDS } from "@/lib/stats";
 
 export const metadata = { title: "Règles — TCVG" };
 
@@ -72,6 +73,67 @@ export default function RulesPage() {
         <p className="mt-3 text-xs text-white/35">
           Le pourcentage est la chance qu&apos;une carte tirée soit de cette rareté, pas la chance
           d&apos;obtenir un personnage précis.
+        </p>
+      </Section>
+
+      <Section title="Puissance, aura et qualité">
+        <p>
+          La rareté fixe les chances de tirage. À l&apos;intérieur de chaque rareté, deux
+          statistiques de 0 à 100 situent la carte :
+        </p>
+        <ul className="mt-3 list-inside list-disc space-y-1.5">
+          <li>
+            <strong className="text-acid">Puissance</strong> — son poids au combat. C&apos;est la base
+            du score de collection et du futur mode duel.
+          </li>
+          <li>
+            <strong className="text-cyan">Aura</strong> — son prestige de collection. Elle pèse dans
+            le score global et dans le déblocage des cadres de profil.
+          </li>
+        </ul>
+
+        <div className="mt-4 overflow-hidden rounded-xl border border-white/10">
+          <div className="grid grid-cols-[1fr_auto_auto] gap-2 bg-white/[0.04] px-3 py-2 text-[11px] uppercase tracking-[0.14em] text-white/40">
+            <span>Rareté</span>
+            <span className="text-right">Puissance</span>
+            <span className="text-right">Aura</span>
+          </div>
+          {RARITY_ORDER.map((key) => {
+            const bands = STAT_BANDS[key];
+            return (
+              <div
+                key={key}
+                className="grid grid-cols-[1fr_auto_auto] items-center gap-2 border-t border-white/5 px-3 py-2 text-sm"
+              >
+                <span className={RARITY[key].text}>{RARITY[key].label}</span>
+                <span className="text-right font-mono text-xs text-white/55">
+                  {bands.power.min}–{bands.power.min + bands.power.spread}
+                </span>
+                <span className="text-right font-mono text-xs text-white/55">
+                  {bands.aura.min}–{bands.aura.min + bands.aura.spread}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+
+        <p className="mt-4">
+          La <strong className="text-white/75">qualité</strong> résume les deux : 60 % de la
+          puissance et 40 % de l&apos;aura, arrondis. Elle donne une note de{" "}
+          {QUALITY_GRADES[0].label} à {QUALITY_GRADES[QUALITY_GRADES.length - 1].label}.
+        </p>
+        <ul className="mt-2 flex flex-wrap gap-2">
+          {QUALITY_GRADES.map((grade) => (
+            <li key={grade.key} className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${grade.tone}`}>
+              {grade.label}
+              <span className="ml-1 font-mono font-normal opacity-70">{grade.min}+</span>
+            </li>
+          ))}
+        </ul>
+        <p className="mt-3 text-xs leading-relaxed text-white/35">
+          Les fourchettes se chevauchent volontairement : une Rare au sommet peut dépasser une
+          Épique en bas de la sienne. Deux cartes de même rareté n&apos;ont donc pas forcément la
+          même valeur.
         </p>
       </Section>
 

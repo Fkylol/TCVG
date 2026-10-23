@@ -5,6 +5,7 @@ import { useState } from "react";
 import { CARDS, getCardGradient, getCardNumber, getUniverseLabel, type Card } from "@/lib/cards";
 import { RARITY } from "@/lib/game";
 import { getPortrait } from "@/lib/portraits";
+import { cardStats } from "@/lib/stats";
 
 type Size = "sm" | "md" | "lg";
 
@@ -27,6 +28,7 @@ export function CardFace({
   const rarity = RARITY[card.rarity];
   const s = SIZES[size];
   const portrait = getPortrait(card.id);
+  const stats = cardStats(card);
   const number = getCardNumber(card.id);
   const total = CARDS.length;
   // Certains CDN (Fandom) filtrent les requêtes : si l'image échoue, on revient
@@ -95,13 +97,14 @@ export function CardFace({
           >
             #{String(number ?? 0).padStart(2, "0")}
           </span>
-          {/* Sur les vignettes, le libellé de rareté ne tient pas à côté du numéro :
-              le badge en haut à droite porte déjà l'information. */}
+          {/* Sur les vignettes, les statistiques ne tiennent pas : le badge de
+              rareté en haut à droite suffit. */}
           {size !== "sm" && (
             <span
-              className={`shrink-0 whitespace-nowrap font-semibold uppercase tracking-widest text-white/50 ${s.universe}`}
+              className={`shrink-0 whitespace-nowrap font-mono font-semibold text-white/75 drop-shadow ${s.universe}`}
+              title={`Puissance ${stats.power} · Aura ${stats.aura} · Qualité ${stats.quality} (${stats.grade.label})`}
             >
-              {rarity.label}
+              POW {stats.power} · AURA {stats.aura}
             </span>
           )}
         </div>

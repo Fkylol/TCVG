@@ -86,15 +86,22 @@ La route `src/app/auth/confirm/route.ts` échange le code OAuth contre une sessi
 ## Comment ça marche
 
 - **Booster** : 3 cartes, une rareté tirée par carte selon des poids (60 % / 25 % / 10 % / 4 % / 1 %),
-  puis une carte au hasard dans cette rareté, sans doublon dans le pack.
+  puis une carte au hasard dans cette rareté, sans doublon dans le pack. Les cartes se révèlent une
+  par une : le dos affiché (`public/booster/dos-carte.jpg`) brille selon la rareté avant de se retourner.
 - **Stock** : un booster toutes les 10 minutes, **cumulables jusqu'à 10** (ouverts un par un ou tous
   d'un coup). L'accumulation et la consommation sont calculées **en base** par `open_boosters()` dans
   une transaction avec verrou de ligne — impossible à contourner en rejouant la requête.
 - **Collection** : une ligne par personnage possédé (`quantity` pour les doublons). La table est en
   lecture seule côté client : la seule écriture possible passe par la fonction SQL.
+- **Statistiques** : chaque carte a une **puissance** et une **aura** (0–100) calculées dans la
+  fourchette de sa rareté, à partir d'un coefficient interne de 0 à 1. Leur moyenne pondérée
+  (60 / 40) donne la **qualité**, notée de Standard à Relique. Le barème vit dans
+  `src/lib/stats.ts` ; le score de collection, les cadres et le futur mode duel s'appuient dessus.
 - **Fiche perso** : stats, pouvoir, citation, bio, et les autres cartes du même univers.
 - **Marché** : annonces de doublons (normales ou holos), achat atomique en Pixels avec 5 % de
   commission, prix encadrés par les ventes récentes et les garde-fous de rareté.
+- **Avis et bugs** : le message est enregistré dans `public.feedback` puis notifié par email via
+  Resend (`src/lib/email.ts`, variables `RESEND_API_KEY` et `FEEDBACK_EMAIL_TO`).
 
 ## Visuels des personnages
 

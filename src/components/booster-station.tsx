@@ -1,12 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { openBoosters } from "@/app/actions";
-import { CardFace } from "@/components/card-face";
-import type { Card } from "@/lib/cards";
+import { BoosterReveal, type RevealItem } from "@/components/booster-reveal";
 import {
   BOOSTER_COOLDOWN_MS,
   BOOSTER_STOCK_MAX,
@@ -35,9 +33,7 @@ export function BoosterStation({
   const [stock, setStock] = useState(initialStock);
   const [anchor, setAnchor] = useState(initialAnchor);
   const [now, setNow] = useState(serverNow);
-  const [drawn, setDrawn] = useState<Card[] | null>(null);
-  const [openedCount, setOpenedCount] = useState(0);
-  const [newIds, setNewIds] = useState<string[]>([]);
+  const [reveal, setReveal] = useState<{ items: RevealItem[]; opened: number } | null>(null);
   const [opening, setOpening] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -61,9 +57,15 @@ export function BoosterStation({
     ]);
 
     if (result.status === "ok") {
-      setDrawn(result.cards);
-      setOpenedCount(result.opened);
-      setNewIds(result.newIds);
+      // Un même identifiant peut sortir deux fois : seule la première copie
+      // est signalée comme nouvelle.
+      const seen = new Set<string>();
+      const items = result.cards.map((card) => {
+        const isNew = result.newIds.includes(card.id) && !seen.has(card.id);
+        if (isNew) seen.add(card.id);
+        return { card, holo: false, isNew };
+      });
+      setReveal({ items, opened: result.opened });
       setStock(result.stock);
       setAnchor(result.anchor);
       router.refresh();
@@ -81,47 +83,16 @@ export function BoosterStation({
   return (
     <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
       <section>
-        {drawn ? (
-          <div>
-            <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-              <h2 className="text-lg font-semibold text-white/90">
-                {openedCount} booster{openedCount > 1 ? "s" : ""} ouvert{openedCount > 1 ? "s" : ""} ·{" "}
-                {drawn.length} cartes
-                {newIds.length > 0 && (
-                  <span className="ml-2 text-sm font-normal text-emerald-300">
-                    dont {newIds.length} nouvelle{newIds.length > 1 ? "s" : ""}
-                  </span>
-                )}
-              </h2>
-              <button
-                type="button"
-                onClick={() => setDrawn(null)}
-                className="rounded-full border border-white/15 px-4 py-1.5 text-sm text-white/70 transition hover:border-white/30 hover:text-white"
-              >
-                Retour
-              </button>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-              {drawn.map((card, index) => (
-                <Link
-                  key={`${card.id}-${index}`}
-                  href={`/card/${card.id}`}
-                  className="card-deal block"
-                  style={{ animationDelay: `${Math.min(index, 12) * 70}ms` }}
-                >
-                  <div className="relative">
-                    <CardFace card={card} size="sm" className="aspect-[3/4]" />
-                    {newIds.includes(card.id) && (
-                      <span className="absolute -top-1.5 left-2 z-10 rounded-full bg-emerald-400 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-emerald-950 shadow-lg">
-                        Nouveau
-                      </span>
-                    )}
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
+        {reveal ? (
+          <BoosterReveal
+            title={
+              reveal.opened > 1 ? `${reveal.opened} boosters ouverts` : "Booster ouvert"
+            }
+            subtitle={`${reveal.items.length} carte${reveal.items.length > 1 ? "s" : ""}`}
+            items={reveal.items}
+            onClose={() => setReveal(null)}
+            closeLabel="Retour"
+          />
         ) : (
           <div className="flex flex-col items-center justify-center rounded-3xl border border-white/10 bg-white/[0.03] px-6 py-10 text-center">
             <button
@@ -131,10 +102,10 @@ export function BoosterStation({
               aria-label="Ouvrir un booster"
               className="group relative disabled:cursor-not-allowed"
             >
-              {/* Visuel du booster : découpé depuis `booster1.jpg`, ratio 0,6.
+              {/* Visuel recadré sur le sachet (520 × 760).
                   `unoptimized` évite de dépendre de l'optimiseur d'images du Worker. */}
               <div
-                className={`relative h-60 w-36 overflow-hidden rounded-2xl border border-white/25 shadow-2xl transition ${
+                className={`relative h-60 w-[164px] overflow-hidden rounded-2xl border border-white/25 bg-black/40 shadow-2xl transition ${
                   opening
                     ? "scale-95 opacity-40"
                     : available > 0
@@ -146,9 +117,9 @@ export function BoosterStation({
                   src="/booster/mix.jpg"
                   alt="Booster TCVG"
                   fill
-                  sizes="144px"
+                  sizes="180px"
                   unoptimized
-                  className="object-cover"
+                  className="object-contain"
                 />
                 {available > 0 && (
                   <span className="absolute right-2 top-2 z-10 rounded-full bg-black/60 px-2 py-0.5 text-[11px] font-bold text-white ring-1 ring-white/20">

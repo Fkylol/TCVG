@@ -17,6 +17,16 @@ export type PlannedEntry = {
 export const UPDATES: UpdateEntry[] = [
   {
     date: "23 octobre 2026",
+    title: "Ouverture carte par carte, statistiques et nouveau logo",
+    items: [
+      "Les boosters s'ouvrent une carte à la fois : le dos s'illumine selon la rareté, puis se retourne. Bouton « Tout révéler » et récapitulatif en fin d'ouverture.",
+      "Chaque carte reçoit une puissance et une aura (0–100), résumées par une note de qualité ; le score de collection s'affiche sur le profil.",
+      "Nouveau logo, icône d'onglet et aperçu soigné quand tu partages un lien du site.",
+      "Les avis et bugs envoyés depuis le site arrivent aussi par email, en plus d'être enregistrés.",
+    ],
+  },
+  {
+    date: "23 octobre 2026",
     title: "Marché entre joueurs et visuels de boosters",
     items: [
       "Le marché ouvre : mets tes doublons en vente, achète avec des Pixels, avec 5 % de commission à la vente.",

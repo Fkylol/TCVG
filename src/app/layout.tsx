@@ -19,10 +19,29 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+// URL publique, utilisée pour rendre absolus les liens de partage (og:image).
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://tcvg.fkylol.workers.dev";
+
+const description =
+  "Collectionne les personnages de jeux vidéo : ouvre des boosters, complète ton album, découvre chaque carte. Projet de fan, non officiel.";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
+  applicationName: "TCVG",
   title: "TCVG — Trading Card Video Game",
-  description:
-    "Collectionne les personnages de jeux vidéo : ouvre des boosters, complète ton album, découvre chaque carte. Projet de fan, non officiel.",
+  description,
+  openGraph: {
+    type: "website",
+    locale: "fr_FR",
+    siteName: "TCVG",
+    title: "TCVG — Trading Card Video Game",
+    description,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "TCVG — Trading Card Video Game",
+    description,
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
