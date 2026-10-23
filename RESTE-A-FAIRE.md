@@ -4,10 +4,9 @@ _Mis à jour le 23 octobre 2026._
 
 ## Où en est le site
 
-- Production : <https://tcvg.fkylol.workers.dev> — version déployée `b1b39a8c` (recyclage + Discord uniquement).
+- Production : <https://tcvg.fkylol.workers.dev> — version déployée `69a52339` (marché + visuels de boosters).
 - Base : projet Supabase `jvmozjfibkbkzzpafoos`, migrations `002` à `011` appliquées.
-- Code local : `tsc` propre, `lint` propre, `npm test` 9/9, `npm run build` OK.
-- **Pas encore déployé** : marché entre joueurs et visuels de boosters par thème.
+- Code : `tsc` propre, `lint` propre, `npm test` 9/9, `npm run build` OK.
 
 ### Étapes livrées
 
@@ -17,11 +16,11 @@ _Mis à jour le 23 octobre 2026._
 | 2 · Pixels | fait | Solde dans l'en-tête, bonus quotidien de **10 Pixels / 24 h**, registre `pixel_transactions` |
 | 3 · Boosters payants | fait | Mix 20 P · 5 cartes, 3 boosters de genre à 30 P, pity 10 / 50, holo 2 % |
 | 4 · Recyclage des doublons | fait | `recycle_card` / `recycle_all_duplicates`, boutons collection + fiche carte, 21/21 vérifications en base |
-| 5 · Marché entre joueurs | fait (code) | Annonces normales et holos, achat atomique, commission 5 %, bornes dynamiques, `/marche` + vente depuis la fiche carte |
+| 5 · Marché entre joueurs | fait | Annonces normales et holos, achat atomique, commission 5 %, bornes dynamiques, `/marche` + vente depuis la fiche carte |
 | Connexion Discord | fait | Discord seul : plus de formulaire email, `/login` et `/signup` limités à l'OAuth |
 | Pied de page | fait | Six entrées : Raretés, Règles, Infos, Nouveautés, Classement, Avis et bugs |
 | Pages publiques | fait | `/regles`, `/infos`, `/nouveautes`, `/classement`, `/avis-et-bugs` |
-| Visuels des boosters | fait (code) | 11 visuels dans `public/booster/`, Mix en pack vitrine, un visuel par thème dans la boutique |
+| Visuels des boosters | fait | 11 visuels dans `public/booster/`, Mix en pack vitrine, un visuel par thème dans la boutique |
 
 ### Choses à faire côté tableaux de bord (pas dans le code)
 
@@ -34,7 +33,7 @@ _Mis à jour le 23 octobre 2026._
 
 ## Ce qui reste
 
-### A. Étape 5 — marché entre joueurs · livrée (code, pas déployée)
+### A. Étape 5 — marché entre joueurs · livrée et déployée
 
 Migration `supabase/migrations/011_marche.sql` appliquée et testée le 23 octobre 2026 (39/39).
 
@@ -54,7 +53,7 @@ Migration `supabase/migrations/011_marche.sql` appliquée et testée le 23 octob
 - Pas de compteur de pity affiché à l'acheteur (la garantie existe en base, elle n'est pas montrée).
 - Le bonus quotidien est réclamé automatiquement mais rien ne l'annonce visuellement.
 - `open_boosters()` (boosters gratuits) reçoit encore les cartes du client ; `buy_booster()` ne fait plus confiance au client. À aligner plus tard.
-- Les étapes 2 (Pixels), 3 (boosters payants) et 5 (marché) restent à ajouter à `/nouveautes` au moment du déploiement. Le marché n'a ni expiration d'annonce ni édition de prix ; les holos se vendent dans le même formulaire que les normales.
+- Le marché n'a ni expiration d'annonce ni édition de prix ; les holos se vendent dans le même formulaire que les normales. `/nouveautes` est à jour pour les étapes 2, 3 et 5.
 - Les prix dynamiques restent plafonnés par la rareté : une carte SR ne peut pas dépasser 250 P, même si ses ventes montent.
 
 ---
