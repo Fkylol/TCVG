@@ -950,10 +950,6 @@ export const CARD_LORE: Record<string, CardLore> = {
     tagline: "Le mage noir qui doute",
     bio: "Petit être de toile et de magie fabriqué en série, il cherche ce qu'il est et découvre qu'il n'a pas beaucoup de temps. Sa question la plus simple est la plus profonde du jeu.",
   },
-  "frank": {
-    tagline: "Un visage de Tantalus",
-    bio: "Figure secondaire de Final Fantasy IX, il gravite dans les coulisses de la troupe de Tantalus, entre les loges du théâtre et les mauvais plans du patron.",
-  },
   "markus": {
     tagline: "Le comédien de Tantalus",
     bio: "Marcus, membre de Tantalus, participe au kidnapping raté de la princesse et se retrouve embarqué dans une aventure bien plus grande que prévu.",
@@ -1696,17 +1692,9 @@ export const CARD_LORE: Record<string, CardLore> = {
     tagline: "Le manipulateur du dortoir",
     bio: "Élève brillant et toxique, il manipule les clans de Bullworth pour que tout le monde s'entre-tue à sa place.",
   },
-  "peter-kowalski": {
-    tagline: "Le souffre-douleur",
-    bio: "Camarade de chambre de Jimmy, il encaisse les humiliations jusqu'au jour où il arrête de courber l'échine.",
-  },
   "johnny-vincent": {
     tagline: "Le chef des Greasers",
     bio: "Patron du gang des Greasers, il tient la boutique de moto de la ville et règle ses comptes à coups de poing.",
-  },
-  "lefty-mancini": {
-    tagline: "Le petit caïd",
-    bio: "Élève au tempérament hargneux, il traîne avec les mauvaises personnes et le paie à chaque fois.",
   },
   "lola-lombardi": {
     tagline: "La peste",
@@ -1767,10 +1755,6 @@ export const CARD_LORE: Record<string, CardLore> = {
   "myurdin": {
     tagline: "L'adversaire de Pywel",
     bio: "Antagoniste de Crimson Desert, il fait partie de ceux qui profitent du chaos des royaumes pour prendre ce qu'ils convoitent.",
-  },
-  "split-horn": {
-    tagline: "La corne fendue",
-    bio: "Antagoniste de Crimson Desert, il se dresse sur la route de Kliff et des Greymanes sur le continent de Pywel.",
   },
   "naira": {
     tagline: "La compagne de Kliff",
@@ -2043,11 +2027,6 @@ export const CARD_LORE: Record<string, CardLore> = {
   },
 
   // ——— Lost Ark ———
-  "kadan": {
-    tagline: "Le premier Gardien",
-    quote: "L'obscurité ne reculera que devant une lame décidée.",
-    bio: "Le tout premier Gardien, héros légendaire de la Guerre des Chaînes, sa simple réputation fait trembler les démons.",
-  },
   "brelshaza": {
     tagline: "La reine des illusions",
     quote: "Le désespoir est un jeu magnifique, et je tiens les ficelles.",
@@ -2151,18 +2130,8 @@ export const CARD_LORE: Record<string, CardLore> = {
     quote: "Hé, partenaire ! On continue de grandir ensemble ?",
     bio: "Entité amnésique qui suit le joueur dès ses premiers pas ; derrière ses rires moqueurs dort un pouvoir ancestral capable d'engloutir des régions.",
   },
-  "illezra": {
-    tagline: "La sorcière des Trois Jours de Ténèbres",
-    quote: "Les Trois Jours de Ténèbres ne sont qu'un aperçu de ce qui vient.",
-    bio: "Sorcière légendaire derrière le désastre de Mediah, elle manipule artefacts anciens et magie noire avec une maîtrise au-dessus des archimages.",
-  },
 
   // ——— The Secret World ———
-  "jack-boone": {
-    tagline: "Le shérif de Kingsmouth",
-    quote: "Kingsmouth est foutue, mais on va quand même vendre de la munition.",
-    bio: "Shérif cynique d'une ville noyée dans le brouillard, il maintient l'ordre au milieu des monstres marins et de la folie occulte.",
-  },
   "kirsten-geary": {
     tagline: "La patronne des Illuminati",
     quote: "Le pouvoir ne s'achète pas, il s'administre.",
@@ -2220,11 +2189,6 @@ export const CARD_LORE: Record<string, CardLore> = {
     quote: "[Grondement d'engrenages géants et avertissement de panique dans la guilde]",
     bio: "Gigantesque automate de métal scellé dans son instance de Madrigal, ses attaques de zone et ses dégâts massifs ont marqué des générations de joueurs.",
   },
-  "maflon": {
-    tagline: "Le guide de Flarine",
-    quote: "Bienvenue à Flarine ! Avez-vous besoin de conseils pour vos débuts ?",
-    bio: "PNJ guide chaleureux et incontournable de Flarine, il accueille chaque voyageur de Madrigal et lui apprend à voler sur balai ou sur planche.",
-  },
 
   // ——— Warhammer Online ———
   "tcharzanek": {
@@ -2239,16 +2203,6 @@ export const CARD_LORE: Record<string, CardLore> = {
   },
 
   // ——— Albion Online ———
-  "morgana": {
-    tagline: "L'enchanteresse corrompue",
-    quote: "La magie noire rétablira la véritable suprématie sur Albion.",
-    bio: "Ancienne enchanteresse de la cour d'Arthur tombée dans les arcanes corrompus, ses adeptes et ses démons occupent les zones les plus dangereuses d'Albion.",
-  },
-  "arthur-corrompu": {
-    tagline: "Le spectre du roi",
-    quote: "Mon royaume est éternel, scellé dans le sang et la brume.",
-    bio: "Ancien souverain légendaire d'Albion, revenu sous une forme spectrale et corrompue pour défendre ses terres contre les nouveaux aventuriers.",
-  },
 
   // ——— MU Online ———
   "kundun": {
@@ -2352,11 +2306,6 @@ export const CARD_LORE: Record<string, CardLore> = {
   },
 
   // ——— Cabal Online ———
-  "sage-de-licorne": {
-    tagline: "Le gardien des arts astraux",
-    quote: "La force de l'Astral Force sommeille en ceux qui osent l'éveiller.",
-    bio: "Gardien des secrets mystiques de Nevareth, il transmet la puissance des arts astraux aux mercenaires assez courageux pour affronter les vagues destructrices.",
-  },
 
   // ——— Lineage II ———
   "shilen": {
@@ -2366,32 +2315,12 @@ export const CARD_LORE: Record<string, CardLore> = {
   },
 
   // ——— Knight Online ———
-  "antares": {
-    tagline: "Le dragon de Ronark Land",
-    quote: "[Rugissement assourdissant résonnant dans Ronark Land]",
-    bio: "Dragon légendaire dont les incursions dans les zones de guerre frontalières forçaient El Morad et Karus à suspendre leurs hostilités.",
-  },
 
   // ——— Atlantica Online ———
-  "ulysse": {
-    tagline: "Le stratège d'Ithaque",
-    quote: "La ruse d'un homme vaut souvent mieux que la force d'une armée.",
-    bio: "Roi mythique d'Ithaque et stratège légendaire, il errait à travers les époques et les continents du jeu en quête des secrets d'Atlantis.",
-  },
 
   // ——— Fiesta Online ———
-  "reto": {
-    tagline: "Le chef de Roumen",
-    quote: "Bienvenue à Roumen ! Attention aux slimes voraces dehors !",
-    bio: "Chef incontournable de la ville de départ de Roumen, il accueille des millions de jeunes aventuriers avec ses quêtes de tutoriel hautes en couleur.",
-  },
 
   // ——— Perfect World ———
-  "pan-gu": {
-    tagline: "Le créateur primordial",
-    quote: "De mon corps brisé est né le monde ; de ma volonté, il subsistera.",
-    bio: "Créateur de l'univers de Perfect World, façonné à partir du chaos avant son sommeil ; son réveil menacerait l'existence même de toutes les races.",
-  },
 
   // ——— TERA ———
 
@@ -2513,18 +2442,8 @@ export const CARD_LORE: Record<string, CardLore> = {
   },
 
   // ——— The Mortuary Assistant ———
-  "demon-morsure": {
-    tagline: "L'entité du crématorium",
-    quote: "[Chuchotements spectraux à travers les casiers de conservation des corps]",
-    bio: "Entité occulte malveillante qui s'empare des corps sans vie du crématorium pour tourmenter l'assistant funéraire dans un huis clos terrifiant.",
-  },
 
   // ——— Iron Lung ———
-  "pilote": {
-    tagline: "Le prisonnier de la coque",
-    quote: "[Bruit sourd de la coque en acier sous la pression abyssale]",
-    bio: "Condamné à explorer un océan de sang sur une lune extraterrestre dans un minuscule sous-marin rouillé, il navigue à l'aveugle dans l'obscurité totale.",
-  },
 
   // ——— Manhunt ———
   "james-earl-cash": {

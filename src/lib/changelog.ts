@@ -20,7 +20,7 @@ export const UPDATES: UpdateEntry[] = [
     title: "Des visuels partout, des holos qui se voient",
     items: [
       "Trente-deux personnages qui s'affichaient encore avec un simple emoji ont reçu leur portrait : Roi Dadidou, Freya Crescent, Amarant Coral, Big Smoke, Antharas, le Tarnisé, l'Espion et le Heavy entre autres.",
-      "Dix-sept cas restent sans visuel faute de source publique : ils gardent leur emoji, et la liste est prête pour un ajout manuel.",
+      "Les dix-sept personnages sans visuel public quittent l'album, faute de source : Frank, Kadan, Morgana, Pan Gu, le Pilote et leurs homologues. Le catalogue jouable passe à 557 cartes, et leurs éventuelles copies sont effacées de la base.",
       "L'album d'un univers montre désormais la meilleure carte qu'on y a piochée — la plus rare, puis la plus puissante — au lieu d'un simple dégradé.",
       "Une carte tirée brillante ressemble enfin à une holo : sa pellicule iridescente reste allumée et dérive lentement, au lieu de garder le rendu d'une carte normale sous un badge « Holo ».",
       "Sur téléphone, les toiles d'araignée d'Halloween restent visibles (elles tombaient à 37 px de large) et les boosters replongent dans le noir : la souris fait office de torche, avec des baisses de tension.",

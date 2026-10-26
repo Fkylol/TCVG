@@ -1088,13 +1088,7 @@ export const CARDS: Card[] = [
     id: "jack-marston", name: "Jack Marston", universe: "reddead", emoji: "🤠", rarity: "UC",
   },
   {
-    id: "peter-kowalski", name: "Pete Kowalski", universe: "bully", emoji: "🎒", rarity: "UC",
-  },
-  {
     id: "rauru", name: "Rauru", universe: "zelda", emoji: "🗡️", rarity: "UC",
-  },
-  {
-    id: "split-horn", name: "Split Horn", universe: "crimson-desert", emoji: "🏜️", rarity: "UC",
   },
   {
     id: "wei-cheng", name: "Wei Cheng", universe: "gta", emoji: "🚗", rarity: "UC",
@@ -1139,9 +1133,6 @@ export const CARDS: Card[] = [
     id: "mazli", name: "Mazli", universe: "zelda", emoji: "🗡️", rarity: "C",
   },
   {
-    id: "frank", name: "Frank", universe: "ff9", emoji: "🎺", rarity: "UC",
-  },
-  {
     id: "miguel", name: "Miguel", universe: "gta", emoji: "🚗", rarity: "UC",
   },
   {
@@ -1164,9 +1155,6 @@ export const CARDS: Card[] = [
   },
   {
     id: "bill-williamson", name: "Bill Williamson", universe: "reddead", emoji: "🤠", rarity: "UC",
-  },
-  {
-    id: "lefty-mancini", name: "Lefty Mancini", universe: "bully", emoji: "🎒", rarity: "C",
   },
   {
     id: "purah", name: "Purah", universe: "zelda", emoji: "🗡️", rarity: "C",
@@ -1611,9 +1599,6 @@ export const CARDS: Card[] = [
 
   // ——— Lost Ark ———
   {
-    id: "kadan", name: "Kadan", universe: "lostark", emoji: "⚔️", rarity: "UR",
-  },
-  {
     id: "brelshaza", name: "Brelshaza", universe: "lostark", emoji: "🕸️", rarity: "SR",
   },
 
@@ -1682,14 +1667,8 @@ export const CARDS: Card[] = [
   {
     id: "black-spirit", name: "L'Esprit Occulte", universe: "blackdesert", emoji: "🌀", rarity: "SR",
   },
-  {
-    id: "illezra", name: "Illezra", universe: "blackdesert", emoji: "🌘", rarity: "UC",
-  },
 
   // ——— The Secret World ———
-  {
-    id: "jack-boone", name: "Jack Boone", universe: "thesecretworld", emoji: "🔫", rarity: "SR",
-  },
   {
     id: "kirsten-geary", name: "Kirsten Geary", universe: "thesecretworld", emoji: "💼", rarity: "UC",
   },
@@ -1729,9 +1708,6 @@ export const CARDS: Card[] = [
   {
     id: "clockworks", name: "Clockworks", universe: "flyff", emoji: "⚙️", rarity: "R",
   },
-  {
-    id: "maflon", name: "Maflon", universe: "flyff", emoji: "🧹", rarity: "UC",
-  },
 
   // ——— Warhammer Online ———
   {
@@ -1742,12 +1718,6 @@ export const CARDS: Card[] = [
   },
 
   // ——— Albion Online ———
-  {
-    id: "morgana", name: "Morgana", universe: "albion", emoji: "🌙", rarity: "SR",
-  },
-  {
-    id: "arthur-corrompu", name: "Le Roi Arthur corrompu", universe: "albion", emoji: "⚔️", rarity: "UC",
-  },
 
   // ——— MU Online ———
   {
@@ -1821,9 +1791,6 @@ export const CARDS: Card[] = [
   },
 
   // ——— Cabal Online ———
-  {
-    id: "sage-de-licorne", name: "Le Sage de Licorne", universe: "cabal", emoji: "🦄", rarity: "R",
-  },
 
   // ——— Lineage II ———
   {
@@ -1831,24 +1798,12 @@ export const CARDS: Card[] = [
   },
 
   // ——— Knight Online ———
-  {
-    id: "antares", name: "Antares", universe: "knightonline", emoji: "🐉", rarity: "R",
-  },
 
   // ——— Atlantica Online ———
-  {
-    id: "ulysse", name: "Ulysse", universe: "atlantica", emoji: "🏛️", rarity: "R",
-  },
 
   // ——— Fiesta Online ———
-  {
-    id: "reto", name: "Reto", universe: "fiesta", emoji: "🏠", rarity: "R",
-  },
 
   // ——— Perfect World ———
-  {
-    id: "pan-gu", name: "Pan Gu", universe: "perfectworld", emoji: "🌍", rarity: "R",
-  },
 
   // ——— TERA ———
 
@@ -1936,14 +1891,8 @@ export const CARDS: Card[] = [
   },
 
   // ——— The Mortuary Assistant ———
-  {
-    id: "demon-morsure", name: "Le Démon de la Morsure", universe: "mortuaryassistant", emoji: "⚰️", rarity: "UR",
-  },
 
   // ——— Iron Lung ———
-  {
-    id: "pilote", name: "Le Pilote", universe: "ironlung", emoji: "🫁", rarity: "SR",
-  },
 
   // ——— Manhunt ———
   {

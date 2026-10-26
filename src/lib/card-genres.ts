@@ -210,9 +210,7 @@ export const CARD_GENRES: Record<string, GenreSlug[]> = {
 
   // ——— Bully ———
   "gary-smith": ["action-aventure"],
-  "peter-kowalski": ["action-aventure"],
   "johnny-vincent": ["action-aventure"],
-  "lefty-mancini": ["action-aventure"],
   "lola-lombardi": ["action-aventure"],
   "derby-harrington": ["action-aventure"],
   "ted-thompson": ["action-aventure"],
@@ -253,7 +251,6 @@ export const CARD_GENRES: Record<string, GenreSlug[]> = {
   "damiane": ["action-aventure"],
   "oongka": ["action-aventure"],
   "myurdin": ["action-aventure"],
-  "split-horn": ["action-aventure"],
   "naira": ["action-aventure"],
 
   // ——— Duke Nukem ———
@@ -272,7 +269,6 @@ export const CARD_GENRES: Record<string, GenreSlug[]> = {
   "djidane-tribal": ["rpg"],
   "grenat-til-alexandros-xvii": ["rpg"],
   "bibi-orunitia": ["rpg"],
-  "frank": ["rpg"],
   "markus": ["rpg"],
   "cid-fabul-ix": ["rpg"],
   "branet-raza-alexandros-xvi": ["rpg"],
@@ -617,7 +613,6 @@ export const CARD_GENRES: Record<string, GenreSlug[]> = {
   "wise-old-man": ["mmo"],
   "mannimarco": ["mmo"],
   "cadwell": ["mmo"],
-  "kadan": ["mmo"],
   "brelshaza": ["mmo"],
   "malgus": ["mmo"],
   "satele-shan": ["mmo"],
@@ -637,8 +632,6 @@ export const CARD_GENRES: Record<string, GenreSlug[]> = {
   "jin-soyeon": ["mmo"],
   "hong-seokkeun": ["mmo"],
   "black-spirit": ["mmo"],
-  "illezra": ["mmo"],
-  "jack-boone": ["mmo"],
   "kirsten-geary": ["mmo"],
   "dark-falz-persona": ["mmo"],
   "conan": ["mmo"],
@@ -650,11 +643,8 @@ export const CARD_GENRES: Record<string, GenreSlug[]> = {
 
   // ——— Vague MMO de fin octobre 2026 (suite) ———
   "clockworks": ["mmo"],
-  "maflon": ["mmo"],
   "tcharzanek": ["mmo"],
   "malekith": ["mmo"],
-  "morgana": ["mmo"],
-  "arthur-corrompu": ["mmo"],
   "kundun": ["mmo"],
   "yugo": ["mmo"],
   "qilby": ["mmo"],
@@ -672,12 +662,7 @@ export const CARD_GENRES: Record<string, GenreSlug[]> = {
   "dark-falz-pso": ["mmo"],
   "surt": ["mmo"],
   "yura": ["mmo"],
-  "sage-de-licorne": ["mmo"],
   "shilen": ["mmo"],
-  "antares": ["mmo"],
-  "ulysse": ["mmo"],
-  "reto": ["mmo"],
-  "pan-gu": ["mmo"],
 
   // ——— Horreur (octobre 2026) ———
   "james-sunderland": ["horreur"],
@@ -701,8 +686,6 @@ export const CARD_GENRES: Record<string, GenreSlug[]> = {
   // ——— Horreur (octobre 2026, troisième vague) ———
   "mercer": ["horreur"],
   "bete": ["horreur"],
-  "demon-morsure": ["horreur"],
-  "pilote": ["horreur"],
   "james-earl-cash": ["horreur"],
   "monika": ["horreur"],
   "chasseuse": ["horreur"],

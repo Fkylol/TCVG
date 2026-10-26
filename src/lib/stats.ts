@@ -92,7 +92,6 @@ export const CARD_STATS: Record<string, { power: number; aura: number }> = {
   cadwell: { power: 78, aura: 85 },
 
   // ——— Lost Ark ———
-  kadan: { power: 95, aura: 94 },
   brelshaza: { power: 94, aura: 95 },
 
   // ——— Star Wars: The Old Republic ———
@@ -117,8 +116,6 @@ export const CARD_STATS: Record<string, { power: number; aura: number }> = {
   "jin-soyeon": { power: 96, aura: 97 },
   "hong-seokkeun": { power: 92, aura: 94 },
   "black-spirit": { power: 96, aura: 96 },
-  illezra: { power: 97, aura: 96 },
-  "jack-boone": { power: 86, aura: 87 },
   "kirsten-geary": { power: 85, aura: 92 },
   "dark-falz-persona": { power: 97, aura: 96 },
   conan: { power: 98, aura: 99 },
@@ -132,11 +129,8 @@ export const CARD_STATS: Record<string, { power: number; aura: number }> = {
   // Même règle : la rareté suit le plus haut des deux chiffres, l'autre valeur
   // est ramenée à la borne basse du palier.
   clockworks: { power: 94, aura: 95 },
-  maflon: { power: 71, aura: 82 },
   tcharzanek: { power: 97, aura: 96 },
   malekith: { power: 98, aura: 98 },
-  morgana: { power: 95, aura: 94 },
-  "arthur-corrompu": { power: 97, aura: 96 },
   kundun: { power: 99, aura: 97 },
   yugo: { power: 91, aura: 93 },
   qilby: { power: 96, aura: 96 },
@@ -154,12 +148,7 @@ export const CARD_STATS: Record<string, { power: number; aura: number }> = {
   "dark-falz-pso": { power: 98, aura: 96 },
   surt: { power: 96, aura: 96 },
   yura: { power: 92, aura: 94 },
-  "sage-de-licorne": { power: 86, aura: 89 },
   shilen: { power: 100, aura: 98 },
-  antares: { power: 91, aura: 90 },
-  ulysse: { power: 86, aura: 91 },
-  reto: { power: 71, aura: 78 },
-  "pan-gu": { power: 100, aura: 99 },
 
   // ——— Horreur (octobre 2026) ———
   "james-sunderland": { power: 73, aura: 82 },
@@ -183,8 +172,6 @@ export const CARD_STATS: Record<string, { power: number; aura: number }> = {
   // ——— Horreur (octobre 2026, troisième vague) ———
   mercer: { power: 86, aura: 91 },
   bete: { power: 97, aura: 96 },
-  "demon-morsure": { power: 89, aura: 92 },
-  pilote: { power: 72, aura: 84 },
   "james-earl-cash": { power: 86, aura: 86 },
   monika: { power: 96, aura: 98 },
   chasseuse: { power: 91, aura: 89 },
@@ -550,9 +537,7 @@ export const CARD_COEFFICIENTS: Record<string, number> = {
   "dr-proton": 0.51,
   "jaskier": 0.51,
   "jack-marston": 0.51,
-  "peter-kowalski": 0.51,
   "rauru": 0.5,
-  "split-horn": 0.5,
   "wei-cheng": 0.5,
   "jerrin": 0.5,
   "catalina": 0.49,
@@ -567,7 +552,6 @@ export const CARD_COEFFICIENTS: Record<string, number> = {
   "frank-tenpenny": 0.48,
   "stretch": 0.48,
   "mazli": 0.47,
-  "frank": 0.47,
   "miguel": 0.47,
   "strago-magus": 0.47,
   "iwao-hazuki": 0.47,
@@ -576,7 +560,6 @@ export const CARD_COEFFICIENTS: Record<string, number> = {
   "imlerith": 0.46,
   "mikhail-faustin": 0.46,
   "bill-williamson": 0.46,
-  "lefty-mancini": 0.45,
   "purah": 0.45,
   "damon-merrick": 0.45,
   "cesar-vialpando": 0.45,
@@ -726,7 +709,6 @@ export const CARD_COEFFICIENTS: Record<string, number> = {
   "wise-old-man": 0.5,
   mannimarco: 0.75,
   cadwell: 0.45,
-  kadan: 0.85,
   brelshaza: 0.8,
   malgus: 0.8,
   "satele-shan": 0.7,
@@ -739,7 +721,6 @@ export const CARD_COEFFICIENTS: Record<string, number> = {
   ferumbras: 0.9,
   "valkyrie-randgris": 0.85,
   tiamat: 0.8,
-  illezra: 0.8,
   "jin-soyeon": 0.75,
   "dark-falz-persona": 0.75,
   "black-spirit": 0.7,
@@ -755,18 +736,14 @@ export const CARD_COEFFICIENTS: Record<string, number> = {
   avatus: 0.7,
   "elion-dulas": 0.3,
   "artemis-zin": 0.3,
-  "jack-boone": 0.2,
 
   // ——— Vague MMO de fin octobre 2026 (suite) ———
   clockworks: 0.9,
-  morgana: 0.9,
   yugo: 0.7,
   jula: 0.6,
   abhuva: 0.4,
-  maflon: 0.7,
   tcharzanek: 0.9,
   malekith: 0.95,
-  "arthur-corrompu": 0.85,
   kundun: 0.9,
   qilby: 0.75,
   "lex-luthor": 0.8,
@@ -776,17 +753,12 @@ export const CARD_COEFFICIENTS: Record<string, number> = {
 
   // ——— Vague MMO de fin octobre 2026 (dernière) ———
   "tom-bombadil": 1,
-  "pan-gu": 1,
   shilen: 1,
   "dark-falz-pso": 0.9,
   "witch-king": 0.85,
   surt: 0.8,
   xizor: 0.7,
   yura: 0.65,
-  "sage-de-licorne": 0.5,
-  antares: 0.5,
-  ulysse: 0.1,
-  reto: 0.5,
 
   // ——— Horreur (octobre 2026) ———
   xenomorphe: 1,
@@ -813,8 +785,6 @@ export const CARD_COEFFICIENTS: Record<string, number> = {
   monika: 0.8,
   kusabi: 0.6,
   chasseuse: 0.5,
-  "demon-morsure": 0.5,
-  pilote: 0.2,
   mercer: 0.1,
   "james-earl-cash": 0.1,
   elster: 0.1,

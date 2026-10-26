@@ -6,10 +6,11 @@ import { CARDS, type Rarity } from "../src/lib/cards";
 import { RARITY } from "../src/lib/game";
 import { RARITY_META } from "../src/lib/rarity";
 
-const EXPECTED_BY_RARITY: Record<Rarity, number> = { C: 126, UC: 131, R: 109, SR: 111, UR: 71, L: 26 };
+// 557 cartes : dix-sept personnages sans visuel public ont quitté l'album.
+const EXPECTED_BY_RARITY: Record<Rarity, number> = { C: 125, UC: 125, R: 104, SR: 108, UR: 69, L: 26 };
 
-test("catalogue : 574 cartes, répartition de rareté attendue", () => {
-  assert.equal(CARDS.length, 574);
+test("catalogue : 557 cartes, répartition de rareté attendue", () => {
+  assert.equal(CARDS.length, 557);
 
   const counts: Record<string, number> = {};
   for (const card of CARDS) counts[card.rarity] = (counts[card.rarity] ?? 0) + 1;

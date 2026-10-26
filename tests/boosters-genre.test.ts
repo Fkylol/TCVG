@@ -38,7 +38,10 @@ test("pool MMO : assez de basses raretés pour un paquet de cinq cartes", () => 
 
   const count = (rarity: string) => mmo.filter((card) => card.rarity === rarity).length;
 
-  assert.ok(mmo.length >= 90, `pool MMO trop petit : ${mmo.length}`);
+  // Le pool a perdu dix personnages sans visuel ; le seuil garde une marge
+  // au-dessus des cinq cartes d'un paquet, et les planchers par rareté
+  // ci-dessous restent la vraie garantie.
+  assert.ok(mmo.length >= 80, `pool MMO trop petit : ${mmo.length}`);
   for (const rarity of ["C", "UC", "R"]) {
     assert.ok(count(rarity) >= 5, `${rarity} : ${count(rarity)} cartes seulement`);
   }
