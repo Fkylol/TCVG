@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CARDS } from "@/lib/cards";
+import { CATALOG_SIZE } from "@/lib/cards";
 
 export const metadata = { title: "Infos — TCVG" };
 
@@ -8,9 +8,10 @@ export default function InfoPage() {
     <article>
       <span className="eyebrow">Infos</span>
       <h1 className="display mt-2 text-4xl">Le projet</h1>
+      <span className="title-rule" aria-hidden />
       <p className="mt-3 text-sm leading-relaxed text-white/55">
         TCVG est un jeu de collection de cartes consacré aux personnages de jeux vidéo :{" "}
-        {CARDS.length} héros, méchants et créatures réunis dans un seul album, à obtenir uniquement
+        {CATALOG_SIZE} héros, méchants et créatures réunis dans un seul album, à obtenir uniquement
         en ouvrant des boosters gratuits.
       </p>
 
@@ -29,10 +30,15 @@ export default function InfoPage() {
       </Section>
 
       <Section title="Tes données">
-        Un compte contient un pseudo, l&apos;adresse email de ton compte Discord et ta collection.
-        La connexion passe uniquement par Discord : aucun mot de passe n&apos;est créé ni stocké par
-        le site. Discord transmet l&apos;email et le pseudo, rien de plus. Aucune donnée n&apos;est
-        revendue ni transmise à des tiers, et il n&apos;y a pas de traceur publicitaire.
+        Un compte contient un pseudo, ton identifiant Discord et ta collection. La connexion passe
+        uniquement par Discord : aucun mot de passe n&apos;est créé ni stocké par le site. Le site
+        demande uniquement le scope « identify » (pseudo et identifiant), jamais l&apos;email, les
+        serveurs, les messages ou les amis. Aucune donnée n&apos;est revendue ni transmise à des
+        tiers, et il n&apos;y a pas de traceur publicitaire. Le détail figure sur la page{" "}
+        <Link href="/confidentialite" className="text-acid underline-offset-4 hover:underline">
+          Confidentialité
+        </Link>
+        .
       </Section>
 
       <Section title="Comment c&apos;est fait">
@@ -55,7 +61,8 @@ export default function InfoPage() {
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="mt-9 border-t border-white/10 pt-6">
+    <section className="mt-9">
+      <span className="section-rule section-rule-tight" aria-hidden />
       <h2 className="display text-xl">{title}</h2>
       <div className="mt-2.5 text-sm leading-relaxed text-white/55">{children}</div>
     </section>

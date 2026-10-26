@@ -29,7 +29,7 @@ export function FeedbackForm() {
           type="text"
           maxLength={200}
           placeholder="/marché, /boosters, fiche de Kratos…"
-          className="w-full rounded-xl border border-white/10 bg-black/40 px-3.5 py-2.5 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-acid/70"
+          className="field py-2.5"
         />
       </label>
 
@@ -44,14 +44,14 @@ export function FeedbackForm() {
           maxLength={2000}
           rows={6}
           placeholder="Décris ce qui s'est passé, ce que tu attendais, et à quel moment."
-          className="w-full resize-y rounded-xl border border-white/10 bg-black/40 px-3.5 py-2.5 text-sm leading-relaxed text-white outline-none transition placeholder:text-white/30 focus:border-acid/70"
+          className="field resize-y py-2.5 leading-relaxed"
         />
       </label>
 
       {state.error && (
         <p
           role="alert"
-          className="rounded-lg border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-200"
+          className="border-l-2 border-rose-400/60 bg-rose-500/10 px-3 py-2 text-sm text-rose-200"
         >
           {state.error}
         </p>
@@ -60,7 +60,7 @@ export function FeedbackForm() {
       {state.message && (
         <p
           role="status"
-          className="rounded-lg border border-emerald-400/30 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-200"
+          className="border-l-2 border-emerald-400/60 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-200"
         >
           {state.message}
         </p>
@@ -69,7 +69,7 @@ export function FeedbackForm() {
       <button
         type="submit"
         disabled={pending}
-        className="rounded-full bg-acid px-6 py-2.5 text-sm font-semibold text-ink transition hover:brightness-110 disabled:cursor-not-allowed disabled:bg-white/20 disabled:text-white/60"
+        className="btn btn-primary"
       >
         {pending ? "Envoi…" : "Envoyer"}
       </button>
@@ -96,7 +96,7 @@ function Choice({
         className="peer sr-only"
         required
       />
-      <span className="rounded-full border border-white/15 px-4 py-1.5 text-sm text-white/60 transition peer-checked:border-acid/60 peer-checked:bg-acid/10 peer-checked:text-acid peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-acid">
+      <span className="tab border border-white/15 px-4 py-1.5 text-sm text-white/60 peer-checked:border-acid/60 peer-checked:bg-acid/10 peer-checked:text-acid peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-acid">
         {label}
       </span>
     </label>

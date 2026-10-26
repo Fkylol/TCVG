@@ -1,27 +1,46 @@
 import Image from "next/image";
 import Link from "next/link";
 import { signOut } from "@/app/actions";
-import { getPortrait } from "@/lib/portraits";
-import { FRAMES, frameOf } from "@/lib/profile";
+import { AvatarFrame } from "@/components/avatar-frame";
+import { BoosterBadge } from "@/components/booster-badge";
+import { NavLink } from "@/components/nav-link";
+import { getCardArt } from "@/lib/card-art";
 
 export function SiteHeader({
   username,
   avatarCardId,
   frame,
   pixels,
+  boosterStock,
+  bonusBoosters = 0,
+  boosterAnchor,
+  serverNow,
+  unread = 0,
+  admin = false,
 }: {
   username?: string;
   avatarCardId?: string | null;
   frame?: string;
   pixels?: number;
+  /** Boosters disponibles (stock projeté), affiché à côté des Pixels. */
+  boosterStock?: number;
+  /** Boosters bonus (parrainage) affichés à part du stock. */
+  bonusBoosters?: number;
+  /** Ancre d'accumulation, pour que le compteur avance tout seul. */
+  boosterAnchor?: string | null;
+  /** Heure serveur du rendu, point de départ du compteur. */
+  serverNow?: number;
+  /** Notifications non lues, pour la pastille de la cloche. */
+  unread?: number;
+  /** Affiche le lien d'administration du marché. */
+  admin?: boolean;
 }) {
   const initial = username?.trim().charAt(0).toUpperCase() ?? "?";
-  const portrait = avatarCardId ? getPortrait(avatarCardId) : undefined;
-  const frameInfo = FRAMES[frameOf(frame)];
+  const avatar = avatarCardId ? getCardArt(avatarCardId) : null;
 
   return (
-    <header className="sticky top-0 z-40 border-b border-white/10 bg-ink/85 backdrop-blur">
-      <div className="mx-auto flex max-w-6xl items-center gap-1.5 px-3 py-2.5 sm:gap-2 sm:px-4">
+    <header className="sticky top-0 z-40 border-b border-white/10 bg-ink">
+      <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-1.5 px-3 py-2.5 sm:flex-nowrap sm:gap-2 sm:px-4">
         <Link href="/" className="flex shrink-0 items-center gap-2 pr-1 sm:gap-2.5 sm:pr-2">
           {/* Logo fourni par le projet, découpé en pastille (public/logo.png). */}
           <Image
@@ -30,7 +49,7 @@ export function SiteHeader({
             width={36}
             height={36}
             priority
-            className="h-8 w-8 shrink-0 drop-shadow-[0_0_18px_rgba(180,255,57,0.35)] sm:h-9 sm:w-9"
+            className="h-8 w-8 shrink-0 sm:h-9 sm:w-9"
           />
           <span className="display hidden text-[17px] tracking-[0.14em] text-white sm:inline">
             TCVG
@@ -38,20 +57,34 @@ export function SiteHeader({
         </Link>
 
         {username && (
-          <nav className="ml-0 flex min-w-0 flex-1 items-center sm:ml-1 sm:gap-1">
+          <nav className="order-last mt-1.5 flex w-full min-w-0 items-center gap-1 overflow-x-auto border-t border-white/10 pt-2 sm:order-none sm:mt-0 sm:w-auto sm:flex-1 sm:border-0 sm:pt-0">
             <NavLink href="/boosters">Boosters</NavLink>
             <NavLink href="/collection">Collection</NavLink>
+            <NavLink href="/parrainage">Parrainage</NavLink>
+            <NavLink href="/envies">Envies</NavLink>
             <NavLink href="/marche">Marché</NavLink>
+            <NavLink href="/agora">Agora</NavLink>
+            {admin && <NavLink href="/admin/marche">Admin</NavLink>}
+            {admin && <NavLink href="/admin/parrainage">Parrainages</NavLink>}
+            {admin && <NavLink href="/admin/cadres">Cadres</NavLink>}
           </nav>
         )}
 
         <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2">
           {username ? (
             <>
+              {typeof boosterStock === "number" && typeof serverNow === "number" && (
+                <BoosterBadge
+                  stock={boosterStock}
+                  bonus={bonusBoosters}
+                  anchor={boosterAnchor ?? null}
+                  serverNow={serverNow}
+                />
+              )}
               {typeof pixels === "number" && (
                 <span
                   title="Pixels disponibles"
-                  className="flex items-center gap-1 rounded-full border border-acid/30 bg-acid/10 px-1.5 py-1 text-[10px] font-semibold text-acid tabular-nums sm:px-2.5 sm:text-[11px]"
+                  className="chip gap-1 py-1 text-acid sm:px-2.5"
                 >
                   <span aria-hidden className="text-[9px]">
                     ◆
@@ -62,26 +95,40 @@ export function SiteHeader({
                 </span>
               )}
               <Link
+                href="/notifications"
+                title={
+                  unread > 0
+                    ? `${unread} notification${unread > 1 ? "s" : ""} non lue${unread > 1 ? "s" : ""}`
+                    : "Notifications"
+                }
+                className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white/55 transition hover:bg-white/5 hover:text-acid"
+              >
+                <svg
+                  aria-hidden
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.7"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-4 w-4"
+                >
+                  <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+                  <path d="M13.7 21a2 2 0 0 1-3.4 0" />
+                </svg>
+                {unread > 0 && (
+                  <span className="absolute -right-0.5 -top-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-acid px-1 font-mono text-[9px] font-bold text-ink">
+                    {unread > 9 ? "9+" : unread}
+                    <span className="sr-only"> notifications non lues</span>
+                  </span>
+                )}
+              </Link>
+              <Link
                 href="/profil"
                 title="Mon profil"
-                className="flex shrink-0 items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] py-1 pl-1 pr-1 transition hover:border-white/25 sm:pr-3"
+                className="flex shrink-0 items-center gap-2 py-1 pl-1 pr-1 transition hover:opacity-80 sm:pr-2"
               >
-                <span
-                  className={`grid h-7 w-7 shrink-0 place-items-center overflow-hidden rounded-full bg-gradient-to-br from-acid to-cyan text-[11px] font-bold text-ink ring-2 ${frameInfo.ring} ${frameInfo.glow}`}
-                >
-                  {portrait ? (
-                    <Image
-                      src={portrait.url}
-                      alt=""
-                      width={28}
-                      height={28}
-                      unoptimized
-                      className="h-full w-full object-cover object-top"
-                    />
-                  ) : (
-                    initial
-                  )}
-                </span>
+                <AvatarFrame avatar={avatar} initial={initial} size={28} frameId={frame} />
                 <span className="hidden max-w-32 truncate text-xs text-white/70 sm:inline">
                   {username}
                 </span>
@@ -91,7 +138,7 @@ export function SiteHeader({
                   type="submit"
                   aria-label="Déconnexion"
                   title="Déconnexion"
-                  className="grid h-8 w-8 place-items-center rounded-full border border-white/10 text-white/55 transition hover:border-white/30 hover:text-white sm:h-auto sm:w-auto sm:px-3 sm:py-1.5 sm:text-[11px]"
+                  className="btn btn-outline btn-sm h-8 w-8 px-0 sm:h-auto sm:w-auto sm:px-3"
                 >
                   <span className="hidden sm:inline">Déconnexion</span>
                   <svg
@@ -113,16 +160,10 @@ export function SiteHeader({
             </>
           ) : (
             <>
-              <Link
-                href="/login"
-                className="rounded-full px-3 py-1.5 text-[13px] text-white/60 transition hover:bg-white/5 hover:text-white"
-              >
+              <Link href="/login" className="tab text-[11px] sm:text-[13px]">
                 Connexion
               </Link>
-              <Link
-                href="/signup"
-                className="rounded-full bg-acid px-4 py-1.5 text-[12px] font-semibold text-ink transition hover:brightness-110"
-              >
+              <Link href="/signup" className="btn btn-primary btn-sm">
                 S&apos;inscrire
               </Link>
             </>
@@ -130,16 +171,5 @@ export function SiteHeader({
         </div>
       </div>
     </header>
-  );
-}
-
-function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
-  return (
-    <Link
-      href={href}
-      className="shrink-0 rounded-full px-1 py-1.5 text-[11px] text-white/55 transition hover:bg-white/5 hover:text-white sm:px-3 sm:text-[13px]"
-    >
-      {children}
-    </Link>
   );
 }

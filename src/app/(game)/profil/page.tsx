@@ -1,18 +1,31 @@
+import Link from "next/link";
 import { ProfileEditor, type AvatarChoice } from "@/components/profile-editor";
 import { requireSession } from "@/lib/auth";
 import { CARDS, getCardNumber, getUniverseLabel, type Card } from "@/lib/cards";
 import { getCollection, getProfile } from "@/lib/data";
-import { collectionStats, unlockedFrames } from "@/lib/profile";
-import { getPortrait } from "@/lib/portraits";
+import { evaluateFrames, getFrameOverview } from "@/lib/frames";
+import { collectionStats } from "@/lib/profile";
+import { getCardArt } from "@/lib/card-art";
 import { collectionScore } from "@/lib/stats";
 
 export const metadata = { title: "Profil — TCVG" };
 
-export default async function ProfilePage() {
+export default async function ProfilePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ cadre?: string }>;
+}) {
+  const { cadre } = await searchParams;
   const { supabase, user } = await requireSession();
-  const [profile, collection] = await Promise.all([
+
+  // Les déblocages sont permanents : on évalue à chaque visite du profil, ce
+  // qui rattrape aussi une vente ou un changement de catalogue.
+  const evaluation = await evaluateFrames(user.id);
+
+  const [profile, collection, overview] = await Promise.all([
     getProfile(supabase, user),
     getCollection(supabase, user.id),
+    getFrameOverview(supabase, user.id),
   ]);
 
   const owned = collection
@@ -21,7 +34,6 @@ export default async function ProfilePage() {
 
   const stats = collectionStats(owned);
   const score = collectionScore(owned);
-  const unlocked = unlockedFrames(stats);
 
   const choices: AvatarChoice[] = owned
     .map((card) => ({
@@ -29,18 +41,42 @@ export default async function ProfilePage() {
       name: card.name,
       number: getCardNumber(card.id) ?? 0,
       universe: getUniverseLabel(card.universe),
-      url: getPortrait(card.id)?.url ?? null,
+      url: getCardArt(card.id)?.src ?? null,
     }))
     .sort((a, b) => a.number - b.number);
+
+  const initialFrame =
+    cadre && overview.frames.some((frame) => frame.id === cadre && frame.unlocked)
+      ? cadre
+      : null;
 
   return (
     <div>
       <span className="eyebrow">Profil</span>
       <h1 className="display mt-2 text-4xl">{profile.username}</h1>
-      <p className="mt-1 text-sm text-white/50">
+      <span className="title-rule" aria-hidden />
+      <p className="mt-3 font-mono text-sm text-white/50">
         {stats.unique} personnage{stats.unique > 1 ? "s" : ""} · {stats.legendary} légendaire
         {stats.legendary > 1 ? "s" : ""} · {stats.mythic} mythique{stats.mythic > 1 ? "s" : ""}
       </p>
+
+      {evaluation.newlyUnlocked.length > 0 && (
+        <div className="mt-4 border-l-2 border-acid bg-acid/[0.08] px-4 py-3 text-sm">
+          <span className="font-semibold text-acid">
+            {evaluation.newlyUnlocked.length > 1
+              ? "Nouveaux cadres débloqués"
+              : "Nouveau cadre débloqué"}
+            {" : "}
+          </span>
+          <span className="text-white/80">
+            {evaluation.newlyUnlocked.map((frame) => frame.name).join(", ")}
+          </span>
+          {" "}
+          <Link href="#cadres" className="text-[12px] text-acid hover:underline">
+            Choisir →
+          </Link>
+        </div>
+      )}
 
       <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <ScoreTile label="Score de collection" value={score.quality} accent="text-acid" />
@@ -56,9 +92,13 @@ export default async function ProfilePage() {
       <ProfileEditor
         username={profile.username}
         avatarCardId={profile.avatarCardId}
-        frame={profile.frame}
+        selectedFrameId={overview.selectedFrameId}
         choices={choices}
-        unlocked={unlocked}
+        frames={overview.frames}
+        unlockedCount={overview.unlockedCount}
+        activeTotal={overview.activeTotal}
+        next={overview.next}
+        initialFrame={initialFrame}
       />
     </div>
   );
@@ -74,7 +114,7 @@ function ScoreTile({
   accent?: string;
 }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-3.5">
+    <div className="panel p-3.5">
       <p className="text-[10px] uppercase tracking-[0.16em] text-white/35">{label}</p>
       <p className={`mt-1 font-mono text-2xl font-semibold tabular-nums ${accent}`}>
         {value.toLocaleString("fr-FR")}

@@ -2,28 +2,20 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { CARDS, findDuplicateCards, getCardNumber } from "../src/lib/cards";
+import { CARD_LORE } from "../src/lib/card-lore";
 import {
   BOOSTER_COOLDOWN_MS,
   BOOSTER_STOCK_MAX,
   CARDS_PER_BOOSTER,
   RARITY,
+  TOTAL_WEIGHT,
   collectionCompletion,
   formatCountdown,
+  formatPercent,
   projectedStock,
-  rollBooster,
-  rollRarity,
+  rarestRarity,
 } from "../src/lib/game";
-
-/** PRNG déterministe (mulberry32) pour des tests reproductibles. */
-function seeded(seed: number) {
-  let a = seed >>> 0;
-  return () => {
-    a = (a + 0x6d2b79f5) >>> 0;
-    let t = Math.imul(a ^ (a >>> 15), 1 | a);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
+import { PACKS } from "../src/lib/packs";
 
 test("catalogue : identifiants uniques et données complètes", () => {
   const ids = new Set<string>();
@@ -33,9 +25,28 @@ test("catalogue : identifiants uniques et données complètes", () => {
     assert.ok(card.name.trim().length > 0, `${card.id} sans nom`);
     assert.ok(card.emoji.trim().length > 0, `${card.id} sans emoji`);
     assert.ok(RARITY[card.rarity], `${card.id} a une rareté inconnue`);
-    assert.ok(card.bio.length > 20, `${card.id} bio trop courte`);
+    // Les cartes importées n'ont pas encore de fiche : quand elle existe, elle
+    // doit être complète.
+    const lore = CARD_LORE[card.id];
+    if (lore) {
+      assert.ok(lore.bio.length > 20, `${card.id} bio trop courte`);
+      assert.ok(lore.tagline.length > 0, `${card.id} sans accroche`);
+      // Citation et pouvoir sont optionnels : les fiches récentes n'ont que
+      // l'accroche et la biographie.
+      if (lore.quote) assert.ok(lore.quote.length > 0, `${card.id} sans citation`);
+      if (lore.power) assert.ok(lore.power.length > 0, `${card.id} sans pouvoir`);
+    }
   }
   assert.ok(CARDS.length >= 50, "le catalogue doit proposer au moins 50 cartes");
+});
+
+test("catalogue : chaque carte a une fiche", () => {
+  const missing = CARDS.filter((card) => !CARD_LORE[card.id]);
+  assert.deepEqual(
+    missing.map((card) => card.id),
+    [],
+    "chaque carte doit avoir au moins une accroche et une biographie",
+  );
 });
 
 test("catalogue : chaque rareté possède au moins une carte", () => {
@@ -45,56 +56,78 @@ test("catalogue : chaque rareté possède au moins une carte", () => {
   }
 });
 
-test("rollRarity respecte les poids annoncés", () => {
-  const random = seeded(42);
-  const draws = 120_000;
-  const counts: Record<string, number> = { C: 0, R: 0, SR: 0, UR: 0, L: 0 };
+test("rareté la plus haute d'un tirage", () => {
+  assert.equal(rarestRarity([]), "C");
+  assert.equal(rarestRarity(["C", "UC", "R"]), "R");
+  assert.equal(rarestRarity(["C", "UC"]), "UC");
+  assert.equal(rarestRarity(["C", "R", "SR"]), "SR");
+  assert.equal(rarestRarity(["SR", "L", "R"]), "L");
+  assert.equal(rarestRarity(["UR", "SR"]), "UR");
+});
 
-  for (let i = 0; i < draws; i++) counts[rollRarity(random)] += 1;
+test("affichage des raretés : les six lettres C, U, R, E, L, M", () => {
+  // Le badge suit l'ordre des paliers, pas l'initiale du libellé :
+  // « Peu commune » s'affiche U et « Légendaire » L, comme sur les cartes.
+  assert.deepEqual(
+    (["C", "UC", "R", "SR", "UR", "L"] as const).map((key) => RARITY[key].short),
+    ["C", "U", "R", "E", "L", "M"],
+  );
+});
 
-  for (const [key, info] of Object.entries(RARITY)) {
-    const expected = (info.weight / 1000) * 100;
-    const actual = (counts[key] / draws) * 100;
+test("raretés : les poids couvrent bien 1 000", () => {
+  assert.equal(Math.round(TOTAL_WEIGHT), 1000);
+  assert.deepEqual(
+    Object.values(RARITY).map((info) => info.weight),
+    [620.25, 250, 114, 14, 1.5, 0.25],
+  );
+});
+
+test("raretés : chances par booster de 5 cartes", () => {
+  // Mêmes valeurs que la base (`game_config.booster_drop_rates`) et que
+  // l'affichage « Chance par booster » : 1 - (1 - p)^5.
+  const chance = (weight: number) => 1 - Math.pow(1 - weight / TOTAL_WEIGHT, CARDS_PER_BOOSTER);
+
+  // Taux de référence : C 62 % · U 25 % · R 11,4 % · E 1,4 % · L 0,15 % · M 0,025 %.
+  assert.ok(Math.abs(chance(RARITY.UC.weight) - 0.7627) < 0.002);
+  assert.ok(Math.abs(chance(RARITY.R.weight) - 0.4546) < 0.002);
+  assert.ok(Math.abs(chance(RARITY.SR.weight) - 0.068) < 0.002);
+  assert.ok(Math.abs(chance(RARITY.UR.weight) - 0.0075) < 0.001);
+  assert.ok(Math.abs(chance(RARITY.L.weight) - 0.00125) < 0.0005);
+});
+
+test("packs : 10 packs, 5 cartes chacun, un seul de chaque genre", () => {
+  assert.equal(CARDS_PER_BOOSTER, 5);
+  assert.equal(PACKS.length, 10);
+  assert.equal(new Set(PACKS.map((pack) => pack.id)).size, 10);
+
+  // Le premier est le Mix (aucun genre), les neuf autres couvrent les genres.
+  assert.equal(PACKS[0].genre, null);
+  const genres = PACKS.slice(1).map((pack) => pack.genre);
+  assert.equal(new Set(genres).size, 9);
+  assert.ok(PACKS.some((pack) => pack.id === "mmo" && pack.genre === "mmo"));
+  assert.ok(genres.every((genre) => genre !== null));
+
+  // Chaque pack a une palette complète, une taille de titre et une inclinaison.
+  for (const pack of PACKS) {
+    assert.ok(pack.pricePixels > 0, `${pack.id} sans prix`);
+    for (const key of ["t1", "t2", "ink", "gl", "glow"] as const) {
+      assert.match(
+        pack.colors[key],
+        /^#[0-9a-f]{6}([0-9a-f]{2})?$/i,
+        `${pack.id} : couleur ${key} invalide`,
+      );
+    }
+    assert.match(pack.colors.tx, /^rgba\(/, `${pack.id} : trait de texture manquant`);
+    if (pack.colors.tx2) {
+      assert.match(pack.colors.tx2, /^rgba\(/, `${pack.id} : second trait invalide`);
+    }
     assert.ok(
-      Math.abs(actual - expected) < 1.5,
-      `rareté ${key} : attendu ~${expected}%, obtenu ${actual.toFixed(2)}%`,
+      pack.titleSize >= 11 && pack.titleSize <= 16,
+      `${pack.id} : taille de titre hors bornes`,
     );
+    assert.ok(Math.abs(pack.tilt.bx) <= 5, `${pack.id} : inclinaison X hors bornes`);
+    assert.ok(Math.abs(pack.tilt.by) <= 15, `${pack.id} : inclinaison Y hors bornes`);
   }
-});
-
-test("rollBooster tire le bon nombre de cartes, sans doublon", () => {
-  const random = seeded(7);
-  for (let i = 0; i < 2000; i++) {
-    const pack = rollBooster(random);
-    assert.equal(pack.length, CARDS_PER_BOOSTER);
-    const ids = new Set(pack.map((card) => card.id));
-    assert.equal(ids.size, pack.length, "un booster contient deux fois la même carte");
-    for (const card of pack) {
-      assert.ok(CARDS.some((c) => c.id === card.id), `carte inconnue tirée : ${card.id}`);
-    }
-  }
-});
-
-test("rollBooster produit parfois des rares, mais rarement des mythiques", () => {
-  const random = seeded(99);
-  const packs = 5000;
-  let mythic = 0;
-  let epicOrBetter = 0;
-
-  for (let i = 0; i < packs; i++) {
-    const pack = rollBooster(random);
-    if (pack.some((card) => card.rarity === "L")) mythic += 1;
-    if (pack.some((card) => card.rarity === "SR" || card.rarity === "UR" || card.rarity === "L")) {
-      epicOrBetter += 1;
-    }
-  }
-
-  const mythicRate = mythic / packs;
-  const epicRate = epicOrBetter / packs;
-
-  assert.ok(mythicRate > 0, "aucun mythique sur 5000 boosters");
-  assert.ok(mythicRate < 0.06, `trop de mythiques : ${(mythicRate * 100).toFixed(2)}%`);
-  assert.ok(epicRate > 0.15, `trop peu d'épiques+ : ${(epicRate * 100).toFixed(2)}%`);
 });
 
 test("stock : +1 par tranche de 10 minutes, plafonné à 10", () => {
@@ -141,6 +174,15 @@ test("formatCountdown et completion", () => {
 
   assert.equal(collectionCompletion(0), 0);
   assert.equal(collectionCompletion(CARDS.length), 100);
+});
+
+test("pourcentages : français, sans décimale inutile", () => {
+  assert.equal(formatPercent(0.62025), "62 %");
+  assert.equal(formatPercent(0.25), "25 %");
+  assert.equal(formatPercent(0.114), "11,4 %");
+  assert.equal(formatPercent(0.014), "1,4 %");
+  assert.equal(formatPercent(0.0015), "0,15 %");
+  assert.equal(formatPercent(0.00025), "0,025 %");
 });
 
 test("le catalogue refuse les doublons d'identifiant et de personnage", () => {

@@ -4,6 +4,7 @@ import test from "node:test";
 import { CARDS, type Card } from "../src/lib/cards";
 import {
   CARD_COEFFICIENTS,
+  CARD_STATS,
   QUALITY_GRADES,
   STAT_BANDS,
   cardStats,
@@ -63,6 +64,31 @@ test("stats : coefficients 0 et 1 donnent les bornes exactes", () => {
     assert.equal(statValue(bands.power, 1), bands.power.min + bands.power.spread);
     assert.equal(statValue(bands.aura, -3), bands.aura.min, "coefficient borné en bas");
     assert.equal(statValue(bands.aura, 4), bands.aura.min + bands.aura.spread, "coefficient borné en haut");
+  }
+});
+
+test("stats : les valeurs explicites visent une carte connue et respectent la fourchette", () => {
+  const byId = new Map(CARDS.map((card) => [card.id, card]));
+
+  for (const [id, values] of Object.entries(CARD_STATS)) {
+    const card = byId.get(id);
+    assert.ok(card, `valeur explicite pour une carte inconnue : ${id}`);
+
+    // La valeur affichée est exacte quand elle tient dans la fourchette, et
+    // ramenée à la borne sinon : jamais hors barème.
+    const bands = STAT_BANDS[card.rarity];
+    const expectedPower = Math.min(
+      bands.power.min + bands.power.spread,
+      Math.max(bands.power.min, values.power),
+    );
+    const expectedAura = Math.min(
+      bands.aura.min + bands.aura.spread,
+      Math.max(bands.aura.min, values.aura),
+    );
+
+    const stats = cardStats(card);
+    assert.equal(stats.power, expectedPower, `${id} : puissance`);
+    assert.equal(stats.aura, expectedAura, `${id} : aura`);
   }
 });
 

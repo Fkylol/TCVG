@@ -3,10 +3,12 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
-import { buyListing, cancelListing } from "@/app/actions";
+import { buyListing, cancelBuyOrder, cancelListing, updateListingPrice } from "@/app/actions";
+import { AvatarFrame } from "@/components/avatar-frame";
 import { CardFace } from "@/components/card-face";
+import { getCardArt } from "@/lib/card-art";
 import { getCard, getCardNumber, type Rarity } from "@/lib/cards";
-import type { GenreOption, MarketListing } from "@/lib/data";
+import type { BuyOrder, GenreOption, MarketListing } from "@/lib/data";
 import { RARITY, RARITY_ORDER } from "@/lib/game";
 
 type Note = { tone: "ok" | "bad"; text: string } | null;
@@ -24,9 +26,31 @@ const STATUS_STYLE: Record<MarketListing["status"], string> = {
   cancelled: "bg-white/10 text-white/45",
 };
 
+/** Libellés des ordres d'achat — mêmes mots que les annonces. */
+const ORDER_LABEL: Record<BuyOrder["status"], string> = {
+  active: "En attente",
+  filled: "Servi",
+  cancelled: "Annulé",
+};
+
 function formatDate(value: string | null): string {
   if (!value) return "";
   return new Date(value).toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
+}
+
+/** « Expire dans 5 jours » — repère lisible sans dépendre de l'heure exacte. */
+function expiryLabel(value: string | null): string {
+  if (!value) return "";
+  const days = Math.ceil((Date.parse(value) - Date.now()) / 86_400_000);
+  if (days <= 0) return "Échéance dépassée";
+  if (days === 1) return "Expire demain";
+  return `Expire dans ${days} jours`;
+}
+
+/** Une annulation pour expiration se lit « Expirée », pas « Annulée ». */
+function statusLabel(listing: MarketListing): string {
+  if (listing.status === "cancelled" && listing.cancelReason === "expired") return "Expirée";
+  return STATUS_LABEL[listing.status];
 }
 
 export function MarketBrowser({
@@ -34,20 +58,28 @@ export function MarketBrowser({
   genres,
   pixels,
   userId,
+  initialCard = null,
+  orders,
 }: {
   listings: MarketListing[];
   genres: GenreOption[];
   pixels: number;
   userId: string;
+  /** Carte sur laquelle le marché est filtré à l'arrivée (`/marche?carte=`). */
+  initialCard?: string | null;
+  /** Ordres d'achat du joueur, actifs ou terminés. */
+  orders: BuyOrder[];
 }) {
   const router = useRouter();
-  const [tab, setTab] = useState<"market" | "mine">("market");
+  const [tab, setTab] = useState<"market" | "mine" | "orders">("market");
   const [rarity, setRarity] = useState<Rarity | "all">("all");
   const [genre, setGenre] = useState<string>("all");
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [sort, setSort] = useState<Sort>("recent");
+  const [cardFilter, setCardFilter] = useState<string>(initialCard ?? "all");
   const [busy, setBusy] = useState<number | null>(null);
+  const [editing, setEditing] = useState<{ id: number; value: string } | null>(null);
   const [note, setNote] = useState<Note>(null);
   const [currentPixels, setCurrentPixels] = useState(pixels);
 
@@ -58,6 +90,10 @@ export function MarketBrowser({
   );
   const myActive = mine.filter((listing) => listing.status === "active");
   const myFinished = mine.filter((listing) => listing.status !== "active").slice(0, 20);
+  const activeOrders = orders.filter((order) => order.status === "active");
+  const finishedOrders = orders.filter((order) => order.status !== "active").slice(0, 20);
+  // Pixels immobilisés par les ordres en attente : le solde affiché reste net.
+  const reservedPixels = activeOrders.reduce((sum, order) => sum + order.reserved, 0);
 
   const filtered = useMemo(() => {
     const low = Number.parseInt(minPrice, 10);
@@ -65,6 +101,7 @@ export function MarketBrowser({
     const list = active.filter((listing) => {
       const card = getCard(listing.cardId);
       if (!card) return false;
+      if (cardFilter !== "all" && listing.cardId !== cardFilter) return false;
       if (rarity !== "all" && card.rarity !== rarity) return false;
       if (genre !== "all" && !listing.genres.includes(genre)) return false;
       if (Number.isFinite(low) && listing.price < low) return false;
@@ -75,7 +112,7 @@ export function MarketBrowser({
     if (sort === "price-asc") return [...list].sort((a, b) => a.price - b.price);
     if (sort === "price-desc") return [...list].sort((a, b) => b.price - a.price);
     return list;
-  }, [active, rarity, genre, minPrice, maxPrice, sort]);
+  }, [active, cardFilter, rarity, genre, minPrice, maxPrice, sort]);
 
   async function buy(listing: MarketListing) {
     const card = getCard(listing.cardId);
@@ -103,6 +140,83 @@ export function MarketBrowser({
       setNote({ tone: "bad", text: "Cette annonce est la tienne." });
     } else if (result.status === "unavailable") {
       setNote({ tone: "bad", text: "Annonce déjà vendue ou annulée." });
+      router.refresh();
+    } else if (result.status === "expired") {
+      setNote({ tone: "bad", text: "Annonce expirée : la copie est revenue chez son vendeur." });
+      router.refresh();
+    } else {
+      setNote({ tone: "bad", text: result.message });
+    }
+
+    setBusy(null);
+  }
+
+  async function cancelOrder(order: BuyOrder) {
+    const card = getCard(order.cardId);
+    if (!card || busy !== null) return;
+    if (!window.confirm(`Annuler ton ordre sur ${card.name} ? Les ◆ ${order.reserved} réservés te reviennent.`)) {
+      return;
+    }
+
+    setBusy(order.id);
+    setNote(null);
+
+    const result = await cancelBuyOrder(order.id);
+
+    if (result.status === "ok") {
+      setCurrentPixels(result.pixels);
+      setNote({ tone: "ok", text: `Ordre annulé : ◆ ${result.refund} rendus.` });
+      router.refresh();
+    } else if (result.status === "unavailable") {
+      setNote({ tone: "bad", text: "Cet ordre est déjà servi ou annulé." });
+      router.refresh();
+    } else {
+      setNote({ tone: "bad", text: result.message });
+    }
+
+    setBusy(null);
+  }
+
+  async function savePrice(listing: MarketListing) {
+    if (!editing || busy !== null) return;
+    const card = getCard(listing.cardId);
+    const value = Number.parseInt(editing.value, 10);
+
+    if (!Number.isInteger(value) || value < 1) {
+      setNote({ tone: "bad", text: "Indique un prix entier en Pixels." });
+      return;
+    }
+    if (value === listing.price) {
+      setEditing(null);
+      return;
+    }
+
+    setBusy(listing.id);
+    setNote(null);
+
+    const result = await updateListingPrice(listing.id, value);
+
+    if (result.status === "ok") {
+      setNote({
+        tone: "ok",
+        text: result.sold
+          ? `${card?.name ?? "La carte"} est partie à ◆ ${result.price} — l'ordre en attente a été servi.`
+          : `Nouveau prix : ◆ ${result.price}.`,
+      });
+      setEditing(null);
+      router.refresh();
+    } else if (result.status === "out_of_bounds") {
+      setNote({
+        tone: "bad",
+        text: `Prix hors fourchette : entre ◆ ${result.min} et ◆ ${result.max}.`,
+      });
+    } else if (result.status === "expired") {
+      setNote({ tone: "bad", text: "Annonce expirée : la copie est revenue dans ta collection." });
+      setEditing(null);
+      router.refresh();
+    } else if (result.status === "unavailable") {
+      setNote({ tone: "bad", text: "Annonce déjà vendue ou retirée." });
+      setEditing(null);
       router.refresh();
     } else {
       setNote({ tone: "bad", text: result.message });
@@ -139,39 +253,45 @@ export function MarketBrowser({
   return (
     <div>
       <div className="flex flex-wrap items-center gap-2">
-        <div className="flex rounded-xl border border-white/10 bg-black/30 p-1 text-xs">
+        <div className="tabs text-xs">
           <button
             type="button"
             onClick={() => setTab("market")}
-            className={`rounded-lg px-3 py-1.5 transition ${
-              tab === "market" ? "bg-acid text-ink" : "text-white/55 hover:text-white"
-            }`}
+            className={`tab px-3 py-1.5 ${tab === "market" ? "bg-acid text-ink" : ""}`}
           >
             Annonces ({active.length})
           </button>
           <button
             type="button"
             onClick={() => setTab("mine")}
-            className={`rounded-lg px-3 py-1.5 transition ${
-              tab === "mine" ? "bg-acid text-ink" : "text-white/55 hover:text-white"
-            }`}
+            className={`tab px-3 py-1.5 ${tab === "mine" ? "bg-acid text-ink" : ""}`}
           >
             Mes annonces ({myActive.length})
           </button>
+          <button
+            type="button"
+            onClick={() => setTab("orders")}
+            className={`tab px-3 py-1.5 ${tab === "orders" ? "bg-acid text-ink" : ""}`}
+          >
+            Mes ordres ({activeOrders.length})
+          </button>
         </div>
 
-        <span className="ml-auto rounded-full border border-acid/30 bg-acid/10 px-3 py-1.5 text-xs font-semibold text-acid tabular-nums">
-          ◆ {currentPixels}
-        </span>
+        <span className="chip ml-auto py-1.5 font-semibold text-acid">◆ {currentPixels}</span>
+        {reservedPixels > 0 && (
+          <span className="chip py-1.5 text-white/45">
+            <span className="font-sans text-white/30">réservé</span> ◆ {reservedPixels}
+          </span>
+        )}
       </div>
 
       {note && (
         <p
           role="status"
-          className={`mt-4 rounded-lg border px-3 py-2 text-sm ${
+          className={`mt-4 border-l-2 px-3 py-2 text-sm ${
             note.tone === "ok"
-              ? "border-emerald-400/30 bg-emerald-500/10 text-emerald-200"
-              : "border-rose-400/30 bg-rose-500/10 text-rose-200"
+              ? "border-emerald-400/60 bg-emerald-500/10 text-emerald-200"
+              : "border-rose-400/60 bg-rose-500/10 text-rose-200"
           }`}
         >
           {note.text}
@@ -180,11 +300,25 @@ export function MarketBrowser({
 
       {tab === "market" ? (
         <>
-          <div className="mt-4 flex flex-wrap items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.03] p-3">
+          <div className="toolbar mt-4">
+            {cardFilter !== "all" && (
+              <span className="chip gap-2 py-1.5 text-white/70">
+                {getCard(cardFilter)?.name ?? cardFilter}
+                <button
+                  type="button"
+                  onClick={() => setCardFilter("all")}
+                  className="text-white/40 transition hover:text-acid"
+                  aria-label="Retirer le filtre de carte"
+                >
+                  ✕
+                </button>
+              </span>
+            )}
+
             <select
               value={rarity}
               onChange={(event) => setRarity(event.target.value as Rarity | "all")}
-              className="rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm outline-none focus:border-acid/60"
+              className="field w-auto"
             >
               <option value="all">Toutes les raretés</option>
               {RARITY_ORDER.map((key) => (
@@ -197,7 +331,7 @@ export function MarketBrowser({
             <select
               value={genre}
               onChange={(event) => setGenre(event.target.value)}
-              className="rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm outline-none focus:border-acid/60"
+              className="field w-auto"
             >
               <option value="all">Tous les genres</option>
               {genres.map((item) => (
@@ -214,7 +348,7 @@ export function MarketBrowser({
               value={minPrice}
               onChange={(event) => setMinPrice(event.target.value)}
               placeholder="Prix min"
-              className="w-24 rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm outline-none placeholder:text-white/35 focus:border-acid/60"
+              className="field w-24"
             />
             <input
               type="number"
@@ -223,13 +357,13 @@ export function MarketBrowser({
               value={maxPrice}
               onChange={(event) => setMaxPrice(event.target.value)}
               placeholder="Prix max"
-              className="w-24 rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm outline-none placeholder:text-white/35 focus:border-acid/60"
+              className="field w-24"
             />
 
             <select
               value={sort}
               onChange={(event) => setSort(event.target.value as Sort)}
-              className="rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm outline-none focus:border-acid/60"
+              className="field w-auto"
             >
               <option value="recent">Plus récentes</option>
               <option value="price-asc">Prix croissant</option>
@@ -242,10 +376,12 @@ export function MarketBrowser({
           </div>
 
           {filtered.length === 0 ? (
-            <div className="mt-6 rounded-2xl border border-dashed border-white/15 px-6 py-14 text-center text-sm text-white/50">
+            <div className="mt-6 border border-dashed border-white/15 px-6 py-14 text-center text-sm text-white/50">
               {active.length === 0
                 ? "Le marché est vide pour le moment. Ouvre des boosters, puis mets un doublon en vente depuis sa fiche."
-                : "Aucune annonce ne correspond à ces filtres."}
+                : cardFilter !== "all"
+                  ? `Aucune annonce pour ${getCard(cardFilter)?.name ?? "cette carte"} pour le moment.`
+                  : "Aucune annonce ne correspond à ces filtres."}
             </div>
           ) : (
             <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -260,7 +396,7 @@ export function MarketBrowser({
                 return (
                   <article
                     key={listing.id}
-                    className="flex gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-3 transition hover:border-white/20"
+                    className="panel flex gap-3 p-3 transition hover:brightness-110"
                   >
                     <Link
                       href={`/card/${card.id}`}
@@ -268,7 +404,7 @@ export function MarketBrowser({
                     >
                       <CardFace card={card} size="sm" className="aspect-[3/4]" />
                       {listing.holo && (
-                        <span className="absolute -top-1.5 right-1 z-10 rounded-full bg-amber-300 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-amber-950 shadow-lg">
+                        <span className="chip absolute -top-1.5 right-1 z-10 bg-amber-300 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-amber-950">
                           Holo
                         </span>
                       )}
@@ -276,7 +412,7 @@ export function MarketBrowser({
 
                     <div className="flex min-w-0 flex-1 flex-col">
                       <div className="flex flex-wrap items-center gap-1.5">
-                        <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${info.badge}`}>
+                        <span className={`chip px-2 py-0.5 text-[10px] font-semibold ${info.badge}`}>
                           {info.short}
                         </span>
                         <span className="font-mono text-[10px] text-white/30">
@@ -285,16 +421,24 @@ export function MarketBrowser({
                       </div>
 
                       <h3 className="mt-1 truncate text-sm font-semibold text-white/90">{card.name}</h3>
-                      <p className="truncate text-[11px] text-white/40">
-                        Vendeur : <span className="text-white/60">{listing.sellerName}</span>
-                      </p>
+                      <div className="mt-1 flex items-center gap-1.5">
+                        <AvatarFrame
+                          avatar={listing.sellerAvatarCardId ? getCardArt(listing.sellerAvatarCardId) : null}
+                          initial={listing.sellerName.charAt(0)}
+                          size={24}
+                          frameId={listing.sellerFrame}
+                        />
+                        <p className="truncate text-[11px] text-white/40">
+                          Vendeur : <span className="text-white/60">{listing.sellerName}</span>
+                        </p>
+                      </div>
                       <p className="mt-1 font-mono text-lg font-bold text-acid">◆ {listing.price}</p>
 
                       {mineListing ? (
                         <button
                           type="button"
                           onClick={() => setTab("mine")}
-                          className="mt-auto w-full rounded-full border border-white/15 px-3 py-1.5 text-xs text-white/60 transition hover:border-white/30 hover:text-white"
+                          className="btn btn-outline btn-sm mt-auto w-full"
                         >
                           Ton annonce
                         </button>
@@ -303,7 +447,7 @@ export function MarketBrowser({
                           type="button"
                           onClick={() => buy(listing)}
                           disabled={working || short}
-                          className="mt-auto w-full rounded-full bg-acid px-3 py-1.5 text-xs font-semibold text-ink transition hover:brightness-110 disabled:cursor-not-allowed disabled:bg-white/15 disabled:text-white/40"
+                          className="btn btn-primary btn-sm mt-auto w-full"
                         >
                           {working ? "Achat…" : short ? `Il manque ${listing.price - currentPixels} ◆` : "Acheter"}
                         </button>
@@ -315,10 +459,10 @@ export function MarketBrowser({
             </div>
           )}
         </>
-      ) : (
+      ) : tab === "mine" ? (
         <div className="mt-4">
           {myActive.length === 0 && myFinished.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-white/15 px-6 py-14 text-center text-sm text-white/50">
+            <div className="border border-dashed border-white/15 px-6 py-14 text-center text-sm text-white/50">
               Tu n&apos;as aucune annonce.{" "}
               <Link href="/collection" className="text-acid hover:underline">
                 Choisis un doublon dans ta collection
@@ -343,19 +487,19 @@ export function MarketBrowser({
                     return (
                       <article
                         key={listing.id}
-                        className="flex gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-3"
+                        className="panel flex gap-3 p-3"
                       >
                         <Link href={`/card/${card.id}`} className="relative w-20 shrink-0 self-start">
                           <CardFace card={card} size="sm" className="aspect-[3/4]" />
                           {listing.holo && (
-                            <span className="absolute -top-1.5 right-1 z-10 rounded-full bg-amber-300 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-amber-950 shadow-lg">
+                            <span className="chip absolute -top-1.5 right-1 z-10 bg-amber-300 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-amber-950">
                               Holo
                             </span>
                           )}
                         </Link>
 
                         <div className="flex min-w-0 flex-1 flex-col">
-                          <span className={`self-start rounded-full px-2 py-0.5 text-[10px] font-semibold ${info.badge}`}>
+                          <span className={`chip self-start px-2 py-0.5 text-[10px] font-semibold ${info.badge}`}>
                             {info.short}
                           </span>
                           <h3 className="mt-1 truncate text-sm font-semibold text-white/90">{card.name}</h3>
@@ -363,14 +507,65 @@ export function MarketBrowser({
                           <p className="text-[11px] text-white/35">
                             Mise en vente le {formatDate(listing.createdAt)}
                           </p>
-                          <button
-                            type="button"
-                            onClick={() => cancel(listing)}
-                            disabled={working}
-                            className="mt-auto w-full rounded-full border border-rose-400/30 bg-rose-500/10 px-3 py-1.5 text-xs font-semibold text-rose-200 transition hover:bg-rose-500/20 disabled:cursor-not-allowed disabled:opacity-50"
-                          >
-                            {working ? "Annulation…" : "Retirer l'annonce"}
-                          </button>
+                          {listing.expiresAt && (
+                            <p className="text-[11px] text-amber-200/60">
+                              {expiryLabel(listing.expiresAt)}
+                            </p>
+                          )}
+
+                          {editing?.id === listing.id ? (
+                            <div className="mt-auto flex items-center gap-1.5 pt-2">
+                              <input
+                                type="number"
+                                min={1}
+                                inputMode="numeric"
+                                value={editing.value}
+                                onChange={(event) =>
+                                  setEditing({ id: listing.id, value: event.target.value })
+                                }
+                                aria-label={`Nouveau prix pour ${card.name}`}
+                                className="field w-20 py-1 text-xs"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => savePrice(listing)}
+                                disabled={working}
+                                className="btn btn-primary btn-sm flex-1"
+                              >
+                                {working ? "…" : "Enregistrer"}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setEditing(null)}
+                                disabled={working}
+                                aria-label="Annuler le changement de prix"
+                                className="btn btn-outline btn-sm"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="mt-auto flex gap-1.5 pt-2">
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setEditing({ id: listing.id, value: String(listing.price) })
+                                }
+                                disabled={working}
+                                className="btn btn-outline btn-sm flex-1"
+                              >
+                                Modifier le prix
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => cancel(listing)}
+                                disabled={working}
+                                className="btn btn-sm bg-rose-500/10 text-rose-200 shadow-[inset_0_0_0_1px_rgba(251,113,133,0.35)]"
+                              >
+                                {working ? "…" : "Retirer"}
+                              </button>
+                            </div>
+                          )}
                         </div>
                       </article>
                     );
@@ -383,7 +578,7 @@ export function MarketBrowser({
                   <h2 className="mt-8 text-sm uppercase tracking-[0.18em] text-white/40">
                     Dernières annonces terminées
                   </h2>
-                  <ul className="mt-3 divide-y divide-white/10 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02]">
+                  <ul className="mt-3 divide-y divide-white/10 overflow-hidden border border-white/10 bg-white/[0.02]">
                     {myFinished.map((listing) => {
                       const card = getCard(listing.cardId);
                       if (!card) return null;
@@ -395,9 +590,9 @@ export function MarketBrowser({
                           </span>
                           <span className="font-mono text-xs text-white/45">◆ {listing.price}</span>
                           <span
-                            className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${STATUS_STYLE[listing.status]}`}
+                            className={`px-2 py-0.5 text-[10px] font-semibold ${STATUS_STYLE[listing.status]}`}
                           >
-                            {STATUS_LABEL[listing.status]}
+                            {statusLabel(listing)}
                           </span>
                           <span className="w-24 text-right text-[11px] text-white/35">
                             {listing.status === "sold"
@@ -411,6 +606,95 @@ export function MarketBrowser({
                   <p className="mt-2 text-[11px] text-white/30">
                     Les montants nets affichés tiennent compte de la commission de 5 %.
                   </p>
+                </>
+              )}
+            </>
+          )}
+        </div>
+      ) : (
+        <div className="mt-4">
+          {orders.length === 0 ? (
+            <div className="border border-dashed border-white/15 px-6 py-14 text-center text-sm text-white/50">
+              Aucun ordre d&apos;achat. Depuis la fiche d&apos;une carte, « Poser un ordre
+              d&apos;achat » réserve ton prix maximum jusqu&apos;à ce qu&apos;une annonce passe en
+              dessous.
+            </div>
+          ) : (
+            <>
+              <h2 className="text-sm uppercase tracking-[0.18em] text-white/40">
+                En attente ({activeOrders.length})
+              </h2>
+              {activeOrders.length === 0 ? (
+                <p className="mt-2 text-sm text-white/45">Aucun ordre en attente.</p>
+              ) : (
+                <ul className="mt-3 divide-y divide-white/10 overflow-hidden border border-white/10 bg-white/[0.02]">
+                  {activeOrders.map((order) => {
+                    const card = getCard(order.cardId);
+                    if (!card) return null;
+                    const working = busy === order.id;
+
+                    return (
+                      <li key={order.id} className="flex flex-wrap items-center gap-3 px-4 py-3">
+                        <Link
+                          href={`/card/${card.id}`}
+                          className="min-w-0 flex-1 truncate text-sm text-white/80 hover:text-acid"
+                        >
+                          {card.name}
+                          {order.holo ? " · holo" : ""}
+                        </Link>
+                        <span className="font-mono text-xs text-acid">◆ {order.maxPrice}</span>
+                        <span className="font-mono text-[11px] text-white/35">
+                          réservé ◆ {order.reserved}
+                        </span>
+                        <span className="w-24 text-[11px] text-white/35">
+                          {formatDate(order.createdAt)}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => cancelOrder(order)}
+                          disabled={working}
+                          className="btn btn-sm bg-rose-500/10 text-rose-200 shadow-[inset_0_0_0_1px_rgba(251,113,133,0.35)]"
+                        >
+                          {working ? "Annulation…" : "Annuler"}
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+
+              {finishedOrders.length > 0 && (
+                <>
+                  <h2 className="mt-8 text-sm uppercase tracking-[0.18em] text-white/40">
+                    Ordres terminés
+                  </h2>
+                  <ul className="mt-3 divide-y divide-white/10 overflow-hidden border border-white/10 bg-white/[0.02]">
+                    {finishedOrders.map((order) => {
+                      const card = getCard(order.cardId);
+                      if (!card) return null;
+                      return (
+                        <li key={order.id} className="flex flex-wrap items-center gap-3 px-4 py-3">
+                          <span className="min-w-0 flex-1 truncate text-sm text-white/80">
+                            {card.name}
+                            {order.holo ? " · holo" : ""}
+                          </span>
+                          <span className="font-mono text-xs text-white/45">◆ {order.maxPrice}</span>
+                          <span
+                            className={`px-2 py-0.5 text-[10px] font-semibold ${STATUS_STYLE[
+                              order.status === "filled" ? "sold" : "cancelled"
+                            ]}`}
+                          >
+                            {ORDER_LABEL[order.status]}
+                          </span>
+                          <span className="w-32 text-right text-[11px] text-white/35">
+                            {order.status === "filled"
+                              ? `achetée ◆ ${order.paid ?? order.maxPrice}`
+                              : `remboursé ◆ ${order.maxPrice}`}
+                          </span>
+                        </li>
+                      );
+                    })}
+                  </ul>
                 </>
               )}
             </>

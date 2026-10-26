@@ -45,3 +45,9 @@ next-env.d.ts
 .open-next
 .wrangler
 .dev.vars
+
+# chantier « rareté par popularité » : caches de travail et instantanés de base
+/.popularity/
+/.snapshots/
+/.images/
+.popularity-*.log

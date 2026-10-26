@@ -15,9 +15,10 @@ export default async function LoginPage({
     <div className="flex min-h-screen flex-col">
       <SiteHeader />
       <main className="flex flex-1 items-center justify-center px-4 py-12">
-        <div className="w-full max-w-sm rounded-3xl border border-white/10 bg-white/[0.04] p-7 backdrop-blur">
+        <div className="panel panel-accent w-full max-w-sm p-7 backdrop-blur">
           <span className="eyebrow">Connexion</span>
           <h1 className="display mt-2 text-3xl">Content de te revoir</h1>
+          <span className="title-rule" aria-hidden />
           <p className="mb-6 mt-1 text-sm text-white/50">
             La connexion se fait uniquement avec Discord.
           </p>
@@ -25,7 +26,7 @@ export default async function LoginPage({
           {erreur === "discord" && (
             <p
               role="alert"
-              className="mb-4 rounded-lg border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-200"
+              className="mb-4 border-l-2 border-rose-400/60 bg-rose-500/10 px-3 py-2 text-sm text-rose-200"
             >
               La connexion Discord a échoué. Réessaie dans un instant.
             </p>

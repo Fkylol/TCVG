@@ -1,0 +1,339 @@
+﻿#;Personnage;Jeu;Franchise;Rôle;Statut;Carte;Rareté;Visuel
+1;Carl Johnson;Grand Theft Auto: San Andreas - GTA;gta;Principal;importée;carl-johnson;L;Fandom
+2;CatNap;Poppy Playtime: Chapter 3 - Deep Sleep;poppyplaytime;Antagoniste;importée;catnap;SR;Fandom
+3;Niko Bellic;Grand Theft Auto IV - GTA;gta;Principal;importée;niko-bellic;UR;Fandom
+4;Tommy Vercetti;Grand Theft Auto: Vice City - GTA;gta;Principal;importée;tommy-vercetti;UR;Fandom
+5;Franklin Clinton;Grand Theft Auto V - GTA;gta;Principal;importée;franklin-clinton;UR;Fandom
+6;Tifa Lockhart;Final Fantasy VII;;Principal;déjà présente sous « Tifa »;;;
+7;Isabella Torrisi;Mafia: The Old Country;mafia;Principal;importée;isabella-torrisi;R;Fandom
+8;Tidus;Final Fantasy X;ff10;Principal;importée;tidus;UR;Fandom
+9;Victor Gideon;Resident Evil 9 – Requiem;residentevil;Antagoniste;importée;victor-gideon;R;Fandom
+10;Prototype Expérience 1006;Poppy Playtime: Chapter 1 - A Tight Squeeze;poppyplaytime;Antagoniste;importée;prototype-experience-1006;R;Fandom
+11;Cloud Strife;Final Fantasy VII;;Principal;déjà présente;;;
+12;Grace Ashcroft;Resident Evil 9 – Requiem;residentevil;Principal;importée;grace-ashcroft;R;Fandom
+13;Enzo Favani;Mafia: The Old Country;mafia;Principal;importée;enzo-favani;R;dégradé + emoji
+14;Leon Scott Kennedy;Resident Evil 2;;Principal;déjà présent sous « Leon »;;;
+15;Huggy Wuggy;Poppy Playtime: Chapter 1 - A Tight Squeeze;poppyplaytime;Antagoniste;importée;huggy-wuggy;UR;Fandom
+16;Gustave;Clair Obscur: Expedition 33;clair-obscur;Principal;importée;gustave;R;Fandom
+17;Mommy Long Legs;Poppy Playtime: Chapter 2 - Fly in a Web;poppyplaytime;Antagoniste;importée;mommy-long-legs;SR;Fandom
+18;Luca Trapani;Mafia: The Old Country;mafia;Principal;importée;luca-trapani;R;Fandom
+19;Jimmy De Santa;Grand Theft Auto V - GTA;gta;Secondaire;importée;jimmy-de-santa;R;Fandom
+20;Melvin Harris;Grand Theft Auto: San Andreas - GTA;gta;Antagoniste;importée;melvin-harris;R;Fandom
+21;Auron;Final Fantasy X;ff10;Principal;importée;auron;UR;Fandom
+22;Barret Wallace;Final Fantasy VII;ff7;Principal;importée;barret-wallace;SR;Fandom
+23;Roman Bellic;Grand Theft Auto IV - GTA;gta;Secondaire;importée;roman-bellic;R;Fandom
+24;Lucia Caminos;Grand Theft Auto VI GTA VI;gta;Principal;importée;lucia-caminos;R;Fandom
+25;Jason Duval;Grand Theft Auto VI GTA VI;gta;Principal;importée;jason-duval;R;Fandom
+26;Boobie Ike;Grand Theft Auto VI GTA VI;gta;Secondaire;importée;boobie-ike;R;Fandom
+27;Renoir;Clair Obscur: Expedition 33;clair-obscur;Principal;importée;renoir;R;Fandom
+28;Kissy Missy;Poppy Playtime: Chapter 1 - A Tight Squeeze;poppyplaytime;Principal;importée;kissy-missy;SR;Fandom
+29;Aerith Gainsborough;Final Fantasy VII;;Principal;déjà présente sous « Aerith »;;;
+30;Fox McCloud;Starwing;starfox;Principal;importée;fox-mccloud;L;Fandom
+31;Emily;Resident Evil 9 – Requiem;residentevil;Secondaire;importée;emily;R;Fandom
+32;Michael De Santa;Grand Theft Auto V - GTA;gta;Principal;importée;michael-de-santa;UR;Fandom
+33;Kliff Macduff;Crimson Desert;crimson-desert;Principal;importée;kliff-macduff;R;Fandom
+34;Nightmare (anciennement Siegfried);Soul Edge;soulcalibur;Principal;importée;nightmare;UR;Fandom
+35;Damiane;Crimson Desert;crimson-desert;Principal;importée;damiane;R;Fandom
+36;Yarnaby;Poppy Playtime: Chapter 4 - Safe Haven;poppyplaytime;Antagoniste;importée;yarnaby;R;Fandom
+37;Astaroth;SoulCalibur;soulcalibur;Principal;importée;astaroth;SR;Fandom
+38;Voldo;Soul Edge;soulcalibur;Principal;importée;voldo;SR;Fandom
+39;Rufus Shinra;Final Fantasy VII;ff7;Antagoniste;importée;rufus-shinra;SR;Fandom
+40;Chris Redfield;Resident Evil;residentevil;Principal;importée;chris-redfield;UR;Fandom
+41;Raul Bautista;Grand Theft Auto VI GTA VI;gta;Secondaire;importée;raul-bautista;R;Fandom
+42;Poppy Ludwig;Poppy Playtime: Chapter 1 - A Tight Squeeze;poppyplaytime;Principal;importée;poppy-ludwig;SR;Fandom
+43;Trevor Philips;Grand Theft Auto V - GTA;gta;Principal;importée;trevor-philips;UR;Fandom
+44;Miss Delight;Poppy Playtime: Chapter 3 - Deep Sleep;poppyplaytime;Antagoniste;importée;miss-delight;R;Fandom
+45;Reno;Final Fantasy VII;ff7;Antagoniste;importée;reno;SR;Fandom
+46;Heishiro Mitsurugi;Soul Edge;soulcalibur;Principal;importée;heishiro-mitsurugi;R;Fandom
+47;Jessie Rasberry;Final Fantasy VII;ff7;Secondaire;importée;jessie-rasberry;R;Fandom
+48;Boxy Boo;Poppy Playtime: Chapter 3 - Deep Sleep;poppyplaytime;Antagoniste;importée;boxy-boo;R;Fandom
+49;Yuna;Final Fantasy X;ff10;Principal;importée;yuna;UR;Fandom
+50;Claire Redfield;Resident Evil 2;residentevil;Principal;importée;claire-redfield;UR;Fandom
+51;Yuffie Kisaragi;Final Fantasy VII;ff7;Principal;importée;yuffie-kisaragi;SR;Fandom
+52;Siegfried Schtauffen;Soul Edge;soulcalibur;Principal;importée;siegfried-schtauffen;R;Fandom
+53;Cait Sith;Final Fantasy VII;ff7;Principal;importée;cait-sith;R;Fandom
+54;Meta Knight;Kirby's Adventure;;Secondaire;déjà présente;;;
+56;Link;The Legend of Zelda;;Principal;déjà présente;;;
+57;Max Caulfield;Life is Strange;lifeisstrange;Principal;importée;max-caulfield;SR;Fandom
+58;Ricardo Diaz;Grand Theft Auto: Vice City - GTA;gta;Antagoniste;importée;ricardo-diaz;R;Fandom
+59;Jénova;Final Fantasy VII;ff7;Antagoniste;importée;jenova;R;dégradé + emoji
+60;Princesse Zelda;The Legend of Zelda;;Principal;déjà présente sous « Zelda »;;;
+61;Bunzo Bunny;Poppy Playtime: Chapter 2 - Fly in a Web;poppyplaytime;Antagoniste;importée;bunzo-bunny;R;Fandom
+62;Seymour Guado;Final Fantasy X;ff10;Antagoniste;importée;seymour-guado;SR;Fandom
+63;Esquie;Clair Obscur: Expedition 33;clair-obscur;PNJ;importée;esquie;UC;Fandom
+64;Jill Valentine;Resident Evil;residentevil;Principal;importée;jill-valentine;L;Fandom
+65;Oongka;Crimson Desert;crimson-desert;Principal;importée;oongka;R;Fandom
+66;Seong Mi-na;Soul Edge;soulcalibur;Principal;importée;seong-mi-na;SR;Fandom
+67;Sephiroth;Final Fantasy VII;;Antagoniste;déjà présente;;;
+68;Sophie;Clair Obscur: Expedition 33;clair-obscur;Secondaire;importée;sophie;R;Fandom
+69;Samus Aran;Metroid;;Principal;déjà présente;;;
+70;Maëlle;Clair Obscur: Expedition 33;clair-obscur;Principal;importée;maelle;R;Fandom
+71;Kirby;Kirby's Dream Land;;Principal;déjà présente;;;
+72;Little Jacob;Grand Theft Auto IV - GTA;gta;Secondaire;importée;little-jacob;R;Fandom
+73;King Dedede;Kirby's Dream Land;;Antagoniste;déjà présente sous « Roi Dadidou »;;;
+74;Lance Vance;Grand Theft Auto Vice City Stories - GTA;gta;Secondaire;importée;lance-vance;R;Fandom
+75;Revali;The Legend of Zelda: Breath of the Wild;zelda;Secondaire;importée;revali;SR;Fandom
+76;Dave Norton;Grand Theft Auto V - GTA;gta;Secondaire;importée;dave-norton;R;Fandom
+77;Ken Rosenberg;Grand Theft Auto: Vice City - GTA;gta;Secondaire;importée;ken-rosenberg;R;Fandom
+78;Zeno;Resident Evil 9 – Requiem;residentevil;Antagoniste;importée;zeno;R;Fandom
+79;Chloe Price;Life is Strange;lifeisstrange;Principal;importée;chloe-price;SR;Fandom
+80;Mother Brain;Metroid;metroid;Antagoniste;importée;mother-brain;SR;Fandom
+81;Doey the Doughman;Poppy Playtime: Chapter 4 - Safe Haven;poppyplaytime;Principal;importée;doey-the-doughman;R;Fandom
+82;Zack Fair;Crisis Core Final Fantasy VII;ff7;Principal;importée;zack-fair;SR;Fandom
+83;Solid Snake;Metal Gear Solid;metalgear;Principal;importée;solid-snake;L;Fandom
+84;Beate;Final Fantasy IX;ff9;Secondaire;importée;beate;R;Fandom
+85;Elena;Final Fantasy VII;ff7;Antagoniste;importée;elena;R;Fandom
+86;Valentin Voda;Code Vein 2;codevein;Secondaire;importée;valentin-voda;R;dégradé + emoji
+87;Lance Wilson;Grand Theft Auto: San Andreas - GTA;gta;Antagoniste;importée;lance-wilson;R;Fandom
+88;Josée Anjou;Code Vein 2;codevein;Secondaire;importée;josee-anjou;R;dégradé + emoji
+89;Nathan Prescott;Life is Strange;lifeisstrange;Antagoniste;importée;nathan-prescott;R;Fandom
+90;Cid Highwind;Final Fantasy VII;ff7;Principal;importée;cid-highwind;R;Fandom
+91;Wakka;Final Fantasy X;ff10;Principal;importée;wakka;SR;Fandom
+92;Sonny Forelli;Grand Theft Auto: Vice City - GTA;gta;Antagoniste;importée;sonny-forelli;R;Fandom
+93;Kweena Quen;Final Fantasy IX;ff9;Principal;importée;kweena-quen;R;Fandom
+94;Terra Branford;Final Fantasy VI;ff6;Principal;importée;terra-branford;SR;Fandom
+95;Ada Wong;Resident Evil 2;residentevil;Secondaire;importée;ada-wong;UR;Fandom
+96;Lulu;Final Fantasy X;ff10;Principal;importée;lulu;SR;Fandom
+97;Falco Lombardi;Starwing;starfox;Principal;importée;falco-lombardi;R;Fandom
+98;Lune;Clair Obscur: Expedition 33;clair-obscur;Principal;importée;lune;R;Fandom
+99;Alyssa Ashcroft;Resident Evil: Outbreak;residentevil;Secondaire;importée;alyssa-ashcroft;UC;Fandom
+100;Vincent Valentine;Final Fantasy VII;ff7;Principal;importée;vincent-valentine;SR;Fandom
+101;Jeffrey Cross;Grand Theft Auto: San Andreas - GTA;gta;Secondaire;importée;jeffrey-cross;UC;Fandom
+102;Myles MacKenzie;Metroid Prime 4: Beyond;metroid;Secondaire;importée;myles-mackenzie;UC;Fandom
+103;Kuja;Final Fantasy IX;ff9;Antagoniste;importée;kuja;UR;Fandom
+104;Kimahri Ronso;Final Fantasy X;ff10;Principal;importée;kimahri-ronso;SR;Fandom
+105;Geralt de Riv;The Witcher;;Principal;déjà présente;;;
+106;Krystal;Star Fox Adventures;starfox;Principal;importée;krystal;R;Fandom
+107;Dre’Quan Priest;Grand Theft Auto VI GTA VI;gta;Secondaire;importée;dre-quan-priest;UC;Fandom
+108;Kilik;SoulCalibur;soulcalibur;Principal;importée;kilik;SR;Fandom
+109;Sergent Duke;Metroid Prime 4: Beyond;metroid;Secondaire;importée;sergent-duke;UC;Fandom
+110;Ganondorf;The Legend of Zelda;;Antagoniste;déjà présente;;;
+111;Micah Bell;Red Dead Redemption 2;reddead;Antagoniste;importée;micah-bell;SR;Fandom
+112;Biggs;Final Fantasy VII;ff7;Secondaire;importée;biggs;UC;Fandom
+113;Tseng;Final Fantasy VII;ff7;Antagoniste;importée;tseng;R;Fandom
+114;Ryo Hazuki;Shenmue;shenmue;Principal;importée;ryo-hazuki;SR;Fandom
+115;Sean Diaz;Life is Strange 2;lifeisstrange;Principal;importée;sean-diaz;R;Fandom
+116;Kent Paul;Grand Theft Auto: Vice City - GTA;gta;Secondaire;importée;kent-paul;UC;Fandom
+117;Wedge;Final Fantasy VII;ff7;Secondaire;importée;wedge;UC;Fandom
+118;Jecht;Final Fantasy X;ff10;Secondaire;importée;jecht;SR;Fandom
+119;HUNK;Resident Evil 2;residentevil;Antagoniste;importée;hunk;R;Fandom
+120;Nanaki Rouge XIII (Red XIII);Final Fantasy VII;ff7;Principal;importée;red-xiii;SR;Fandom
+121;Piers Nivans;Resident Evil 6;residentevil;Principal;importée;piers-nivans;R;Fandom
+122;Rude;Final Fantasy VII;ff7;Antagoniste;importée;rude;R;Fandom
+123;Shenhua Ling;Shenmue II;shenmue;Secondaire;importée;shenhua-ling;UC;Fandom
+124;Braska;Final Fantasy X;ff10;Secondaire;importée;braska;UC;Fandom
+125;Duke Nukem;Duke Nukem;dukenukem;Principal;importée;duke-nukem;SR;Fandom
+126;Playboy X;Grand Theft Auto IV - GTA;gta;Secondaire;importée;playboy-x;UC;Fandom
+127;Lavinia Voda;Code Vein 2;codevein;Secondaire;importée;lavinia-voda;UC;dégradé + emoji
+128;The Paintress;Clair Obscur: Expedition 33;clair-obscur;Antagoniste;importée;the-paintress;UC;Fandom
+129;Claude;Grand Theft Auto III GTA;gta;Principal;importée;claude;R;Fandom
+130;Belgemine;Final Fantasy X;ff10;PNJ;importée;belgemine;UC;Fandom
+131;Jimmy Pegorino;Grand Theft Auto IV - GTA;gta;Antagoniste;importée;jimmy-pegorino;UC;Fandom
+132;Maître Mika;Final Fantasy X;ff10;PNJ;importée;maitre-mika;UC;Fandom
+133;Steiner Adelbert;Final Fantasy IX;ff9;Principal;importée;steiner-adelbert;SR;Fandom
+134;Mark Jefferson;Life is Strange;lifeisstrange;Antagoniste;importée;mark-jefferson;UC;Fandom
+135;Naked Snake / Big Boss;Metal Gear Solid;metalgear;Antagoniste;importée;big-boss;UR;Fandom
+136;Dimitri Rascalov;Grand Theft Auto IV - GTA;gta;Antagoniste;importée;dimitri-rascalov;UC;Fandom
+137;Mog;Final Fantasy VI;ff6;Principal;importée;mog;R;dégradé + emoji
+138;Nozomi Harasaki;Shenmue;shenmue;Secondaire;importée;nozomi-harasaki;UC;Fandom
+139;Tanisha Jackson;Grand Theft Auto V - GTA;gta;Secondaire;importée;tanisha-jackson;UC;Fandom
+140;Freyja Crescent;Final Fantasy IX;ff9;Principal;importée;freyja-crescent;R;Fandom
+141;Ethan Winters;Resident Evil 7: Biohazard;residentevil;Principal;importée;ethan-winters;UC;Fandom
+142;Adamska (alias Revolver Ocelot);Metal Gear Solid;metalgear;Antagoniste;importée;revolver-ocelot;SR;Fandom
+143;Ridley;Metroid;;Antagoniste;déjà présente;;;
+144;Holly Asturias;Code Vein 2;codevein;Secondaire;importée;holly-asturias;UC;dégradé + emoji
+145;Wen Kinoc;Final Fantasy X;ff10;PNJ;importée;wen-kinoc;UC;Fandom
+146;Mipha;The Legend of Zelda: Breath of the Wild;zelda;Secondaire;importée;mipha;SR;Fandom
+147;8-Ball;Grand Theft Auto Advance;gta;Secondaire;importée;8-ball;UC;Fandom
+148;Kraid;Metroid;metroid;Antagoniste;importée;kraid;SR;Fandom
+149;Eiko Carol;Final Fantasy IX;ff9;Principal;importée;eiko-carol;SR;Fandom
+150;Locke Cole;Final Fantasy VI;ff6;Principal;importée;locke-cole;SR;Fandom
+151;Lester Crest;Grand Theft Auto V - GTA;gta;Secondaire;importée;lester-crest;UC;Fandom
+152;Slippy Toad;Starwing;starfox;Principal;importée;slippy-toad;UC;Fandom
+153;Verso;Clair Obscur: Expedition 33;clair-obscur;Principal;importée;verso;UC;Fandom
+154;Darko Brevic;Grand Theft Auto IV - GTA;gta;Antagoniste;importée;darko-brevic;UC;Fandom
+155;Cal Hampton;Grand Theft Auto VI GTA VI;gta;Secondaire;importée;cal-hampton;UC;Fandom
+156;Yunalesca;Final Fantasy X;ff10;PNJ;importée;yunalesca;UC;Fandom
+157;Mineru;The Legend of Zelda: Tears of the Kingdom;zelda;Secondaire;importée;mineru;UC;Fandom
+158;Tarask Coral;Final Fantasy IX;ff9;Principal;importée;tarask-coral;UC;Fandom
+159;Celes Chere;Final Fantasy VI;ff6;Principal;importée;celes-chere;SR;Fandom
+160;Professeur Hojo;Final Fantasy VII;ff7;Antagoniste;importée;professeur-hojo;UC;Fandom
+161;Dr. Hal Emmerich alias Otacon;Metal Gear Solid;metalgear;Secondaire;importée;otacon;SR;Fandom
+162;Amanda De Santa;Grand Theft Auto V - GTA;gta;Secondaire;importée;amanda-de-santa;UC;Fandom
+163;Peppy Hare;Starwing;starfox;Principal;importée;peppy-hare;UC;Fandom
+164;Sciel;Clair Obscur: Expedition 33;clair-obscur;Principal;importée;sciel;UC;Fandom
+165;Tokabi;Metroid Prime 4: Beyond;metroid;Secondaire;importée;tokabi;UC;Fandom
+166;Bandana Waddle Dee;Kirby Super Star Ultra;kirby;Secondaire;importée;bandana-waddle-dee;UC;dégradé + emoji
+167;Billy Coen;Resident Evil Zero;residentevil;Principal;importée;billy-coen;UC;Fandom
+168;Isabella (Ivy) Valentine;SoulCalibur;soulcalibur;Principal;importée;ivy-valentine;UC;Fandom
+169;Tracy De Santa;Grand Theft Auto V - GTA;gta;PNJ;importée;tracy-de-santa;UC;Fandom
+170;Juzo Mido;Code Vein;codevein;Antagoniste;importée;juzo-mido;UC;dégradé + emoji
+171;Kefka Palazzo;Final Fantasy VI;ff6;Antagoniste;importée;kefka-palazzo;UR;Fandom
+172;Sylux;Metroid Prime 3 Corruption;metroid;Antagoniste;importée;sylux;UC;Fandom
+173;Safiya Llewellyn-Fayyad;Life is Strange: Double Exposure;lifeisstrange;Antagoniste;importée;safiya-llewellyn-fayyad;UC;Fandom
+174;Rikku;Final Fantasy X;ff10;Principal;importée;rikku;SR;Fandom
+175;Monoco;Clair Obscur: Expedition 33;clair-obscur;Principal;importée;monoco;UC;Fandom
+176;Yoshimitsu;Soul Edge;soulcalibur;Principal;importée;yoshimitsu;SR;Fandom
+177;The Player;Poppy Playtime: Chapter 1 - A Tight Squeeze;poppyplaytime;Principal;importée;the-player;UC;Fandom
+178;Josha;The Legend of Zelda: Tears of the Kingdom;zelda;Secondaire;importée;josha;UC;Fandom
+179;Yennefer de Vengerberg;The Witcher;;Principal;déjà présente sous « Yennefer »;;;
+180;Ultros;Final Fantasy VI;ff6;Antagoniste;importée;ultros;SR;Fandom
+181;Armstrong;Metroid Prime 4: Beyond;metroid;Secondaire;importée;armstrong;UC;Fandom
+182;Djidane Tribal;Final Fantasy IX;ff9;Principal;importée;djidane-tribal;SR;Fandom
+183;Louis Amamiya;Code Vein;codevein;Secondaire;importée;louis-amamiya;UC;Fandom
+184;Helena Harper;Resident Evil 6;residentevil;Principal;importée;helena-harper;UC;Fandom
+185;Lou MagMell;Code Vein 2;codevein;Secondaire;importée;lou-magmell;UC;dégradé + emoji
+186;Grenat Til Alexandros XVII;Final Fantasy IX;ff9;Principal;importée;grenat-til-alexandros-xvii;SR;Fandom
+187;Daniel Diaz;Life is Strange 2;lifeisstrange;Principal;importée;daniel-diaz;UC;Fandom
+188;Sean Johnson;Grand Theft Auto: San Andreas - GTA;gta;Antagoniste;importée;sean-johnson;UC;Fandom
+189;Teba;The Legend of Zelda: Breath of the Wild;zelda;Secondaire;importée;teba;UC;Fandom
+190;Floyd Hebert;Grand Theft Auto V - GTA;gta;Secondaire;importée;floyd-hebert;UC;Fandom
+191;Meve de Lyria;The Witcher;witcher;Principal;importée;meve-de-lyria;UC;Fandom
+192;Issun;Ōkami;gta;Principal;importée;issun;UC;Fandom
+193;John Marston;Red Dead Redemption;reddead;Principal;importée;john-marston;UR;Fandom
+194;Gary Smith;Bully (Canis Canem Edit);bully;Antagoniste;importée;gary-smith;SR;Fandom
+195;Sidon;The Legend of Zelda: Breath of the Wild;zelda;Secondaire;importée;sidon;SR;Fandom
+196;Bibi Orunitia;Final Fantasy IX;ff9;Principal;importée;bibi-orunitia;SR;Fandom
+197;Alexandra Chen;Life is Strange: True Colors;lifeisstrange;Principal;importée;alexandra-chen;UC;Fandom
+198;Myurdin;Crimson Desert;crimson-desert;Antagoniste;importée;myurdin;UC;Fandom
+199;Steve Haines;Grand Theft Auto V - GTA;gta;Antagoniste;importée;steve-haines;UC;Fandom
+200;Riju;The Legend of Zelda: Breath of the Wild;zelda;Secondaire;importée;riju;SR;Fandom
+201;Setzer Gabbiani;Final Fantasy VI;ff6;Principal;importée;setzer-gabbiani;SR;Fandom
+202;Joy;Shenmue II;shenmue;Secondaire;importée;joy;UC;Fandom
+203;Denise Clinton;Grand Theft Auto V - GTA;gta;Secondaire;importée;denise-clinton;UC;Fandom
+204;Dr. Proton;Duke Nukem;dukenukem;Antagoniste;importée;dr-proton;UC;Fandom
+205;Jaskier;The Witcher;witcher;Secondaire;importée;jaskier;UC;Fandom
+206;Jack Marston;Red Dead Redemption;reddead;Principal;importée;jack-marston;UC;Fandom
+207;Peter Kowalski;Bully (Canis Canem Edit);bully;Secondaire;importée;peter-kowalski;UC;dégradé + emoji
+208;Rauru;The Legend of Zelda Ocarina of Time;zelda;Secondaire;importée;rauru;UC;Fandom
+209;Split Horn;Crimson Desert;crimson-desert;Antagoniste;importée;split-horn;UC;Fandom
+210;Wei Cheng;Grand Theft Auto V - GTA;gta;Antagoniste;importée;wei-cheng;UC;Fandom
+211;Jerrin;The Legend of Zelda: Breath of the Wild;zelda;PNJ;importée;jerrin;C;Fandom
+213;Catalina;Grand Theft Auto III GTA;gta;Antagoniste;importée;catalina;UC;Fandom
+214;Cycloid Empero;Duke Nukem 3D;dukenukem;Antagoniste;importée;cycloid-empero;UC;Fandom
+215;Eredin Bréacc Glas;The Witcher;witcher;Antagoniste;importée;eredin-breacc-glas;UC;Fandom
+216;Ray Bulgarin;Grand Theft Auto IV - GTA;gta;Antagoniste;importée;ray-bulgarin;UC;Fandom
+217;Arthur Morgan;Red Dead Redemption 2;reddead;Principal;importée;arthur-morgan;L;Fandom
+218;Johnny Vincent;Bully (Canis Canem Edit);bully;Antagoniste;importée;johnny-vincent;UC;Fandom
+219;Sir Jyscal Guado;Final Fantasy X;ff10;PNJ;importée;sir-jyscal-guado;C;Fandom
+220;Sonia;The Legend of Zelda: Tears of the Kingdom;zelda;Secondaire;importée;sonia;UC;Fandom
+221;Naira;Crimson Desert;crimson-desert;Secondaire;importée;naira;UC;Fandom
+222;Frank Tenpenny;Grand Theft Auto: San Andreas - GTA;gta;Antagoniste;importée;frank-tenpenny;UC;Fandom
+223;Stretch;Grand Theft Auto V - GTA;gta;Antagoniste;importée;stretch;UC;dégradé + emoji
+224;Mazli;The Legend of Zelda: Breath of the Wild;zelda;PNJ;importée;mazli;C;Fandom
+225;Frank;Final Fantasy IX;ff9;Secondaire;importée;frank;UC;Fandom
+226;Miguel;Grand Theft Auto III GTA;gta;Secondaire;importée;miguel;UC;Fandom
+227;Strago Magus;Final Fantasy VI;ff6;Principal;importée;strago-magus;UC;Fandom
+228;Iwao Hazuki;Shenmue;shenmue;Secondaire;importée;iwao-hazuki;UC;Fandom
+229;Sophitia Alexandra;Soul Edge;soulcalibur;Principal;importée;sophitia-alexandra;SR;Fandom
+230;Chef;Grand Theft Auto V - GTA;gta;Secondaire;importée;chef;UC;Fandom
+231;Imlerith;The Witcher 3: Wild Hunt;witcher;Antagoniste;importée;imlerith;UC;Fandom
+232;Mikhail Faustin;Grand Theft Auto IV - GTA;gta;Antagoniste;importée;mikhail-faustin;UC;Fandom
+233;Bill Williamson;Red Dead Redemption;reddead;Antagoniste;importée;bill-williamson;UC;Fandom
+234;Lefty Mancini;Bully (Canis Canem Edit);bully;Secondaire;importée;lefty-mancini;C;Fandom
+235;Purah;The Legend of Zelda: Breath of the Wild;zelda;Secondaire;importée;purah;C;Fandom
+236;Damon Merrick;Life is Strange: Before the Storm;lifeisstrange;Antagoniste;importée;damon-merrick;UC;Fandom
+237;Cesar Vialpando;Grand Theft Auto: San Andreas - GTA;gta;Secondaire;importée;cesar-vialpando;C;Fandom
+238;Jack the Ripper Alias Raiden;Metal Gear Solid 2 Sons of Liberty;metalgear;Principal;importée;raiden;SR;Fandom
+239;Lamar Davis;Grand Theft Auto V - GTA;gta;Secondaire;importée;lamar-davis;C;Fandom
+240;Markus;Final Fantasy IX;ff9;Secondaire;importée;markus;C;Fandom
+241;Relm Arrowny;Final Fantasy VI;ff6;Principal;importée;relm-arrowny;UC;Fandom
+242;Xiuying Hong;Shenmue II;shenmue;Secondaire;importée;xiuying-hong;C;Fandom
+243;Taki;Soul Edge;soulcalibur;Principal;importée;taki;SR;Fandom
+244;Solomon Richards;Grand Theft Auto V - GTA;gta;Secondaire;importée;solomon-richards;C;Fandom
+245;Caranthir Ar-Feiniel;The Witcher 3: Wild Hunt;witcher;Antagoniste;importée;caranthir-ar-feiniel;UC;Fandom
+246;Vladimir Glebov;Grand Theft Auto IV - GTA;gta;Antagoniste;importée;vladimir-glebov;UC;Fandom
+247;Lyle McLeish;Code Vein 2;codevein;Secondaire;importée;lyle-mcleish;C;dégradé + emoji
+248;Dutch van der Linde;Red Dead Redemption;reddead;Antagoniste;importée;dutch-van-der-linde;UR;Fandom
+249;Lola Lombardi;Bully (Canis Canem Edit);bully;Secondaire;importée;lola-lombardi;C;Fandom
+250;Kelk Ronso;Final Fantasy X;ff10;PNJ;importée;kelk-ronso;C;Fandom
+251;Impa;The Legend of Zelda;zelda;Secondaire;importée;impa;SR;Fandom
+252;Hank Stamper;Life is Strange 2;lifeisstrange;Antagoniste;importée;hank-stamper;UC;Fandom
+253;Carlos Oliveira;Resident Evil 3: Nemesis;residentevil;Secondaire;importée;carlos-oliveira;C;Fandom
+254;Frank Jaeger Alias : Gray Fox, Ninja, Null (dans Portable Ops);Metal Gear Solid;metalgear;Antagoniste;importée;gray-fox;SR;Fandom
+255;Cid Fabul IX;Final Fantasy IX;ff9;Secondaire;importée;cid-fabul-ix;C;Fandom
+256;Mallorie Bardas;Grand Theft Auto IV - GTA;gta;Secondaire;importée;mallorie-bardas;C;Fandom
+257;Luigi Goterelli;Grand Theft Auto III GTA;gta;Secondaire;importée;luigi-goterelli;C;Fandom
+258;Umaro;Final Fantasy VI;ff6;Principal;importée;umaro;UC;Fandom
+259;Guizhang Chen;Shenmue;shenmue;Secondaire;importée;guizhang-chen;C;Fandom
+260;Raphael Sorel;SoulCalibur II;soulcalibur;Principal;importée;raphael-sorel;UC;Fandom
+261;Letho de Guleta;The Witcher 2: Assassins of Kings;witcher;Antagoniste;importée;letho-de-guleta;UC;Fandom
+262;Zenon Gryfgote;Code Vein 2;codevein;Secondaire;importée;zenon-gryfgote;C;dégradé + emoji
+263;Nathan Dempsy;Resident Evil 9 – Requiem;residentevil;PNJ;importée;nathan-dempsy;C;Fandom
+264;Javier Escuella;Red Dead Redemption;reddead;Antagoniste;importée;javier-escuella;UC;Fandom
+265;Derby Harrington;Bully (Canis Canem Edit);bully;Antagoniste;importée;derby-harrington;UC;Fandom
+266;Lisbeth Fischer;Life is Strange 2;lifeisstrange;Antagoniste;importée;lisbeth-fischer;UC;Fandom
+267;Rebecca Chambers;Resident Evil;residentevil;Secondaire;importée;rebecca-chambers;C;Fandom
+268;Urbosa;The Legend of Zelda: Breath of the Wild;zelda;Secondaire;importée;urbosa;SR;Fandom
+269;Patrick McReary;Grand Theft Auto IV - GTA;gta;Secondaire;importée;patrick-mcreary;C;Fandom
+270;Joey Leone;Grand Theft Auto III GTA;gta;Secondaire;importée;joey-leone;C;Fandom
+271;Gogo;Final Fantasy VI;ff6;Principal;importée;gogo;UC;Fandom
+272;Chai;Shenmue;shenmue;Antagoniste;importée;chai;C;Fandom
+273;Jacques de Aldersberg;The Witcher;witcher;Antagoniste;importée;jacques-de-aldersberg;C;Fandom
+274;Noah G. MagMell;Code Vein 2;codevein;Secondaire;importée;noah-g-magmell;C;dégradé + emoji
+275;Edgar Ross;Red Dead Redemption;reddead;Antagoniste;importée;edgar-ross;C;Fandom
+277;Zaon;Final Fantasy X;ff10;PNJ;importée;zaon;C;Fandom
+278;Yunobo;The Legend of Zelda: Breath of the Wild;zelda;Secondaire;importée;yunobo;C;Fandom
+279;Dr Harley Sawyer;Poppy Playtime: Chapter 4 - Safe Haven;poppyplaytime;Antagoniste;importée;dr-harley-sawyer;C;Fandom
+280;Jedediah Lucan;Life is Strange: True Colors;lifeisstrange;Antagoniste;importée;jedediah-lucan;C;Fandom
+281;Edgar Roni Figaro;Final Fantasy VI;ff6;Principal;importée;edgar-roni-figaro;SR;Fandom
+282;Daruk;The Legend of Zelda: Breath of the Wild;zelda;Secondaire;importée;daruk;SR;Fandom
+283;Brucie Kibbutz;Grand Theft Auto IV - GTA;gta;Secondaire;importée;brucie-kibbutz;C;Fandom
+284;Bubsy Bobcat;Bubsy in: Fractured Furry Tales;bubsy;Principal;importée;bubsy-bobcat;C;Fandom
+285;Chai Xianghua;SoulCalibur;soulcalibur;Principal;importée;chai-xianghua;SR;Fandom
+286;Marx;Kirby's Fun Pak;kirby;Antagoniste;importée;marx;C;Fandom
+287;Azar Javed;The Witcher;witcher;Antagoniste;importée;azar-javed;C;Fandom
+288;Iris MagMell;Code Vein 2;codevein;Secondaire;importée;iris-magmell;C;dégradé + emoji
+289;Juan García Cortez;Grand Theft Auto: Vice City - GTA;gta;Secondaire;importée;juan-garcia-cortez;C;Fandom
+290;Agustín Allende;Red Dead Redemption;reddead;Antagoniste;importée;agustin-allende;C;Fandom
+291;Ted Thompson;Bully (Canis Canem Edit);bully;Antagoniste;importée;ted-thompson;C;Fandom
+292;Robbie;The Legend of Zelda: Breath of the Wild;zelda;Secondaire;importée;robbie;C;Fandom
+293;Branet Raza Alexandros XVI;Final Fantasy IX;ff9;Antagoniste;importée;branet-raza-alexandros-xvi;C;Fandom
+294;Sabin Rene Figaro;Final Fantasy VI;ff6;Principal;importée;sabin-rene-figaro;SR;Fandom
+295;Sheva Alomar;Resident Evil 5;residentevil;Principal;importée;sheva-alomar;C;Fandom
+296;Corrado Bastoni;Mafia: The Old Country;mafia;Antagoniste;importée;corrado-bastoni;C;Fandom
+297;Tatl;The Legend of Zelda: Majora’s Mask;zelda;Secondaire;importée;tatl;C;Fandom
+298;Ciri;The Witcher;;Principal;déjà présente;;;
+299;Dwayne Forge;Grand Theft Auto IV - GTA;gta;Secondaire;importée;dwayne-forge;C;Fandom
+300;Cruz Silva;Code Vein;codevein;Antagoniste;importée;cruz-silva;C;dégradé + emoji
+301;Gestahl;Final Fantasy VI;ff6;Antagoniste;importée;gestahl;C;Fandom
+302;Dona;Final Fantasy X;ff10;Secondaire;importée;dona;C;Fandom
+303;Terry Bobcat;Bubsy II;bubsy;Secondaire;importée;terry-bobcat;C;dégradé + emoji (visuel commun aux jumeaux retiré)
+304;Magolor;Kirby's Adventure Wii;kirby;Antagoniste;importée;magolor;C;Fandom
+305;Rachel Amber;Life is Strange: Before the Storm;lifeisstrange;Secondaire;importée;rachel-amber;C;Fandom
+306;Jadwiga;Code Vein 2;codevein;PNJ;importée;jadwiga;C;dégradé + emoji
+307;Avery Carrington;Grand Theft Auto: Vice City - GTA;gta;Secondaire;importée;avery-carrington;C;Fandom
+308;Pile et Face;Final Fantasy IX;ff9;Antagoniste;importée;pile-et-face;C;Fandom
+309;PJ Pug-a-Pillar;Poppy Playtime: Chapter 2 - Fly in a Web;poppyplaytime;Antagoniste;importée;pj-pug-a-pillar;C;Fandom
+310;Yasmin Fayyad;Life is Strange: Double Exposure;lifeisstrange;Antagoniste;importée;yasmin-fayyad;C;Fandom
+311;Shadow;Final Fantasy VI;ff6;Principal;importée;shadow-2;C;Fandom
+312;Jake Muller;Resident Evil 6;residentevil;Principal;importée;jake-muller;C;Fandom
+313;Maxi;SoulCalibur;soulcalibur;Principal;importée;maxi;C;Fandom
+314;Ron Jakowski;Grand Theft Auto V - GTA;gta;Secondaire;importée;ron-jakowski;C;Fandom
+315;Skull Kid;The Legend of Zelda Ocarina of Time;zelda;Antagoniste;importée;skull-kid;C;Fandom
+316;Karen Daniels;Grand Theft Auto IV - GTA;gta;Secondaire;importée;karen-daniels;C;Fandom
+317;Gregorio Silva;Code Vein;codevein;Antagoniste;importée;gregorio-silva;C;Fandom
+318;Terri Bobcat;Bubsy II;bubsy;Secondaire;importée;terri-bobcat;C;dégradé + emoji (visuel commun aux jumeaux retiré)
+319;Natsu;SoulCalibur V;soulcalibur;Principal;importée;natsu;C;Fandom
+320;Midna;The Legend of Zelda: Twilight Princess;zelda;Secondaire;importée;midna;C;Fandom
+321;Sherry Birkin;Resident Evil 2;residentevil;Secondaire;importée;sherry-birkin;C;Fandom
+322;Brian Heder;Grand Theft Auto VI GTA VI;gta;Secondaire;importée;brian-heder;C;Fandom
+323;Paya;The Legend of Zelda: Breath of the Wild;zelda;Secondaire;importée;paya;C;Fandom
+324;Garland;Final Fantasy IX;ff9;Antagoniste;importée;garland;C;Fandom
+325;Lucas Colmenero;Life is Strange: True Colors;lifeisstrange;Antagoniste;importée;lucas-colmenero;C;Fandom
+326;Cyan Garamonde;Final Fantasy VI;ff6;Principal;importée;cyan-garamonde;C;Fandom
+327;Longsun Zhao (alias Lan Di);Shenmue;shenmue;Antagoniste;importée;longsun-zhao;C;Fandom
+328;Wade Hebert;Grand Theft Auto V - GTA;gta;Secondaire;importée;wade-hebert;C;Fandom
+329;Vaati;The Legend of Zelda: The Minish Cap;zelda;Antagoniste;importée;vaati;C;Fandom
+330;Triss Merigold de Maribor;The Witcher;witcher;Principal;importée;triss-merigold-de-maribor;C;Fandom
+331;Bernie Crane;Grand Theft Auto IV - GTA;gta;Secondaire;importée;bernie-crane;C;Fandom
+332;Amaterasu Ōkami;Ōkami;gta;Principal;importée;amaterasu-okami;C;Fandom
+333;Curator;Clair Obscur: Expedition 33;clair-obscur;PNJ;importée;curator;C;Fandom
+334;Oinker P. Hamm;Bubsy II;bubsy;Antagoniste;importée;oinker-p-hamm;C;Fandom
+335;James Hopkins;Bully (Canis Canem Edit);bully;Principal;importée;james-hopkins;C;dégradé + emoji
+336;VUE 995;Metroid Prime 4: Beyond;metroid;Secondaire;importée;vue-995;C;Fandom
+337;Tulin;The Legend of Zelda: Breath of the Wild;zelda;Secondaire;importée;tulin;C;Fandom
+338;Devin Weston;Grand Theft Auto V - GTA;gta;Antagoniste;importée;devin-weston;C;Fandom
+339;Nécron;Final Fantasy IX;ff9;Antagoniste;importée;necron;C;Fandom
+340;Ryan Lucan;Life is Strange: True Colors;lifeisstrange;Secondaire;importée;ryan-lucan;C;Fandom
+341;Gau;Final Fantasy VI;ff6;Principal;importée;gau;C;Fandom

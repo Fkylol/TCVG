@@ -1,21 +1,20 @@
 # TCVG — état des lieux et reste à faire
 
-_Mis à jour le 23 octobre 2026._
+_Mis à jour le 24 octobre 2026._
 
 ## Où en est le site
 
-- Production : <https://tcvg.fkylol.workers.dev> — version déployée `69a52339` (marché + visuels de boosters).
-- En local, non déployé : révélation des boosters carte par carte et visuels recadrés sur le sachet.
-- Base : projet Supabase `jvmozjfibkbkzzpafoos`, migrations `002` à `011` appliquées.
-- Code : `tsc` propre, `lint` propre, `npm test` 9/9, `npm run build` OK.
+- Production : <https://tcvg.fun> — version déployée `7226c860` (classement au score de collection).
+- Base : projet Supabase `jvmozjfibkbkzzpafoos`, migrations `002` à `030` appliquées.
+- Code : `tsc` propre, `lint` propre, `npm test` 175/175, `npm run cf:build` OK.
 
 ### Étapes livrées
 
 | Étape | État | Détail |
 |---|---|---|
 | 1 · Franchises et genres | fait | 32 franchises, 10 genres, 96 liaisons, `cards.franchise_id` NOT NULL |
-| 2 · Pixels | fait | Solde dans l'en-tête, bonus quotidien de **10 Pixels / 24 h**, registre `pixel_transactions` |
-| 3 · Boosters payants | fait | Mix 20 P · 5 cartes, 3 boosters de genre à 30 P, pity 10 / 50, holo 2 % |
+| 2 · Pixels | fait | Solde dans l'en-tête, bonus quotidien de **10 Pixels / 24 h** annoncé par une barre au crédit, registre `pixel_transactions` |
+| 3 · Boosters payants | fait | Mix 20 P · 5 cartes, 3 boosters de genre à 30 P, holo 2 % ; pas de pity (voir E) |
 | 4 · Recyclage des doublons | fait | `recycle_card` / `recycle_all_duplicates`, boutons collection + fiche carte, 21/21 vérifications en base |
 | 5 · Marché entre joueurs | fait | Annonces normales et holos, achat atomique, commission 5 %, bornes dynamiques, `/marche` + vente depuis la fiche carte |
 | Connexion Discord | fait | Discord seul : plus de formulaire email, `/login` et `/signup` limités à l'OAuth |
@@ -24,7 +23,13 @@ _Mis à jour le 23 octobre 2026._
 | Visuels des boosters | fait | 11 visuels recadrés sur le sachet (520 × 760) dans `public/booster/`, Mix en pack vitrine, un visuel par thème dans la boutique |
 | Ouverture carte par carte | fait | Dos de carte (`dos-carte.jpg`) dont la lueur change de couleur et d'intensité selon la rareté, retournement au clic, récapitulatif ; boosters gratuits et payants |
 | Avis et bugs par email | fait | Message enregistré dans `public.feedback`, puis notification Resend (`src/lib/email.ts`). Clé dans `.env` en local, secret Cloudflare en production ; destinataire à régler avec `FEEDBACK_EMAIL_TO` |
-| Puissance, aura et qualité | fait | Barème central `STAT_BANDS` + coefficient 0–1 par carte dans `src/lib/stats.ts`, qualité 60/40 (Standard → Relique), affichage fiche + vignette, score de collection sur `/profil`, section dans `/regles`, 9 tests |
+| Puissance, aura et qualité | fait | Barème central `STAT_BANDS` + coefficient 0–1 par carte dans `src/lib/stats.ts`, qualité 60/40 (Standard → Relique), affichage fiche + vignette, score de collection sur `/profil`, section dans `/regles` |
+| Classement au score | fait | `leaderboard()` additionne `cards.quality`, synchronisée par `npm run db:cards` ; égalités départagées par personnages puis total ; cadres verrouillés avec jauge de progression |
+| Univers MMO | fait | 24 personnages (WoW, FF XIV, Dofus, Guild Wars 2), genre `mmo`, 12ᵉ booster et ses visuels ; visuels récupérés sur Wikipédia, les wikis Fandom et l'Internet Archive pour Guild Wars 2 |
+| Échanges carte contre carte | code fait, migration à appliquer | `033_echanges.sql` : `chat_offers` + séquestre (même mécanique que le marché), acceptation atomique, contre-proposition, expiration 24 h, `trades_swaps` immuable, notifications et message privé Discord (bot du jeu) ; `/agora/offres`, bouton dans le fil et annonce depuis la fiche d'une carte |
+| Identité visuelle | code fait, à déployer | Noir mat, un seul accent lime, filets d'un pixel, titres en sans serrée sans capitales, boutons et onglets en casse normale ; cyan, halos, biseaux, trame de fond et cartes inclinées retirés. Les visuels de cartes et les posters de boosters ne changent pas |
+| Durcissement sécurité | code fait, migration à appliquer | `034_durcissement_privileges.sql` : plus d'insertion directe dans `profiles`, `collection` en lecture seule pour `anon`/`authenticated`, fonctions internes du tirage retirées de l'API publique ; en-têtes de sécurité dans `next.config.ts` |
+| Grille des boosters | code fait, migration à appliquer | `035_packs_toujours_disponibles.sql` : les douze packs sont ouvrables en permanence, `open_pack()` rend l'ouverture directe au tirage et les fonctions de sélection quotidienne sont supprimées. `/boosters` montre les douze posters (2/3/4 colonnes), une seule sélection, tiroir mobile ; un pack sous le seuil reste visible, grisé et non ouvrable |
 
 ### Choses à faire côté tableaux de bord (pas dans le code)
 
@@ -53,8 +58,8 @@ Migration `supabase/migrations/011_marche.sql` appliquée et testée le 23 octob
 
 ### B. Suite des stats
 
-- **Classement** : `/classement` classe encore par nombre de cartes uniques. Passer au score de collection demande une migration (fonction `leaderboard` avec la somme des qualités).
-- **Cadres** : les paliers actuels (10 / 25 cartes, une Légendaire, une Mythique) doivent être remplacés par des conditions multiples, avec le score de collection et la progression affichée.
+- **Classement** : fait — `leaderboard()` classe par score de collection (somme des qualités), puis par personnages uniques et total de cartes. La migration `030` ajoute `cards.quality` ; `npm run db:cards` la remplit (une carte active sans qualité fait échouer la synchro).
+- **Cadres** : la jauge de progression est affichée pour chaque cadre verrouillé. Les conditions restent les paliers actuels (10 / 25 personnages, une Légendaire, une Mythique) ; les remplacer par des conditions multiples au score reste à décider.
 - **Duel** : `duelScore()` est figé dans `src/lib/stats.ts` (70 % puissance, 30 % aura), aucun mode de combat ne l'utilise encore.
 - Le coefficient d'une carte se règle dans `CARD_COEFFICIENTS` ; un ajout de carte sans coefficient retombe à 0,5 et fait échouer le test de couverture.
 
@@ -65,20 +70,39 @@ Migration `supabase/migrations/011_marche.sql` appliquée et testée le 23 octob
 - `FEEDBACK_EMAIL_FROM` permettra plus tard d'envoyer depuis un domaine vérifié.
 - Testé : clé valide (aucun domaine vérifié), envoi Resend 200 et `sendFeedbackEmail()` à `true`.
 
-### D. À déployer
+### D. Déploiement
 
-- `npm run build` passe, aucune migration nécessaire : cette livraison ne touche que l'interface (révélation et visuels).
-- Ajouter l'entrée de changelog « Ouverture carte par carte » au moment de la mise en ligne, pas avant.
-- Vérifié sur le serveur de dev avec une session réelle : ouverture gratuite et achat du Mix, dos de carte, lueur des 5 raretés, retournement, carte suivante, récapitulatif.
+- Ordre : `npm run db:migrate <fichier>` puis `npm run db:cards` si le catalogue change, puis `npm run cf:build && npm run cf:deploy`.
+- Vérifié en production : `/classement` en 200 avec les scores, `/nouveautes` à jour, `/profil` protégé (307 sans session).
 
 ### E. Points mineurs laissés de côté
 
-- Les holos ne sont visibles que dans la révélation d'achat et par un `✦n` dans la collection (pas sur la fiche de la carte).
-- Pas de compteur de pity affiché à l'acheteur (la garantie existe en base, elle n'est pas montrée).
-- Le bonus quotidien est réclamé automatiquement mais rien ne l'annonce visuellement.
-- `open_boosters()` (boosters gratuits) reçoit encore les cartes du client ; `buy_booster()` ne fait plus confiance au client. À aligner plus tard.
-- Le marché n'a ni expiration d'annonce ni édition de prix ; les holos se vendent dans le même formulaire que les normales. `/nouveautes` est à jour pour les étapes 2, 3 et 5.
+- **Pity retiré** : `pity_rare` / `pity_legendary` (migration 009) ne sont plus alimentés depuis la 014 — `open_pack()` tire uniquement selon les taux de rareté. L'entrée du changelog du 23 octobre qui annonçait « une garantie toutes les 10 / 50 ouvertures » a été corrigée, et `/boosters` n'affiche pas la tuile « R+ » tant que `GUARANTEE_ENABLED` (`src/lib/packs.ts`) reste à `false`. Réintroduire la garantie demande une migration qui la calcule dans `open_pack()` par joueur et par pack, expose le compteur dans `pack_stats()`, puis le passage du drapeau à `true`.
 - Les prix dynamiques restent plafonnés par la rareté : une carte SR ne peut pas dépasser 250 P, même si ses ventes montent.
+
+### F. Sécurité (audit du 24 octobre 2026)
+
+**Vérifié, rien à corriger** : RLS active sur toutes les tables ; toute écriture de Pixels, de collection, d'annonce ou d'échange passe par une fonction `security definer` avec `search_path = ''` qui revérifie le propriétaire ; la clé `service_role` n'apparaît que côté serveur (`lookupUserEmail`, jamais dans un composant client) ; la session est validée par `auth.getUser()` ; aucun `dangerouslySetInnerHTML`, `eval` ni URL utilisateur dans un `href` ; le chat nettoie et filtre en base (300 caractères, liens refusés, 3 s entre deux messages, 20/min, anti-flood) ; le marché, les envies, les offres et les annonces ont leurs bornes en base, pas seulement dans l'interface ; `next` de `/auth/confirm` est ramené à une origine unique.
+
+**Corrigé** :
+
+- En-têtes `X-Content-Type-Options`, `X-Frame-Options: DENY`, `Referrer-Policy`, `Permissions-Policy`, `Strict-Transport-Security`, et `X-Powered-By` retiré (`next.config.ts`). Vérifié avec `npm run build`, `next start` puis `curl -I` sur `/`, `/login` et `/api/packs`.
+- `034_durcissement_privileges.sql` (à appliquer) : `profiles` n'accepte plus d'insertion directe — la policy ne contrôlait que l'identifiant, donc un joueur dont la ligne manquait pouvait s'écrire `is_admin = true` et le solde de son choix ; `collection` repasse en lecture seule (TRUNCATE n'est pas couvert par RLS) ; `_store_cards`, `_draw_cards`, `_pick_card`, `random_unit` et `roll_rarity` ne sont plus exécutables avec la clé publique. Cause générale : Supabase accorde `EXECUTE`/`ALL` à `anon` et `authenticated` à chaque objet créé, et `revoke ... from public` ne retire pas ces attributions nominatives.
+
+**Reste ouvert** :
+
+- **Limitation de débit absente sur `/avis-et-bugs`** : `sendFeedback` est une Server Action ouverte aux visiteurs, sans compte ; chaque envoi déclenche un e-mail Resend. L'insertion directe dans `feedback` reste possible avec la clé anon. La limite doit être au bord (règle Cloudflare Rate limiting sur les POST, ou Turnstile).
+- **Pas de `Content-Security-Policy`** : les cinq autres en-têtes sont en place. Une CSP doit être testée dans un navigateur (Realtime Supabase, images Wikipédia/Fandom, styles inline de React) avant d'être activée.
+- **`redirectTo` OAuth déduit de l'en-tête `Host`** (`signInWithDiscord`) : Supabase compare l'URL à son allow-list, donc pas d'exploitation directe, mais l'origine devrait venir de `NEXT_PUBLIC_SITE_URL`. À changer en même temps que la vérification de l'allow-list Supabase, sinon la connexion casse.
+- `market_listings` rend les annonces vendues lisibles à tous les joueurs connectés (prix, `seller_id`, `buyer_id`) ; `trades` est déjà limité aux deux parties. Les identifiants sont des UUID, aucune adresse n'est exposée.
+- `chat_report` n'a pas de limite de débit (mais un seul rapport par joueur et par message).
+- Migrations 031 à 033 non appliquées en base : l'Agora et les échanges ne sont pas exposés aujourd'hui. Le drapeau `is_admin` vit en base (jamais dans les métadonnées Discord), mais aucune 2FA n'est exigée pour les comptes de modération.
+
+### G. Visuels
+
+- Aucune carte du catalogue n'est sans visuel : Wikipédia puis Fandom, sinon la carte est retirée (Violet Sinclair, Bach, Russell Northrop).
+- `public/cards/` est vide : tous les portraits sont hotlinkés. Héberger les fichiers localement retirerait la dépendance aux CDN, au prix des copies et des licences.
+- L'audit signale 13 visuels de moins de 200 px de large (Derby, Gary, Jill, Chell, etc.) et 6 visuels limités en 429 lors du dernier passage : à revoir avec `npm run portraits:audit`.
 
 ---
 

@@ -6,6 +6,7 @@ import {
   CARDS_PER_BOOSTER,
   RARITY,
   RARITY_ORDER,
+  formatPercent,
 } from "@/lib/game";
 import { QUALITY_GRADES, STAT_BANDS } from "@/lib/stats";
 
@@ -18,6 +19,7 @@ export default function RulesPage() {
     <article>
       <span className="eyebrow">Règles</span>
       <h1 className="display mt-2 text-4xl">Comment ça marche</h1>
+      <span className="title-rule" aria-hidden />
       <p className="mt-3 text-sm leading-relaxed text-white/55">
         Tout se joue avec des boosters gratuits : pas d&apos;achat, pas de pub, pas de monnaie
         payante. Voici les mécaniques exactes du site, telles qu&apos;elles tournent aujourd&apos;hui.
@@ -55,7 +57,7 @@ export default function RulesPage() {
             return (
               <li
                 key={key}
-                className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-black/25 px-3 py-2"
+                className="flex items-center justify-between gap-3 border border-white/10 bg-black/25 px-3 py-2"
               >
                 <span className="flex items-center gap-2">
                   <span className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${info.badge}`}>
@@ -64,7 +66,7 @@ export default function RulesPage() {
                   <span className={`text-sm ${info.text}`}>{info.label}</span>
                 </span>
                 <span className="font-mono text-[11px] text-white/40">
-                  {count} cartes · {(info.weight / 10).toFixed(1)} %
+                  {count} cartes · {formatPercent(info.weight / 1000)}
                 </span>
               </li>
             );
@@ -87,7 +89,7 @@ export default function RulesPage() {
             du score de collection et du futur mode duel.
           </li>
           <li>
-            <strong className="text-cyan">Aura</strong> — son prestige de collection. Elle pèse dans
+            <strong className="text-acid">Aura</strong> — son prestige de collection. Elle pèse dans
             le score global et dans le déblocage des cadres de profil.
           </li>
         </ul>
@@ -124,7 +126,7 @@ export default function RulesPage() {
         </p>
         <ul className="mt-2 flex flex-wrap gap-2">
           {QUALITY_GRADES.map((grade) => (
-            <li key={grade.key} className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${grade.tone}`}>
+            <li key={grade.key} className={`chip px-2.5 py-1 text-[11px] font-semibold ${grade.tone}`}>
               {grade.label}
               <span className="ml-1 font-mono font-normal opacity-70">{grade.min}+</span>
             </li>
@@ -169,7 +171,8 @@ export default function RulesPage() {
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="mt-9 border-t border-white/10 pt-6">
+    <section className="mt-9">
+      <span className="section-rule section-rule-tight" aria-hidden />
       <h2 className="display text-xl">{title}</h2>
       <div className="mt-2.5 text-sm leading-relaxed text-white/55">{children}</div>
     </section>

@@ -37,8 +37,16 @@ export const PROJECT_REF =
 async function viaApi(token: string): Promise<Runner> {
   if (!PROJECT_REF) throw new Error("Impossible de déduire la référence du projet (NEXT_PUBLIC_SUPABASE_URL).");
 
-  const query = async (sql: string) => {
-    const response = await fetch(`https://api.supabase.com/v1/projects/${PROJECT_REF}/database/query`, {
+  // La Management API tolère mal les rafales : on espace les requêtes de
+  // 400 ms, en plus des reprises sur 429.
+  let nextAt = 0;
+  const send = async (sql: string) => {
+    const now = Date.now();
+    const wait = Math.max(0, nextAt - now);
+    nextAt = Math.max(now, nextAt) + 400;
+    if (wait > 0) await new Promise((resolve) => setTimeout(resolve, wait));
+
+    return fetch(`https://api.supabase.com/v1/projects/${PROJECT_REF}/database/query`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -47,6 +55,16 @@ async function viaApi(token: string): Promise<Runner> {
       },
       body: JSON.stringify({ query: sql }),
     });
+  };
+
+  const query = async (sql: string) => {
+    let response = await send(sql);
+    for (let attempt = 0; attempt < 5 && (response.status === 429 || response.status >= 500); attempt += 1) {
+      const retryAfter = Number(response.headers.get("retry-after") ?? 0) * 1000;
+      const delay = retryAfter > 0 ? retryAfter : 1500 * (attempt + 1) + Math.random() * 500;
+      await new Promise((resolve) => setTimeout(resolve, delay));
+      response = await send(sql);
+    }
 
     const text = await response.text();
     if (!response.ok) {
@@ -73,6 +91,9 @@ async function viaPostgres(connectionString: string): Promise<Runner> {
   }
 
   const url = new URL(connectionString.trim());
+  // Supabase impose TLS ; une base locale de test peut s'en passer. Le dire
+  // dans l'URL (`?sslmode=disable`) évite de modifier le script partagé.
+  const sslDisabled = url.searchParams.get("sslmode") === "disable";
   // Un espace recopié en début ou fin de mot de passe (souvent encodé `%20`)
   // provoque un `28P01` impossible à diagnostiquer à l'œil : on le retire.
   const password = safeDecode(url.password).trim();
@@ -84,7 +105,7 @@ async function viaPostgres(connectionString: string): Promise<Runner> {
     user: safeDecode(url.username),
     password,
     database: url.pathname.replace(/^\//, "") || "postgres",
-    ssl: { rejectUnauthorized: false },
+    ssl: sslDisabled ? false : { rejectUnauthorized: false },
     connectionTimeoutMillis: 20_000,
   });
 

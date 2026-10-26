@@ -58,8 +58,7 @@ export function RecycleButton({
         onClick={run}
         disabled={busy}
         className={
-          className ??
-          "rounded-full border border-acid/30 bg-acid/10 px-3 py-1.5 text-xs font-semibold text-acid transition hover:bg-acid/20 disabled:cursor-not-allowed disabled:opacity-50"
+          className ?? "btn btn-sm btn-acid"
         }
       >
         {busy ? "Recyclage…" : label}

@@ -10,9 +10,10 @@ export default function SignupPage() {
     <div className="flex min-h-screen flex-col">
       <SiteHeader />
       <main className="flex flex-1 items-center justify-center px-4 py-12">
-        <div className="w-full max-w-sm rounded-3xl border border-white/10 bg-white/[0.04] p-7 backdrop-blur">
+        <div className="panel panel-accent w-full max-w-sm p-7 backdrop-blur">
           <span className="eyebrow">Inscription</span>
           <h1 className="display mt-2 text-3xl">Crée ta collection</h1>
+          <span className="title-rule" aria-hidden />
           <p className="mb-6 mt-1 text-sm text-white/50">
             Gratuit, uniquement avec Discord. Ton premier booster t&apos;attend juste après.
           </p>

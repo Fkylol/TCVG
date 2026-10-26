@@ -59,8 +59,6 @@ export function ListingForm({
     if (result.status === "ok") {
       setNote({ tone: "ok", text: `Annonce publiée à ◆ ${result.price}.` });
       router.refresh();
-    } else if (result.status === "keep_one") {
-      setNote({ tone: "bad", text: "Garde au moins un exemplaire de cette carte." });
     } else if (result.status === "not_owned") {
       setNote({ tone: "bad", text: "Cette carte n'est plus dans ta collection." });
     } else if (result.status === "out_of_bounds") {
@@ -78,10 +76,10 @@ export function ListingForm({
   }
 
   return (
-    <section className="mt-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-sm">
+    <section className="panel mt-4 p-4 text-sm">
       <div className="flex items-start justify-between gap-2">
         <div>
-          <h2 className="font-semibold text-white/90">Vendre au marché</h2>
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-white/90">Vendre au marché</h2>
           <p className="mt-0.5 text-[11px] leading-relaxed text-white/35">
             Une copie quitte ta collection jusqu&apos;à la vente ou l&apos;annulation. Commission de
             5 % à la vente.
@@ -93,29 +91,25 @@ export function ListingForm({
       </div>
 
       {!sellable ? (
-        <p className="mt-3 rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-[11px] leading-relaxed text-white/40">
-          Aucune copie vendable pour le moment : une copie normale reste toujours dans ta
-          collection. Ouvre d&apos;autres boosters ou attends la vente d&apos;une annonce.
+        <p className="mt-3 border-l-2 border-white/15 bg-black/20 px-3 py-2 text-[11px] leading-relaxed text-white/40">
+          Aucune copie vendable pour le moment : tu ne possèdes pas cette carte. Ouvre un
+          booster ou attends la vente d&apos;une annonce.
         </p>
       ) : (
         <>
           {canSellNormal && canSellHolo && (
-            <div className="mt-3 flex rounded-lg border border-white/10 bg-black/30 p-1 text-[11px]">
+            <div className="tabs mt-3 w-full text-[11px]">
               <button
                 type="button"
                 onClick={() => choose(false)}
-                className={`flex-1 rounded-md px-2 py-1.5 transition ${
-                  !isHolo ? "bg-acid text-ink" : "text-white/55 hover:text-white"
-                }`}
+                className={`tab flex-1 px-2 py-1.5 ${!isHolo ? "bg-acid text-ink" : ""}`}
               >
                 Normale
               </button>
               <button
                 type="button"
                 onClick={() => choose(true)}
-                className={`flex-1 rounded-md px-2 py-1.5 transition ${
-                  isHolo ? "bg-amber-300 text-amber-950" : "text-white/55 hover:text-white"
-                }`}
+                className={`tab flex-1 px-2 py-1.5 ${isHolo ? "bg-amber-300 text-amber-950" : ""}`}
               >
                 Holo
               </button>
@@ -147,14 +141,14 @@ export function ListingForm({
                     step={1}
                     value={price}
                     onChange={(event) => setPrice(event.target.value)}
-                    className="w-full rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm outline-none focus:border-acid/60"
+                    className="field"
                   />
                 </label>
                 <button
                   type="button"
                   onClick={submit}
                   disabled={busy || !valid}
-                  className="shrink-0 rounded-xl bg-acid px-3 py-2 text-xs font-semibold text-ink transition hover:brightness-110 disabled:cursor-not-allowed disabled:bg-white/15 disabled:text-white/40"
+                  className="btn btn-primary btn-sm shrink-0"
                 >
                   {busy ? "Publication…" : "Mettre en vente"}
                 </button>

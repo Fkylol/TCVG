@@ -2,12 +2,31 @@
 
 @theme inline {
   --font-sans: var(--font-geist-sans);
-  --font-display: var(--font-archivo);
-  --font-mono: var(--font-geist-mono);
-  --color-ink: #08090a;
-  --color-ink-soft: #101214;
-  --color-acid: #b4ff39;
-  --color-cyan: #22e3d0;
+  --font-display: var(--font-geist-sans);
+  --font-mono: var(--font-jetbrains);
+  --color-ink: #0b0c0b;
+  --color-ink-soft: #141615;
+  --color-acid: #b6ff2e;
+}
+
+/* ————— Jetons d'identité —————
+   Noir mat, un seul accent (le lime), des filets d'un pixel. Aucune lueur,
+   aucune découpe : la couleur et le vide portent la hiérarchie. */
+:root {
+  --acid: #b6ff2e;
+  --acid-line: rgba(182, 255, 46, 0.28);
+  --acid-wash: rgba(182, 255, 46, 0.09);
+  --ink: #0b0c0b;
+  --ink-raised: #141615;
+  --line: rgba(255, 255, 255, 0.09);
+  --line-strong: rgba(255, 255, 255, 0.2);
+  --panel-bg: #0f1110;
+  --panel-bg-deep: #0b0d0c;
+  --radius: 4px;
+  --radius-sm: 3px;
+  --section-gap: clamp(3rem, 6vw, 5rem);
+  --bevel: inset(0 round var(--radius));
+  --bevel-sm: inset(0 round var(--radius-sm));
 }
 
 html {
@@ -15,242 +34,1636 @@ html {
 }
 
 body {
-  background:
-    radial-gradient(900px 480px at 12% -8%, rgba(180, 255, 57, 0.09), transparent 62%),
-    radial-gradient(760px 420px at 88% -12%, rgba(34, 227, 208, 0.07), transparent 60%),
-    #08090a;
+  /* Noir mat, sans trame ni motif : le fond ne concurrence pas les cartes. */
+  background-color: var(--ink);
   color: #e9ecef;
   font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
 }
 
+/* Les classes d'identité vivent dans la couche `components` : les utilitaires
+   Tailwind (couleurs, tailles, espacements) gardent la priorité dessus. */
+@layer components {
+
 /* ————— Typographie éditoriale ————— */
 
-/* Titres : gras serré, à la manière des gros titres de tableau de bord. */
+/* Titres : la sans du site, grasse et serrée, sans capitales forcées. */
 .display {
-  font-family: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
-  font-weight: 800;
-  letter-spacing: -0.035em;
-  line-height: 0.98;
+  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.022em;
+  line-height: 1.05;
+  text-transform: none;
 }
 
-/* Sur-titre : petites capitales espacées, précédées d'une pastille d'accent. */
+h1,
+.display,
+[role="tab"],
+legend {
+  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Sur-titre : petites capitales espacées, précédées d'un filet lime. */
 .eyebrow {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.6rem;
   font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.2em;
+  font-weight: 500;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: #b4ff39;
+  color: rgba(255, 255, 255, 0.45);
 }
 
 .eyebrow::before {
   content: "";
-  width: 5px;
-  height: 5px;
-  border-radius: 9999px;
-  background: currentColor;
+  width: 16px;
+  height: 1px;
+  background: var(--acid);
 }
+
+/* Soulignement de titre : un filet lime, rien de plus. */
+.title-rule {
+  display: block;
+  width: 48px;
+  height: 1px;
+  margin-top: 1rem;
+  background: var(--acid);
+}
+
+/* Séparateur de section : un filet d'un pixel, sur toute la largeur. */
+.section-rule {
+  display: block;
+  height: 1px;
+  margin-block: var(--section-gap);
+  background: var(--line);
+}
+
+.section-rule-tight {
+  margin-block: 1.9rem 1.4rem;
+}
+
+/* ————— Surfaces mates ————— */
+
+/* Panneau : une surface d'un ton au-dessus du fond, cernée d'un filet. Aucun
+   biseau, aucune ombre portée : le contour suffit à séparer. */
+.panel {
+  position: relative;
+  background: var(--panel-bg);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.panel-deep {
+  background: var(--panel-bg-deep);
+}
+
+/* Panneau important : le filet passe au lime, sans halo ni repère d'angle. */
+.panel-accent {
+  border-color: var(--acid-line);
+}
+
+/* Découpe simple : un arrondi discret, là où le clip servait de biseau. */
+.cut {
+  clip-path: var(--bevel-sm);
+}
+
+.cut-lg {
+  clip-path: var(--bevel);
+}
+
+/* Mise en avant : le vert reste un accent, il n'éclaire plus le fond. */
+.pack-glow {
+  position: relative;
+  isolation: isolate;
+}
+
+/* ————— Posters de boosters —————
+
+   Un pack est un objet DOM : fond teinté, bandes crantées, emblème et texture
+   sont dessinés, donc nets à toutes les tailles. Tout ce qui doit suivre la
+   largeur est exprimé en `cqw` sur le conteneur `inline-size`.
+
+   Aucun suivi du pointeur : l'inclinaison au repos vient de `--bx` / `--by`
+   (une par pack), le survol et le focus redressent le poster. */
+
+.pack-frame {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.pack-poster {
+  /* Les couleurs sont posées en variables par `BoosterPack`. */
+  --pack-t1: #d9ccff;
+  --pack-t2: #ffb8d8;
+  --pack-ink: #2b2150;
+  --pack-gl: #ffe08a;
+  --pack-glow: rgba(255, 184, 216, 0.5);
+  --pack-tx: rgba(255, 255, 255, 0.4);
+  --pack-tx2: var(--pack-tx);
+  --pack-veil: rgba(8, 9, 14, 0);
+  --bx: 0deg;
+  --by: 0deg;
+  --title-size: 15;
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 5 / 8;
+  overflow: hidden;
+  border-radius: 16px;
+  container-type: inline-size;
+  color: var(--pack-ink);
+  background: linear-gradient(162deg, var(--pack-t1) 0%, var(--pack-t2) 100%);
+  box-shadow:
+    0 26px 42px -24px var(--pack-glow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.16),
+    inset 0 -34px 52px -34px rgba(0, 0, 0, 0.4);
+  transform: perspective(900px) rotateX(var(--bx)) rotateY(var(--by));
+  transition:
+    transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 0.4s ease;
+  will-change: transform;
+  outline: none;
+}
+
+/* Pack choisi, survol et focus : le poster se redresse, se soulève et son
+   ombre s'étend. Le focus du bouton parent est traité aussi, pour que la
+   tuile entière reste le contrôle. */
+.pack-poster[data-selected="true"],
+.pack-poster:hover,
+.pack-poster:focus-visible,
+button:focus-visible .pack-poster {
+  transform: perspective(900px) rotateX(0deg) rotateY(0deg) translateY(-8px) scale(1.04);
+  box-shadow:
+    0 36px 56px -22px var(--pack-glow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.2),
+    inset 0 -34px 52px -34px rgba(0, 0, 0, 0.4);
+}
+
+.pack-poster:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 4px;
+}
+
+/* Pack indisponible : désaturé, il reste incliné même au survol. */
+.pack-poster[data-locked="true"] {
+  filter: grayscale(0.85) saturate(0.55) brightness(0.94);
+  opacity: 0.5;
+}
+
+.pack-poster[data-locked="true"],
+.pack-poster[data-locked="true"]:hover,
+.pack-poster[data-locked="true"]:focus-visible,
+button:focus-visible .pack-poster[data-locked="true"] {
+  transform: perspective(900px) rotateX(var(--bx)) rotateY(var(--by));
+  box-shadow:
+    0 22px 34px -26px var(--pack-glow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+
+/* Poster droit et figé : révélation (le pack est déchiré) et vignettes. */
+.pack-poster[data-flat="true"],
+.pack-poster[data-flat="true"]:hover,
+.pack-poster[data-flat="true"]:focus-visible,
+button:focus-visible .pack-poster[data-flat="true"] {
+  transform: none;
+  transition: none;
+}
+
+/* Bande crantée : voile blanc translucide, stries fines parfaitement droites,
+   liseré clair côté corps et ombre légère. */
+.pack-band {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 5;
+  height: max(16px, 7cqw);
+  background-color: rgba(255, 255, 255, 0.1);
+  background-image: repeating-linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.16) 0 1px,
+    rgba(255, 255, 255, 0.26) 1px 2px,
+    transparent 2px 4px
+  );
+  pointer-events: none;
+}
+
+.pack-band-top {
+  top: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+
+.pack-band-bottom {
+  bottom: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.32);
+  box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Texture de fond, derrière tout le contenu. */
+.pack-texture {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* Assombrissement doux du bas : posé seulement sur les packs à encre claire,
+   il garantit le contraste du titre et du sous-titre sur les teintes claires. */
+.pack-shade {
+  position: absolute;
+  inset: auto 0 0;
+  z-index: 2;
+  height: 58%;
+  background-image: linear-gradient(to top, var(--pack-veil), transparent 92%);
+  pointer-events: none;
+}
+
+/* Brillant fixe des 22 % supérieurs : plastique givré, jamais un reflet qui
+   suit le pointeur. */
+.pack-sheen {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 3;
+  height: 22%;
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.2), transparent);
+  pointer-events: none;
+}
+
+/* Plis du plastique : diagonales très discrètes, en overlay. */
+.pack-folds {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  background-image: repeating-linear-gradient(
+    103deg,
+    rgba(255, 255, 255, 0.055) 0 1px,
+    transparent 1px 16px
+  );
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+/* Contenu centré, du haut vers le bas. */
+.pack-content {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  padding: calc(max(16px, 7cqw) + 4.5cqw) 10cqw calc(max(16px, 7cqw) + 4cqw);
+  text-align: center;
+}
+
+.pack-mark {
+  display: flex;
+  align-items: center;
+  gap: 0.7cqw;
+  padding: 0.6cqw 2cqw 0.6cqw 1.6cqw;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  background: rgba(8, 8, 16, 0.5);
+  color: #fff;
+  font-family: var(--font-space-mono, ui-monospace, monospace);
+  font-size: max(11px, 2.85cqw);
+  letter-spacing: 0.26em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.pack-mark-dot {
+  width: max(5px, 1.5cqw);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.6;
+}
+
+/* Médaillon : anneau en dégradé clair, disque sombre, emblème au centre. */
+.pack-medallion {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 50cqw;
+  aspect-ratio: 1;
+  margin-top: auto;
+  border: max(2px, 1.2cqw) solid transparent;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 38%, rgba(8, 8, 18, 0.5), rgba(6, 6, 12, 0.78) 74%)
+      padding-box,
+    linear-gradient(
+        155deg,
+        rgba(255, 255, 255, 0.5),
+        rgba(255, 255, 255, 0.06) 46%,
+        rgba(255, 255, 255, 0.32)
+      )
+      border-box;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    inset 0 -10px 20px -12px rgba(0, 0, 0, 0.6),
+    0 12px 24px -16px rgba(0, 0, 0, 0.6);
+}
+
+.pack-emblem {
+  width: 52%;
+  height: 52%;
+  color: var(--pack-gl);
+  filter: drop-shadow(0 0 max(2px, 0.5cqw) color-mix(in srgb, var(--pack-gl) 60%, transparent));
+}
+
+/* Titre : Syne 800. Sa taille finale est calculée par `useFitTitle` (80 % de
+   la largeur du pack au maximum) ; `max-content` permet de mesurer la ligne
+   la plus large, notamment celle d'« Action-aventure ». */
+.pack-title {
+  display: block;
+  width: max-content;
+  max-width: none;
+  margin-top: 5cqw;
+  font-family: var(--font-syne, "Arial Black", ui-sans-serif, sans-serif);
+  font-size: calc(var(--title-size) * 1cqw);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 1;
+  white-space: nowrap;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+.pack-title-line {
+  display: block;
+  white-space: nowrap;
+}
+
+/* Sous-titre : une seule ligne, jamais plus de 80 % de la largeur du pack.
+   `useFitTitle` réduit la police jusqu'à 11 px ; en dessous, l'ellipse prend
+   le relais plutôt que de laisser le texte toucher les bords. */
+.pack-subtitle {
+  display: block;
+  max-width: 100%;
+  margin-top: 2.8cqw;
+  font-family: var(--font-space-mono, ui-monospace, monospace);
+  font-size: max(11px, 2.55cqw);
+  letter-spacing: 0.02em;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 0.72;
+}
+
+.pack-count {
+  margin-top: auto;
+  padding: 0.55cqw 2.6cqw;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 999px;
+  background: rgba(8, 8, 16, 0.62);
+  color: #fff;
+  font-family: var(--font-space-mono, ui-monospace, monospace);
+  font-size: max(11px, 2.4cqw);
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
+/* « Gratuit », hors du pack. */
+.pack-price {
+  margin-top: 2.6cqw;
+  text-align: center;
+  font-family: var(--font-space-mono, ui-monospace, monospace);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: color-mix(in srgb, currentColor 55%, transparent);
+}
+
+/* ————— Boutons, champs et onglets ————— */
+
+/* Bouton : rectangle arrondi de 4 px, texte en casse normale. La couleur porte
+   l'action, pas la forme. */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.62rem 1.1rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  background: transparent;
+  color: #fff;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  line-height: 1.1;
+  cursor: pointer;
+  transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  border-color: var(--line);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.btn-primary {
+  background: var(--acid);
+  border-color: var(--acid);
+  color: var(--ink);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #c8ff5c;
+  border-color: #c8ff5c;
+}
+
+.btn-outline {
+  border-color: var(--line-strong);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.btn-outline:hover:not(:disabled) {
+  border-color: rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.04);
+  color: #fff;
+}
+
+.btn-acid {
+  border-color: var(--acid-line);
+  color: var(--acid);
+}
+
+.btn-acid:hover:not(:disabled) {
+  background: var(--acid-wash);
+}
+
+.btn-sm {
+  padding: 0.38rem 0.7rem;
+  font-size: 0.75rem;
+}
+
+.btn-lg {
+  padding: 0.8rem 1.4rem;
+  font-size: 0.9rem;
+}
+
+/* Champ de formulaire : fond du panneau, filet qui passe au lime au focus. */
+.field {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--panel-bg-deep);
+  color: #fff;
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 160ms ease;
+}
+
+.field::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.field:focus {
+  border-color: var(--acid-line);
+}
+
+/* Barre d'outils qui regroupe filtres, recherche et onglets. */
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel-bg);
+}
+
+/* Groupe d'onglets. */
+.tabs {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel-bg-deep);
+}
+
+/* Onglet / lien de navigation. */
+.tab {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.42rem 0.7rem;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: rgba(255, 255, 255, 0.55);
+  transition: background-color 160ms ease, color 160ms ease;
+}
+
+.tab:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+}
+
+/* Page courante : seul repère vert permanent de la navigation. */
+.tab[aria-current="page"] {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--acid);
+  box-shadow: inset 0 -1px 0 0 var(--acid);
+}
+
+/* Petite étiquette, pour les compteurs et les onglets. */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.18rem 0.5rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.68rem;
+  font-variant-numeric: tabular-nums;
+}
+
+} /* fin de @layer components */
 
 @utility grain {
   background-image: radial-gradient(rgba(255, 255, 255, 0.09) 1px, transparent 1px);
   background-size: 4px 4px;
 }
 
-/* ————— Cartes ————— */
+/* ————— Cartes —————
 
-/* ————— Effets de rareté ————— */
+   Carton sombre teinté par la rareté : fond presque noir, bordure franche de
+   la couleur de rareté, texte clair. La rareté se lit de loin, sans dépendre
+   du visuel. Trois calques d'effet, toujours sous le texte :
+     • `.card-foil` — sous l'illustration, visible sur les marges (reverse holo) ;
+     • `.holo` — dans la fenêtre d'illustration ;
+     • `.card-glare` / `.card-sparkle` — par-dessus, pilotés par le pointeur.
+   Tout s'éteint quand `--intensity` vaut 0 (carte non survolée). */
 
-/* Angle animé du liseré conique (Légendaire et Mythique). */
-@property --edge-angle {
-  syntax: "<angle>";
-  inherits: false;
-  initial-value: 0deg;
+/* ————— Tokens de rareté —————
+   Source unique des couleurs. `-bg` et `-ink` forment la paire de contraste
+   testée (AA), `-on` est l'encre posée sur le badge plein. */
+:root {
+  --rarity-C: #9aa3b2;
+  --rarity-C-bg: #14161c;
+  --rarity-C-ink: #eef2f8;
+  --rarity-C-on: #0b0d11;
+
+  --rarity-U: #3ddb9a;
+  --rarity-U-bg: #0c1a15;
+  --rarity-U-ink: #eafff6;
+  --rarity-U-on: #04120c;
+
+  --rarity-R: #3ea8ff;
+  --rarity-R-bg: #0b1622;
+  --rarity-R-ink: #eaf6ff;
+  --rarity-R-on: #04101b;
+
+  --rarity-E: #a259ff;
+  --rarity-E-bg: #150f22;
+  --rarity-E-ink: #f5edff;
+  --rarity-E-on: #0c0517;
+
+  --rarity-L: #ffb400;
+  --rarity-L-bg: #1b1508;
+  --rarity-L-ink: #fff7e3;
+  --rarity-L-on: #1a1200;
+
+  --rarity-M: #ff4fd8;
+  --rarity-M-bg: #1a0a18;
+  --rarity-M-ink: #ffeffb;
+  --rarity-M-on: #170215;
 }
 
 .card-face {
-  --edge: rgba(255, 255, 255, 0.12);
-  --edge-width: 1px;
-  --glow: 0 10px 26px -20px rgba(0, 0, 0, 0.9);
-  --holo-opacity: 0;
-  --holo-size: 140% 140%;
-  --inner: transparent;
+  /* Couleur de rareté, surchargée par `[data-rarity]`. */
+  --rarity: var(--rarity-C);
+  --rarity-bg: var(--rarity-C-bg);
+  --rarity-ink: var(--rarity-C-ink);
+  --rarity-on: var(--rarity-C-on);
+  --rarity-border: var(--rarity);
+  /* Halo : intensité croissante du Commun au Mythique. */
+  --glow: 0 10px 24px -22px rgba(0, 0, 0, 0.95);
+  /* Foil : `--foil-art` dans la fenêtre, `--foil-card` sur les marges. */
+  --foil-art: 0;
+  --foil-card: 0;
+  --foil-hue: 0deg;
+  --holo-angle: 118deg;
+  --glare-max: 0.3;
+  --sparkle: 0;
+  --border-width: 2px;
+  /* Variables écrites par `useCardTilt` : inclinaison, position du pointeur,
+     intensité du survol et écart au centre pour la parallaxe. */
+  --rx: 0deg;
+  --ry: 0deg;
+  --tx: 0;
+  --ty: 0;
+  --intensity: 0;
+  --tilt-scale: 1;
+  /* Dimensions internes, redéfinies par taille. */
+  --pad: 8px;
+  --art-radius: 9px;
+  --name: 15px;
+  --meta: 11.5px;
+  --stat: 11px;
+  --badge: 20px;
+  --radius: 0.875rem;
   position: relative;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
-  border-radius: 1rem;
+  padding: var(--pad);
+  border: var(--border-width) solid var(--rarity-border);
+  border-radius: var(--radius);
   isolation: isolate;
-  box-shadow: var(--glow);
-  transition: box-shadow 300ms ease;
+  background:
+    linear-gradient(
+      176deg,
+      color-mix(in oklab, var(--rarity) 20%, var(--rarity-bg)) 0%,
+      var(--rarity-bg) 55%,
+      #06060a 100%
+    );
+  color: var(--rarity-ink);
+  box-shadow:
+    var(--glow),
+    inset 0 0 0 1px color-mix(in oklab, var(--rarity) 45%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  /* Aucune transformation 3D au repos : une carte inclinable mais immobile
+     n'a pas besoin d'un contexte 3D, et c'est lui qui coûtait le plus cher
+     dans la révélation (trois cartes empilées, plus l'éventail). */
+  transform: none;
+  transition:
+    transform 300ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 300ms ease;
+  /* Au doigt : le glissement horizontal incline la carte, le vertical fait
+     défiler la page (le navigateur annule alors le suivi du doigt). */
+  touch-action: pan-y;
 }
 
-/* Liseré intérieur : un dégradé qui ne remplit que la bordure. */
-.card-face::before {
+/* Anneau prismatique du Mythique : un dégradé en bordure, sous le contenu.
+   `inset: 0` et non `-border-width` : la carte clippe ses enfants au padding
+   box, un anneau posé sur la bordure serait invisible. */
+.card-face[data-rarity="L"]::before {
   content: "";
   position: absolute;
   inset: 0;
-  z-index: 4;
-  padding: var(--edge-width);
+  z-index: 0;
+  padding: var(--border-width);
   border-radius: inherit;
-  background: var(--edge);
+  background: conic-gradient(
+    from calc(140deg + var(--rx) * 3),
+    #ff4fd8,
+    #ffd23f,
+    #5ff0cf,
+    #5b8cff,
+    #b06bff,
+    #ff4fd8
+  );
   -webkit-mask:
     linear-gradient(#000 0 0) content-box,
     linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
   mask:
     linear-gradient(#000 0 0) content-box,
     linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
   mask-composite: exclude;
+  opacity: calc(0.65 + 0.35 * var(--intensity));
   pointer-events: none;
 }
 
-/* Commun : mat, aucun halo, aucune brillance (voir `card-shine` plus bas). */
+/* Carte non possédée : niveaux de gris, contenu lisible. */
+.card-face[data-muted="true"] {
+  filter: grayscale(1) brightness(0.78);
+}
+
+/* Survol (ou doigt posé) : la carte suit le pointeur sans traîner, puis
+   revient à plat en douceur quand il repart. */
+.card-face[data-tilt="true"] {
+  --tilt-scale: 1.04;
+  transform: perspective(800px) rotateX(var(--rx)) rotateY(var(--ry)) scale(var(--tilt-scale));
+  transition:
+    transform 0s,
+    box-shadow 300ms ease;
+  will-change: transform;
+}
+
+.card-face[data-size="sm"] {
+  --radius: 0.625rem;
+  --pad: 6px;
+  --art-radius: 7px;
+  --name: 11px;
+  --meta: 9.5px;
+  --stat: 9px;
+  --badge: 15px;
+  --border-width: 1.5px;
+}
+
+.card-face[data-size="md"] {
+  --radius: 0.875rem;
+  --pad: 8px;
+  --art-radius: 9px;
+  --name: 15px;
+  --meta: 11.5px;
+  --stat: 11px;
+  --badge: 20px;
+}
+
+.card-face[data-size="lg"] {
+  --radius: 1.125rem;
+  --pad: 12px;
+  --art-radius: 12px;
+  --name: 20px;
+  --meta: 13.5px;
+  --stat: 13px;
+  --badge: 26px;
+}
+
+.card-face[data-size="xl"] {
+  --radius: 1.25rem;
+  --pad: 14px;
+  --art-radius: 14px;
+  --name: 24px;
+  --meta: 15.5px;
+  --stat: 15px;
+  --badge: 30px;
+}
+
+.card-head {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding-bottom: calc(var(--pad) * 0.85);
+}
+
+.card-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--name);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: var(--rarity-ink);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
+}
+
+.card-badge {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: var(--badge);
+  height: var(--badge);
+  border-radius: 9999px;
+  background: var(--rarity);
+  color: var(--rarity-on);
+  font-size: calc(var(--badge) * 0.5);
+  font-weight: 800;
+  line-height: 1;
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.35),
+    0 2px 6px -3px rgba(0, 0, 0, 0.8);
+}
+
+/* Les effets ne sont matérialisés que pendant l'interaction. Au repos, leur
+   opacité est nulle : les garder dans l'arbre de rendu faisait composer cinq
+   calques par carte dans la révélation (trois cartes empilées + l'éventail).
+   `display: none` les retire complètement ; ils reviennent au survol, au
+   doigt posé, et dans le banc d'essai. */
+.card-face:not([data-tilt="true"]) .holo,
+.card-face:not([data-tilt="true"]) .card-foil,
+.card-face:not([data-tilt="true"]) .card-sparkle,
+.card-face:not([data-tilt="true"]) .card-glare {
+  display: none;
+}
+
+/* Carte retournable : l'inclinaison vit sur le conteneur, pas sur la face. */
+.card-flip-tilt[data-tilt="true"] .card-face .holo,
+.card-flip-tilt[data-tilt="true"] .card-face .card-foil,
+.card-flip-tilt[data-tilt="true"] .card-face .card-sparkle,
+.card-flip-tilt[data-tilt="true"] .card-face .card-glare,
+.holo-lab .card-face .holo,
+.holo-lab .card-face .card-foil,
+.holo-lab .card-face .card-sparkle,
+.holo-lab .card-face .card-glare {
+  display: block;
+}
+
+/* Étiquettes de variante et de retrait, empilées en bas à droite de la
+   fenêtre d'illustration. Volontairement neutres : elles ne concurrencent pas
+   le badge de rareté. */
+.card-tags {
+  position: absolute;
+  right: 5%;
+  bottom: 4.5%;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  pointer-events: none;
+}
+
+.card-misprint {
+  padding: 0.08em 0.4em;
+  border-radius: 9999px;
+  background: rgba(6, 8, 10, 0.72);
+  color: rgba(255, 255, 255, 0.82);
+  font-family: var(--font-geist-mono, ui-monospace, monospace);
+  font-size: calc(var(--stat) * 0.78);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
+  white-space: nowrap;
+}
+
+/* Carte retirée : l'étiquette reste sobre, le visuel a déjà disparu. */
+.card-retired {
+  background: rgba(8, 9, 10, 0.82);
+  color: rgba(255, 255, 255, 0.6);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
+}
+
+.card-art {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: var(--art-radius);
+  background: #07070b;
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklab, var(--rarity) 40%, transparent),
+    0 6px 16px -12px rgba(0, 0, 0, 0.9);
+}
+
+.card-emoji {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.55));
+}
+
+/* Dégradé de lisibilité du numéro d'album. */
+.card-art-shade {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    to top,
+    rgba(4, 5, 8, 0.85) 0%,
+    rgba(4, 5, 8, 0.22) 26%,
+    transparent 48%
+  );
+  pointer-events: none;
+}
+
+.card-number {
+  position: absolute;
+  left: 5%;
+  bottom: 4.5%;
+  z-index: 4;
+  font-family: var(--font-geist-mono, ui-monospace, monospace);
+  font-size: var(--stat);
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.94);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85);
+  font-variant-numeric: tabular-nums;
+}
+
+.card-universe {
+  position: relative;
+  z-index: 2;
+  padding: calc(var(--pad) * 0.75) 2px calc(var(--pad) * 0.55);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--meta);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, var(--rarity-ink) 78%, var(--rarity));
+}
+
+.card-stats {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin: 0 calc(-1 * var(--pad)) calc(-1 * var(--pad));
+  padding: calc(var(--pad) * 0.62) var(--pad);
+  border-top: 1px solid color-mix(in oklab, var(--rarity) 38%, transparent);
+  background: color-mix(in oklab, var(--rarity) 12%, #050508);
+  font-family: var(--font-geist-mono, ui-monospace, monospace);
+  font-size: var(--stat);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #ffffff;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ————— Couleur de rareté —————
+   Les clés de données (`UC`, `SR`, `UR`, `L`) diffèrent des suffixes de token
+   (`U`, `E`, `L`, `M`) : la correspondance est posée ici, une seule fois. */
+/* ————— Halo croissant —————
+   Intensité lumineuse et reflets croissants, en plus de la couleur. */
 .card-face[data-rarity="C"] {
-  --edge: rgba(255, 255, 255, 0.1);
-  --holo-opacity: 0;
+  --rarity: var(--rarity-C);
+  --rarity-bg: var(--rarity-C-bg);
+  --rarity-ink: var(--rarity-C-ink);
+  --rarity-on: var(--rarity-C-on);
 }
 
-/* Rare : liseré bleu franc et lueur interne froide. */
+.card-face[data-rarity="UC"] {
+  --rarity: var(--rarity-U);
+  --rarity-bg: var(--rarity-U-bg);
+  --rarity-ink: var(--rarity-U-ink);
+  --rarity-on: var(--rarity-U-on);
+  --glow:
+    0 0 0 1px color-mix(in oklab, var(--rarity) 22%, transparent),
+    0 14px 28px -20px color-mix(in oklab, var(--rarity) 45%, transparent);
+  --glare-max: 0.34;
+}
+
 .card-face[data-rarity="R"] {
-  --edge: linear-gradient(155deg, rgba(125, 211, 252, 0.95), rgba(56, 189, 248, 0.3) 65%);
+  --rarity: var(--rarity-R);
+  --rarity-bg: var(--rarity-R-bg);
+  --rarity-ink: var(--rarity-R-ink);
+  --rarity-on: var(--rarity-R-on);
   --glow:
-    0 0 0 1px rgba(56, 189, 248, 0.12), 0 16px 34px -20px rgba(56, 189, 248, 0.6),
-    inset 0 0 30px -16px rgba(56, 189, 248, 0.95);
-  --holo-opacity: 0.16;
-  --inner: rgba(56, 189, 248, 0.8);
+    0 0 0 1px color-mix(in oklab, var(--rarity) 30%, transparent),
+    0 16px 32px -18px color-mix(in oklab, var(--rarity) 60%, transparent);
+  --glare-max: 0.4;
+  --foil-art: 0.3;
 }
 
-/* Épique : liseré violet→cyan plus épais, halo et lueur interne violets. */
 .card-face[data-rarity="SR"] {
-  --edge: linear-gradient(155deg, #c4b5fd, #a78bfa 45%, rgba(34, 227, 208, 0.7) 88%);
-  --edge-width: 1.5px;
+  --rarity: var(--rarity-E);
+  --rarity-bg: var(--rarity-E-bg);
+  --rarity-ink: var(--rarity-E-ink);
+  --rarity-on: var(--rarity-E-on);
   --glow:
-    0 0 0 2px rgba(167, 139, 250, 0.12), 0 18px 40px -18px rgba(167, 139, 250, 0.7),
-    inset 0 0 38px -18px rgba(167, 139, 250, 1);
-  --holo-opacity: 0.36;
-  --inner: rgba(167, 139, 250, 0.85);
+    0 0 0 1.5px color-mix(in oklab, var(--rarity) 32%, transparent),
+    0 18px 38px -18px color-mix(in oklab, var(--rarity) 65%, transparent);
+  --glare-max: 0.44;
+  --foil-card: 0.28;
+  --holo-angle: 128deg;
+  --foil-hue: 24deg;
 }
 
-/* Légendaire : liseré doré qui tourne, halo chaud, reflet qui balaie. */
 .card-face[data-rarity="UR"] {
-  --edge: conic-gradient(
-    from var(--edge-angle),
-    #fcd34d,
-    #fffbeb,
-    #f59e0b,
-    #fde68a,
-    #fcd34d
-  );
-  --edge-width: 2px;
+  --rarity: var(--rarity-L);
+  --rarity-bg: var(--rarity-L-bg);
+  --rarity-ink: var(--rarity-L-ink);
+  --rarity-on: var(--rarity-L-on);
   --glow:
-    0 0 0 2px rgba(252, 211, 77, 0.16), 0 20px 44px -18px rgba(245, 158, 11, 0.75),
-    inset 0 0 42px -20px rgba(252, 211, 77, 1);
-  --holo-opacity: 0.44;
-  --inner: rgba(252, 211, 77, 0.8);
-  animation: edge-spin 9s linear infinite;
+    0 0 0 2px color-mix(in oklab, var(--rarity) 36%, transparent),
+    0 20px 44px -18px color-mix(in oklab, var(--rarity) 75%, transparent);
+  --glare-max: 0.5;
+  --sparkle: 0.7;
+  --foil-art: 0.5;
+  --foil-card: 0.34;
+  --holo-angle: 106deg;
+  --foil-hue: -16deg;
 }
 
-/* Mythique : arc-en-ciel en rotation, iridescence animée. */
 .card-face[data-rarity="L"] {
-  --edge: conic-gradient(
-    from var(--edge-angle),
-    #f472b6,
-    #fcd34d,
-    #4ade80,
-    #22e3d0,
-    #a78bfa,
-    #f472b6
-  );
-  --edge-width: 2px;
+  --rarity: var(--rarity-M);
+  --rarity-bg: var(--rarity-M-bg);
+  --rarity-ink: var(--rarity-M-ink);
+  --rarity-on: var(--rarity-M-on);
   --glow:
-    0 0 0 2px rgba(244, 114, 182, 0.2), 0 22px 50px -18px rgba(167, 139, 250, 0.8),
-    inset 0 0 46px -18px rgba(244, 114, 182, 1);
-  --holo-opacity: 0.55;
-  --holo-size: 220% 220%;
-  --inner: rgba(244, 114, 182, 0.8);
-  animation: edge-spin 6s linear infinite;
+    0 0 0 2px color-mix(in oklab, var(--rarity) 40%, transparent),
+    0 22px 50px -16px color-mix(in oklab, var(--rarity) 80%, transparent);
+  --glare-max: 0.56;
+  --sparkle: 1;
+  --foil-art: 0.68;
+  --foil-card: 0.5;
+  --holo-angle: 118deg;
+}/* ————— Foil —————
+   Une pellicule iridescente en bandes larges et translucides, un reflet
+   spéculaire qui glisse avec le pointeur et une micro-gravure métallique.
+   Les bandes restent douces : le foil irise l'illustration, il ne la
+   recouvre plus d'un arc-en-ciel opaque. `color-dodge` ne s'applique qu'à
+   une opacité faible, donc les fonds sombres restent sombres et seules les
+   lumières s'allument. */
+.card-foil,
+.holo {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+  background-image:
+    linear-gradient(
+      var(--holo-angle, 118deg),
+      rgba(70, 160, 255, 0) 0%,
+      rgba(70, 160, 255, 0.42) 15%,
+      rgba(90, 255, 190, 0.38) 31%,
+      rgba(255, 210, 60, 0.34) 46%,
+      rgba(255, 80, 180, 0.4) 61%,
+      rgba(180, 100, 255, 0.42) 77%,
+      rgba(70, 160, 255, 0) 94%
+    ),
+    radial-gradient(
+      120% 90% at 50% -10%,
+      rgba(255, 255, 255, 0.28),
+      transparent 58%
+    );
+  background-size:
+    200% 200%,
+    100% 100%;
+  background-position: center;
+  mix-blend-mode: color-dodge;
+  filter: hue-rotate(var(--foil-hue, 0deg)) saturate(1.08) contrast(1.02) brightness(0.92);
+  transition: opacity 320ms ease;
+  /* Parallaxe de la pellicule : seuls `transform` et `opacity` bougent, le
+     dégradé n'est jamais recalculé. */
+  transform: translate3d(calc(var(--tx) * 7px), calc(var(--ty) * 7px), 0) scale(1.03);
 }
 
-.card-face[data-rarity="L"] .holo {
-  animation: holo-shift 6s linear infinite;
+/* Foil de la carte entière : sous l'illustration (reverse holo). */
+.card-foil {
+  z-index: 0;
+  border-radius: inherit;
+  opacity: calc(var(--foil-card) * var(--intensity, 0));
 }
 
-.card-face:hover {
-  --holo-opacity: 0.5;
+/* Foil de la fenêtre d'illustration. */
+.holo {
+  z-index: 2;
+  opacity: calc(var(--foil-art) * var(--intensity, 0));
 }
 
-.card-face[data-rarity="C"]:hover {
-  --holo-opacity: 0;
+/* Reflet spéculaire de la pellicule : une bande blanche qui suit le pointeur.
+   Le déplacement passe par `transform` (compositeur) et non par la position
+   du dégradé, qui forcerait un repeint à chaque frame. */
+.holo::before,
+.card-foil::before {
+  content: "";
+  position: absolute;
+  inset: -45%;
+  background-image:
+    linear-gradient(
+      112deg,
+      transparent 34%,
+      rgba(255, 255, 255, 0.12) 41%,
+      rgba(255, 255, 255, 0.6) 47%,
+      rgba(255, 255, 255, 0.9) 49.5%,
+      rgba(255, 255, 255, 0.55) 51.5%,
+      rgba(255, 255, 255, 0.1) 58%,
+      transparent 66%
+    ),
+    radial-gradient(55% 45% at 50% 42%, rgba(255, 255, 255, 0.35), transparent 72%);
+  mix-blend-mode: screen;
+  transform:
+    translate3d(calc(var(--tx) * 18%), calc(var(--ty) * 13%), 0)
+    rotate(calc(var(--ry) * -0.45));
+  opacity: calc(0.55 + 0.45 * var(--intensity, 0));
+  pointer-events: none;
 }
 
-@keyframes edge-spin {
+/* Texture fine du foil : gravure en diagonale + grain, pour éviter l'aplat. */
+.holo::after,
+.card-foil::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(
+      112deg,
+      rgba(255, 255, 255, 0.14) 0 1px,
+      transparent 1px 4px
+    ),
+    radial-gradient(rgba(255, 255, 255, 0.2) 0.6px, transparent 0.9px);
+  background-size:
+    auto,
+    4px 4px;
+  mix-blend-mode: soft-light;
+  opacity: 0.42;
+  pointer-events: none;
+}
+
+/* Mythique : foil prismatique, dérive lente des teintes au survol.
+   Le conique reste translucide pour que le visuel garde ses contrastes. */
+.card-face[data-rarity="L"] .holo,
+.card-face[data-rarity="L"] .card-foil {
+  background-image:
+    conic-gradient(
+      from calc(var(--holo-angle) * 1.6),
+      rgba(255, 79, 216, 0.5),
+      rgba(255, 210, 63, 0.44),
+      rgba(95, 240, 207, 0.42),
+      rgba(91, 140, 255, 0.48),
+      rgba(176, 107, 255, 0.46),
+      rgba(255, 79, 216, 0.5)
+    ),
+    repeating-linear-gradient(
+      112deg,
+      rgba(255, 255, 255, 0.18) 0 2%,
+      transparent 2% 9%
+    );
+  /* La dérive des teintes n'est pas gratuite : elle est en pause au repos et
+     ne tourne qu'au survol (ou dans le banc d'essai). */
+  animation: holo-hue 14s linear infinite paused;
+}
+
+.card-face[data-rarity="L"][data-tilt="true"] .holo,
+.card-face[data-rarity="L"][data-tilt="true"] .card-foil,
+.holo-lab .card-face[data-rarity="L"] .holo,
+.holo-lab .card-face[data-rarity="L"] .card-foil {
+  animation-play-state: running;
+}
+
+@keyframes holo-hue {
+  from {
+    filter: hue-rotate(0deg) saturate(1.2);
+  }
   to {
-    --edge-angle: 360deg;
+    filter: hue-rotate(360deg) saturate(1.2);
   }
 }
 
-@keyframes holo-shift {
-  to {
-    background-position: 220% 0;
-  }
-}
-
+/* Reflet spéculaire qui balaie la carte au survol des raretés hautes. */
 .card-shine::after {
   content: "";
   position: absolute;
   inset: -60% -20%;
+  z-index: 5;
   background: linear-gradient(
     115deg,
-    transparent 35%,
-    rgba(255, 255, 255, 0.55) 48%,
-    transparent 62%
+    transparent 38%,
+    rgba(255, 255, 255, 0.28) 48%,
+    transparent 60%
   );
   transform: translateX(-120%);
   transition: transform 900ms ease;
   pointer-events: none;
-  z-index: 3;
+  mix-blend-mode: screen;
 }
 
-.card-shine:hover::after {
+.card-face[data-rarity="UR"].card-shine:hover::after,
+.card-face[data-rarity="L"].card-shine:hover::after {
   transform: translateX(120%);
 }
 
-/* Les raretés hautes balaient leur reflet d'elles-mêmes, sans survol. */
-.card-face[data-rarity="UR"].card-shine::after,
-.card-face[data-rarity="L"].card-shine::after {
-  animation: sheen-pass 7s ease-in-out infinite;
-}
-
-@keyframes sheen-pass {
-  0%,
-  58% {
-    transform: translateX(-120%);
-  }
-  78%,
-  100% {
-    transform: translateX(120%);
-  }
-}
-
-/* Voile iridescent : son intensité est pilotée par la rareté (`--holo-opacity`). */
-.holo {
-  background-image: linear-gradient(
-    130deg,
-    rgba(255, 255, 255, 0.34),
-    rgba(244, 114, 182, 0.16) 26%,
-    rgba(252, 211, 77, 0.16) 44%,
-    rgba(74, 222, 128, 0.14) 62%,
-    rgba(34, 227, 208, 0.18) 78%,
-    rgba(167, 139, 250, 0.2) 92%,
-    rgba(255, 255, 255, 0.3)
-  );
-  background-size: var(--holo-size, 140% 140%);
+/* ————— Paillettes ————— */
+.card-sparkle {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle at 15% 22%, rgba(255, 255, 255, 0.95) 0 1.1px, transparent 1.9px),
+    radial-gradient(circle at 62% 12%, rgba(255, 246, 205, 0.92) 0 1px, transparent 1.7px),
+    radial-gradient(circle at 84% 46%, rgba(255, 255, 255, 0.88) 0 1.3px, transparent 2.1px),
+    radial-gradient(circle at 33% 68%, rgba(255, 240, 190, 0.9) 0 1px, transparent 1.8px),
+    radial-gradient(circle at 72% 82%, rgba(255, 255, 255, 0.8) 0 1px, transparent 1.7px),
+    radial-gradient(circle at 48% 38%, rgba(255, 252, 235, 0.8) 0 1.5px, transparent 2.4px);
+  background-size:
+    140px 160px, 180px 200px, 120px 150px, 200px 220px, 160px 180px, 240px 260px;
+  background-position:
+    50% 50%, 50% 50%, 50% 50%, 50% 50%, 50% 50%, 50% 50%;
+  /* La parallaxe passe par une transformation : le compositeur la déplace
+     sans repeindre les six dégradés à chaque mouvement du pointeur. */
+  inset: -18px;
+  transform: translate3d(calc(var(--tx) * 20px), calc(var(--ty) * 16px), 0);
   mix-blend-mode: screen;
-  opacity: var(--holo-opacity, 0);
-  /* Lueur venue des bords : elle doit être peinte par-dessus le visuel, donc
-     sur ce calque et non en box-shadow inset sur la carte. */
-  box-shadow: inset 0 0 42px -14px var(--inner, transparent);
+  opacity: calc(var(--sparkle, 0) * (0.25 + 0.75 * var(--intensity)));
+  transition: opacity 320ms ease;
+}
+
+/* ————— Reflet qui suit le pointeur ————— */
+.card-glare {
+  position: absolute;
+  inset: -30%;
+  z-index: 3;
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(255, 255, 255, 0.55) 0%,
+    rgba(255, 255, 255, 0.16) 22%,
+    transparent 52%
+  );
+  /* Même raison que les paillettes : translation composée, pas de repeint. */
+  transform: translate3d(calc(var(--tx) * 30%), calc(var(--ty) * 30%), 0);
+  mix-blend-mode: soft-light;
+  opacity: calc(var(--glare-max) * var(--intensity));
   transition: opacity 300ms ease;
+  pointer-events: none;
+}
+
+/* Grain fin du carton. */
+.grain {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  opacity: 0.22;
+  pointer-events: none;
+}
+
+/* ————— Variantes misprint —————
+   Purement cosmétiques : jamais d'effet sur les règles. */
+.card-face[data-variant="holo_bleed"] {
+  --foil-card: 0.55;
+}
+
+.card-face[data-variant="off_center"] .card-art {
+  transform: translate(1.5%, -1%) scale(1.03);
+}
+
+.card-face[data-variant="off_center"] .card-head {
+  transform: translateX(2%);
+}
+
+.card-face[data-variant="ghosting"] .card-name {
+  text-shadow:
+    -1.5px 0 rgba(255, 255, 255, 0.35),
+    1px 1px rgba(0, 0, 0, 0.5);
+}
+
+/* ————— Banc d'essai (`/dev/holo`) —————
+   L'intensité vient du curseur, pas du pointeur : les cartes y sont rendues
+   sans inclinaison. */
+.holo-lab .card-face {
+  --intensity: var(--lab-intensity, 0.8);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-face,
+  .card-face[data-tilt="true"] {
+    transform: none;
+    transition: box-shadow 200ms ease;
+  }
+
+  /* La tuile ne s'élève pas non plus : le survol reste sobre. */
+  .collection-tile,
+  .collection-tile:hover,
+  .collection-tile:focus-visible {
+    transform: none;
+    transition: none;
+  }
+
+  .card-face[data-rarity="L"] .holo,
+  .card-face[data-rarity="L"] .card-foil {
+    animation: none;
+  }
+
+  /* La pellicule et son reflet suivent le pointeur : immobiles ici. */
+  .holo,
+  .card-foil,
+  .holo::before,
+  .card-foil::before {
+    transform: none;
+  }
+
+  .card-shine::after {
+    display: none;
+  }
+}
+
+/* ————— Carte retournable (collection) —————
+
+   Deux faces dans un même volume : le conteneur porte l'inclinaison du
+   pointeur, la face intérieure porte la rotation de retournement. Quand la
+   carte est retournée, l'axe horizontal est inversé (`--flip: -1`) pour que
+   l'inclinaison suive le pointeur dans le bon sens. */
+
+/* Visionneuse de la collection : un fond opaque plutôt qu'un
+   `backdrop-filter`. Le flou plein écran devait recomposer la grille entière
+   (des dizaines de cartes en dégradés) à chaque image du retournement, ce qui
+   rendait l'ouverture et la rotation saccadées sur mobile. */
+.card-viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  overflow-y: auto;
+  padding: 1rem;
+  background: radial-gradient(120% 85% at 50% 26%, #12181d 0%, #07090b 58%, #040607 100%);
+}
+
+.card-flip-tilt {
+  --flip: 1;
+  --rx: 0deg;
+  --ry: 0deg;
+  perspective: 1100px;
+  /* Le retournement garde sa profondeur malgré l'inclinaison du parent. */
+  transform-style: preserve-3d;
+  transform: rotateX(var(--rx)) rotateY(calc(var(--ry) * var(--flip)));
+  transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Pointeur sur la carte : l'inclinaison est écrite à chaque frame, une
+   transition la ferait traîner derrière le curseur. Le retour au repos garde
+   son easing. */
+.card-flip-tilt[data-tilt="true"] {
+  transition: transform 0s;
+  will-change: transform;
+}
+
+/* Tuile de la collection : au survol, la carte s'élève au lieu de s'incliner.
+   L'effet 3D reste dans la visionneuse plein écran. */
+.collection-tile {
+  transition: transform 180ms ease-out;
+}
+
+.collection-tile:hover,
+.collection-tile:focus-visible {
+  transform: translateY(-6px);
+}
+
+.card-flip-tilt[data-flipped="true"] {
+  --flip: -1;
+}
+
+.card-flip {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  transform-style: preserve-3d;
+  transition: transform 520ms cubic-bezier(0.2, 0.9, 0.25, 1);
+}
+
+.card-flip[data-flipped="true"] {
+  transform: rotateY(180deg);
+}
+
+/* Pendant le retournement, la carte n'a plus que ses dégradés et son visuel :
+   les calques de foil, de paillettes et de reflet (tous en `mix-blend-mode`)
+   sont retirés de l'arbre le temps de la rotation. */
+.card-flip-tilt[data-flipping="true"] .card-face .holo,
+.card-flip-tilt[data-flipping="true"] .card-face .card-foil,
+.card-flip-tilt[data-flipping="true"] .card-face .card-sparkle,
+.card-flip-tilt[data-flipping="true"] .card-face .card-glare {
+  display: none;
+}
+
+.card-flip-tilt[data-flipping="true"] .card-flip {
+  will-change: transform;
+}
+
+.card-flip-face {
+  position: absolute;
+  inset: 0;
+  display: block;
+  border-radius: 0.625rem;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.card-flip-front {
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.card-flip[data-flipped="true"] .card-flip-front,
+.card-flip:not([data-flipped="true"]) .card-flip-back {
+  pointer-events: none;
+}
+
+/* Visionneuse plein écran : la carte est plus grande, le verso doit suivre.
+   Toutes les tailles du verso étant en `em`, une seule base suffit. */
+.flip-stage .card-flip-back {
+  font-size: 15px;
+  /* Même rayon que le recto (`CardFace` md) : les deux faces coïncident. */
+  border-radius: 1rem;
+}
+
+/* Verso : mêmes teintes que la rareté, sur un fond sombre. */
+.card-flip-back {
+  --back-accent: #cbd5e1;
+  --back-halo: rgba(148, 163, 184, 0.2);
+  --back-edge: rgba(170, 184, 198, 0.32);
+  --glare-max: 0.22;
+  --foil-art: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+  padding: 1.1em;
+  overflow: hidden;
+  font-size: 10px;
+  color: #eef2f6;
+  cursor: pointer;
+  transform: rotateY(180deg);
+  background:
+    radial-gradient(125% 95% at 50% -8%, var(--back-halo), transparent 64%),
+    linear-gradient(168deg, #191d22, #0c0e11 58%, #08090b);
+  box-shadow:
+    inset 0 0 0 1px var(--back-edge),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 12px 26px -20px rgba(0, 0, 0, 0.9);
+}
+
+.card-flip-tilt[data-rarity="UC"] .card-flip-back {
+  --back-accent: #6ee7b7;
+  --back-halo: rgba(52, 211, 153, 0.22);
+  --back-edge: rgba(74, 222, 158, 0.34);
+}
+
+.card-flip-tilt[data-rarity="R"] .card-flip-back {
+  --back-accent: #7dd3fc;
+  --back-halo: rgba(56, 189, 248, 0.22);
+  --back-edge: rgba(56, 189, 248, 0.34);
+}
+
+.card-flip-tilt[data-rarity="SR"] .card-flip-back {
+  --back-accent: #c4b5fd;
+  --back-halo: rgba(167, 139, 250, 0.26);
+  --back-edge: rgba(167, 139, 250, 0.36);
+  --foil-art: 0.34;
+}
+
+.card-flip-tilt[data-rarity="UR"] .card-flip-back {
+  --back-accent: #fcd34d;
+  --back-halo: rgba(245, 158, 11, 0.26);
+  --back-edge: rgba(252, 211, 77, 0.42);
+  --foil-art: 0.34;
+  --sparkle: 0.7;
+}
+
+.card-flip-tilt[data-rarity="L"] .card-flip-back {
+  --back-accent: #f9a8d4;
+  --back-halo: rgba(244, 114, 182, 0.26);
+  --back-edge: rgba(244, 114, 182, 0.42);
+  --foil-art: 0.42;
+  --sparkle: 1;
+}
+
+.card-flip-back .grain {
+  opacity: 0.14;
+}
+
+/* Le verso n'a pas de foil carte entière : seul le calque d'artwork joue. */
+.card-flip-back {
+  --foil-card: 0;
+}
+
+.card-flip-back .card-sparkle {
+  z-index: 1;
+}
+
+.flip-back-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5em;
+  font-size: 0.92em;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.flip-back-rarity {
+  font-weight: 800;
+  color: var(--back-accent);
+}
+
+.flip-back-number {
+  font-family: var(--font-geist-mono, ui-monospace, monospace);
+  letter-spacing: 0.03em;
+  color: rgba(255, 255, 255, 0.42);
+}
+
+/* Variante et retrait, rappelés aussi au verso. */
+.flip-back-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35em;
+}
+
+.flip-back-tag {
+  padding: 0.1em 0.45em;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.82em;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14);
+}
+
+.flip-back-name {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 1.7em;
+  font-weight: 800;
+  line-height: 1.06;
+  letter-spacing: -0.02em;
+}
+
+.flip-back-universe {
+  margin-top: -0.3em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.95em;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.flip-back-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.45em;
+  /* Les cases occupent le centre de la carte, entre le nom et le pied. */
+  margin-block: auto;
+}
+
+.flip-back-cell {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.1em;
+  min-width: 0;
+  min-height: 0;
+  padding: 0.45em 0.55em;
+  border-radius: 0.35em;
+  background: rgba(255, 255, 255, 0.045);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.07);
+}
+
+.flip-back-cell span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.7em;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.42);
+}
+
+.flip-back-cell strong {
+  overflow: hidden;
+  font-family: var(--font-geist-mono, ui-monospace, monospace);
+  font-size: 1.45em;
+  font-weight: 700;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.flip-back-cell strong.flip-back-date {
+  font-size: 0.92em;
+  line-height: 1.25;
+}
+
+.flip-back-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5em;
+}
+
+.flip-back-link {
+  font-size: 0.95em;
+  font-weight: 700;
+  color: var(--back-accent);
+}
+
+.flip-back-link:hover {
+  text-decoration: underline;
+}
+
+.flip-back-return {
+  display: grid;
+  place-items: center;
+  width: 2.1em;
+  height: 2.1em;
+  border-radius: 9999px;
+  background: var(--back-accent);
+  color: #0b0d10;
+  font-size: 1em;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-flip,
+  .card-flip-tilt {
+    transition-duration: 1ms;
+  }
 }
 
 @keyframes card-in {
@@ -271,12 +1684,10 @@ body {
 @keyframes pack-pulse {
   0%,
   100% {
-    transform: translateY(0) rotate(-2deg);
-    box-shadow: 0 22px 60px -20px rgba(180, 255, 57, 0.55);
+    transform: translateY(0) rotate(-1.4deg);
   }
   50% {
-    transform: translateY(-8px) rotate(2deg);
-    box-shadow: 0 34px 80px -18px rgba(34, 227, 208, 0.45);
+    transform: translateY(-8px) rotate(1.4deg);
   }
 }
 
@@ -291,7 +1702,7 @@ body {
 }
 
 .rarity-shine {
-  background: linear-gradient(90deg, #fff, #b4ff39, #22e3d0, #fff);
+  background: linear-gradient(90deg, #fff, var(--acid), #dcffa8, #fff);
   background-size: 200% auto;
   -webkit-background-clip: text;
   background-clip: text;
@@ -301,240 +1712,501 @@ body {
 
 /* ————— Révélation d'un booster ————— */
 
-/* Scène : le clic retourne la carte, le dos garde le mystère. */
+/* Trois temps : le pack scellé se déchire, une aura colorée trahit la
+   meilleure rareté du tirage, puis les cartes se posent l'une sur l'autre. */
+
+/* Écran dédié : l'ouverture prend toute la page, au-dessus du reste. */
+.reveal-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  background:
+    radial-gradient(120% 70% at 50% 0%, rgba(255, 255, 255, 0.055), transparent 62%),
+    #06080a;
+  animation: reveal-screen-in 260ms ease-out;
+}
+
+@keyframes reveal-screen-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.reveal-bar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(6, 8, 10, 0.82);
+  backdrop-filter: blur(8px);
+}
+
+.reveal-bar-count {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.45);
+  font-variant-numeric: tabular-nums;
+}
+
+.reveal-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* `safe` évite de rogner le haut quand le contenu dépasse la hauteur. */
+  justify-content: safe center;
+  padding: 20px 16px 32px;
+}
+
+/* ————— Cadre de révélation —————
+
+   Une seule scène, à la taille d'une carte, du pack scellé jusqu'à la
+   dernière carte : le poster, l'aura et les cartes s'y superposent en
+   `grid-area: 1 / 1`. Avant, chaque étape avait sa propre taille et la page
+   sautait à chaque changement de phase. */
 .reveal-stage {
-  --aura: rgba(226, 232, 240, 0.5);
-  --aura-soft: rgba(226, 232, 240, 0.1);
-  --aura-opacity: 0.18;
-  --aura-blur: 24px;
-  appearance: none;
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: min(86vw, 380px, 52vh);
+  aspect-ratio: 3 / 4;
+  margin-bottom: 10px;
+}
+
+.reveal-stage > * {
+  grid-area: 1 / 1;
+}
+
+/* Le pack garde son ratio 5:8, calé sur la hauteur de la scène. */
+.reveal-stage .pack-stage {
+  width: auto;
+  max-width: 100%;
+  height: 100%;
+}
+
+.reveal-stage .aura-stage {
+  position: absolute;
+  inset: 0;
+  width: auto;
+  aspect-ratio: auto;
+  overflow: hidden;
+  border-radius: 1rem;
+  transition: opacity 520ms ease 120ms;
+}
+
+.reveal-stage .aura-stage[data-fading="true"] {
+  opacity: 0;
+}
+
+.reveal-stage .stack-scene {
+  width: 100%;
+  height: 100%;
+  margin-bottom: 0;
+}
+
+/* Pied de scène : la hauteur est réservée une fois pour toutes, pour que le
+   cadre ne remonte pas quand « Déchirer » laisse place au nom de la carte. */
+.reveal-foot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  /* Hauteur du pied le plus haut (rareté + pastilles + boutons + aide) :
+     elle est réservée à toutes les étapes, sinon la scène remonte de quelques
+     pixels quand les contrôles de la carte remplacent « Déchirer ». */
+  min-height: 200px;
+}
+
+/* ————— Récapitulatif en éventail —————
+
+   Les cartes se chevauchent comme dans une main : chaque tuile est tournée
+   autour de son pied, les extérieures descendent un peu. Au survol (ou au
+   focus clavier), la tuile se redresse, monte et passe devant les autres. */
+
+.fan-scene {
+  --fan-card-w: clamp(96px, 22vw, 176px);
+  --fan-step: clamp(26px, 8vw, 82px);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  margin: 0;
+  /* De la place au-dessus pour la carte qui se lève, et sous les cartes
+     inclinées, qui débordent de leur boîte. */
+  padding: 52px 12px 34px;
+  list-style: none;
+}
+
+.fan-slot {
+  position: relative;
+  flex: 0 0 auto;
+  width: var(--fan-card-w);
+  /* Sans cela, la largeur du contenu (nom + badge) impose sa loi au flex. */
+  min-width: 0;
+  z-index: var(--fan-z, 1);
+  transform-origin: 50% 118%;
+  transform: translateY(var(--fan-drop, 0px)) rotate(var(--fan-rotate, 0deg));
+  transition:
+    transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
+    filter 260ms ease;
+}
+
+/* Le chevauchement passe par une marge négative : l'éventail garde une largeur
+   prévisible quel que soit le nombre de cartes. */
+.fan-slot + .fan-slot {
+  margin-left: calc(var(--fan-step) - var(--fan-card-w));
+}
+
+.fan-slot:hover,
+.fan-slot:focus-within {
+  z-index: 60;
+  transform: translateY(calc(var(--fan-drop, 0px) - 26px)) rotate(0deg) scale(1.16);
+  filter: drop-shadow(0 20px 28px rgba(0, 0, 0, 0.55));
+}
+
+/* Les pastilles « Nouveau » / « Holo » chevaucheraient les voisines : elles
+   n'apparaissent que sur la carte sortie du paquet. */
+.fan-slot .chip {
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+
+.fan-slot:hover .chip,
+.fan-slot:focus-within .chip {
+  opacity: 1;
+}
+
+/* ————— 1. Le booster scellé ————— */
+
+.pack-stage {
+  position: relative;
+  width: min(64vw, 330px, 30vh);
+  aspect-ratio: 5 / 8;
+  display: block;
+  container-type: inline-size;
   border: 0;
   padding: 0;
   background: none;
-  color: inherit;
-  perspective: 1400px;
   cursor: pointer;
   outline: none;
 }
 
-/* La lueur du dos monte avec la rareté : c'est la seule indiscrétion avant
-   le retournement. */
-.reveal-stage[data-rarity="R"] {
-  --aura: rgba(56, 189, 248, 0.55);
-  --aura-soft: rgba(56, 189, 248, 0.18);
-  --aura-opacity: 0.34;
-  --aura-blur: 42px;
+.pack-stage:focus-visible {
+  box-shadow: 0 0 0 2px rgba(182, 255, 46, 0.85);
+  border-radius: 0.75rem;
 }
 
-.reveal-stage[data-rarity="SR"] {
-  --aura: rgba(167, 139, 250, 0.65);
-  --aura-soft: rgba(167, 139, 250, 0.24);
-  --aura-opacity: 0.52;
-  --aura-blur: 58px;
+/* Le booster scellé flotte doucement au-dessus du sol de la scène. L'ombre
+   (`pack-cast`) reste posée : elle compense la translation du parent et
+   s'élargit quand le pack redescend. Aucun suivi du pointeur. */
+.pack-stage {
+  animation: pack-hover 4.6s ease-in-out infinite;
 }
 
-.reveal-stage[data-rarity="UR"] {
-  --aura: rgba(252, 211, 77, 0.75);
-  --aura-soft: rgba(252, 211, 77, 0.3);
-  --aura-opacity: 0.7;
-  --aura-blur: 74px;
-}
-
-.reveal-stage[data-rarity="L"] {
-  --aura: rgba(244, 114, 182, 0.8);
-  --aura-soft: rgba(244, 114, 182, 0.34);
-  --aura-opacity: 0.88;
-  --aura-blur: 88px;
-}
-
-.reveal-stage:focus-visible .reveal-back,
-.reveal-stage:focus-visible .reveal-front {
-  box-shadow: 0 0 0 2px rgba(180, 255, 57, 0.85);
-}
-
-.reveal-inner {
-  transform-style: preserve-3d;
-  transition: transform 620ms cubic-bezier(0.3, 0.9, 0.2, 1);
-}
-
-.reveal-stage[data-open="true"] .reveal-inner {
-  transform: rotateY(180deg);
-}
-
-.reveal-back,
-.reveal-front {
+.pack-cast {
   position: absolute;
-  inset: 0;
-  overflow: hidden;
-  border-radius: 1rem;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-}
-
-.reveal-front {
-  transform: rotateY(180deg);
-  box-shadow: 0 24px 60px -30px rgba(0, 0, 0, 0.95);
-}
-
-/* Dos de carte fourni par le joueur. Tant que la carte n'est pas préparée,
-   il reste neutre : aucune lueur ne trahit la rareté. */
-.reveal-back {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #08090a;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 26px 60px -30px rgba(0, 0, 0, 0.95);
-  transition: border-color 320ms ease, box-shadow 320ms ease;
-}
-
-/* Lueur interne : elle n'apparaît qu'une fois la carte préparée, et pulse
-   plus ou moins fort selon la rareté. */
-.reveal-glow {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(54% 44% at 50% 41%, var(--aura-soft), transparent 74%);
-  mix-blend-mode: screen;
-  opacity: 0;
-  transition: opacity 320ms ease;
-  pointer-events: none;
-}
-
-.reveal-stage[data-ready="true"] .reveal-glow,
-.reveal-stage[data-charging="true"] .reveal-glow {
-  opacity: var(--aura-opacity);
-  animation: back-breathe 3.4s ease-in-out infinite;
-}
-
-@keyframes back-breathe {
-  0%,
-  100% {
-    opacity: calc(var(--aura-opacity) * 0.55);
-  }
-  50% {
-    opacity: var(--aura-opacity);
-  }
-}
-
-/* Halo autour de la carte : éteint au départ, il ne s'allume qu'au premier
-   clic pour laisser deviner la rareté. */
-.reveal-aura {
-  position: absolute;
-  inset: -12%;
+  left: 9%;
+  right: 9%;
+  bottom: -14px;
   z-index: 0;
-  border-radius: 1.6rem;
-  background: radial-gradient(circle, var(--aura-soft), transparent 66%);
-  filter: blur(16px);
-  opacity: 0;
-  transition: opacity 320ms ease;
+  height: 22px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0) 78%);
+  filter: blur(3px);
   pointer-events: none;
+  animation: pack-cast 4.6s ease-in-out infinite;
 }
 
-.reveal-stage[data-open="true"] .reveal-aura {
-  opacity: 0;
-  animation: none;
-}
-
-/* Carte préparée : la lueur s'allume et pulse, sans se retourner. Il faut un
-   second clic pour la révéler. */
-.reveal-stage[data-ready="true"] .reveal-aura,
-.reveal-stage[data-charging="true"] .reveal-aura {
-  opacity: var(--aura-opacity);
-  animation: ready-pulse 2.4s ease-in-out infinite;
-}
-
-.reveal-stage[data-ready="true"] .reveal-back {
-  border-color: var(--aura);
-  box-shadow:
-    0 0 0 1px var(--aura),
-    0 0 calc(var(--aura-blur) * 1.15) var(--aura-soft),
-    inset 0 0 calc(var(--aura-blur)) var(--aura-soft);
-}
-
-@keyframes ready-pulse {
+@keyframes pack-hover {
   0%,
   100% {
-    opacity: var(--aura-opacity);
-    transform: scale(1);
+    transform: translateY(0);
   }
   50% {
-    opacity: calc(var(--aura-opacity) * 1.35);
-    transform: scale(1.05);
+    transform: translateY(-8px);
   }
 }
 
-/* Suspense : la carte vibre et s'illumine avant de se retourner. */
-.reveal-halo {
+@keyframes pack-cast {
+  0%,
+  100% {
+    transform: translateY(0) scaleX(1);
+    opacity: 0.55;
+  }
+  50% {
+    transform: translateY(8px) scaleX(0.86);
+    opacity: 0.34;
+  }
+}
+
+.pack-half {
   position: absolute;
-  inset: -22%;
-  border-radius: 9999px;
-  background: radial-gradient(circle, var(--aura), transparent 62%);
-  opacity: 0;
-  transition: opacity 200ms ease;
-  pointer-events: none;
+  inset: 0;
+  display: block;
+  will-change: transform;
 }
 
-.reveal-stage[data-charging="true"] .reveal-halo {
-  opacity: 1;
-  animation: halo-pulse 620ms ease-out;
+/* Les deux moitiés contiennent le poster entier, clippé par `.pack-strip` et
+   `.pack-body`. Le poster remplit exactement la scène 5:8. */
+.pack-half .pack-frame,
+.pack-half .pack-poster {
+  height: 100%;
 }
 
-.reveal-stage[data-charging="true"] .reveal-back {
-  border-color: var(--aura);
-  box-shadow:
-    0 0 0 2px var(--aura),
-    0 0 calc(var(--aura-blur) * 1.5) var(--aura-soft),
-    inset 0 0 calc(var(--aura-blur) * 1.2) var(--aura-soft);
-  animation: reveal-charge 620ms cubic-bezier(0.35, 0, 0.2, 1) forwards;
+/* Le pack est coupé sur la soudure du haut, à la hauteur exacte de la bande
+   crantée : la bande part d'un côté, le sachet tombe de l'autre. */
+.pack-strip {
+  clip-path: inset(0 0 calc(100% - max(16px, 7cqw) - 1px) 0);
+  /* Pivot près du coin gauche de la soudure : la bande se décolle puis part
+     vers la droite, comme une pellicule arrachée. */
+  transform-origin: 12% 5%;
+  z-index: 1;
 }
 
-@keyframes reveal-charge {
+.pack-body {
+  clip-path: inset(calc(max(16px, 7cqw) + 1px) 0 0 0);
+  z-index: 2;
+}
+
+/* Le pack tremble brièvement avant que la soudure cède. */
+.pack-stage[data-tearing="true"] {
+  animation: pack-shake 220ms ease-in-out;
+}
+
+@keyframes pack-shake {
+  0%, 100% { transform: none; }
+  20% { transform: translate3d(-3px, 0, 0) rotate(-0.5deg); }
+  45% { transform: translate3d(3px, -1px, 0) rotate(0.6deg); }
+  70% { transform: translate3d(-2px, 1px, 0) rotate(-0.3deg); }
+}
+
+.pack-stage[data-tearing="true"] .pack-strip {
+  animation: pack-tear-strip 620ms 100ms cubic-bezier(0.3, 0.7, 0.2, 1) forwards;
+}
+
+.pack-stage[data-tearing="true"] .pack-body {
+  animation: pack-tear-body 620ms 100ms cubic-bezier(0.3, 0.7, 0.2, 1) forwards;
+}
+
+/* Le panneau clippe (`clip-path`), donc la bande tombe vers l'intérieur du
+   cadre au lieu de sortir par le haut. */
+@keyframes pack-tear-strip {
   0% {
-    transform: scale(1) rotate(0deg);
+    transform: none;
+    opacity: 1;
   }
-  18% {
-    transform: scale(1.015) rotate(-0.7deg);
+  16% {
+    transform: translate3d(-2%, -6%, 0) rotate(-3deg);
+    opacity: 1;
   }
-  42% {
-    transform: scale(1.025) rotate(0.8deg);
-  }
-  68% {
-    transform: scale(1.04) rotate(-0.5deg);
+  56% {
+    transform: translate3d(52%, -10%, 0) rotate(-12deg);
+    opacity: 0.94;
   }
   100% {
-    transform: scale(1.055) rotate(0deg);
-  }
-}
-
-@keyframes halo-pulse {
-  0% {
-    transform: scale(0.82);
+    transform: translate3d(120%, -4%, 0) rotate(-24deg);
     opacity: 0;
   }
-  60% {
+}
+
+@keyframes pack-tear-body {
+  0% {
+    transform: none;
+    opacity: 1;
+  }
+  26% {
+    transform: translateY(4px) scale(1.01);
+    opacity: 1;
+  }
+  62% {
+    transform: translate3d(-5%, -2%, 0) rotate(-2.2deg) scale(0.97);
+    opacity: 0.92;
+  }
+  100% {
+    transform: translate3d(-11%, -8%, 0) rotate(-5deg) scale(0.92);
+    opacity: 0;
+  }
+}
+
+/* Trait de découpe : il balaie le pack au moment où la bande se détache. */
+.pack-cut {
+  position: absolute;
+  left: -8%;
+  right: -8%;
+  top: calc(max(16px, 7cqw) + 1px);
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #eaffd0, #ffffff, #eaffd0, transparent);
+  box-shadow: 0 0 16px 5px rgba(190, 255, 110, 0.45);
+  opacity: 0;
+  transform: scaleX(0.15);
+  pointer-events: none;
+}
+
+.pack-stage[data-tearing="true"] .pack-cut {
+  animation: pack-cut 460ms 60ms ease-out forwards;
+}
+
+@keyframes pack-cut {
+  0% {
+    opacity: 0;
+    transform: scaleX(0.15);
+  }
+  30% {
     opacity: 1;
   }
   100% {
-    transform: scale(1.12);
-    opacity: 0.85;
+    opacity: 0;
+    transform: scaleX(1.1);
   }
 }
 
-/* Éclat de révélation, teinté par la rareté. */
-.reveal-burst {
+/* ————— 2. L'aura de rareté —————
+
+   L'aura est montée dès la déchirure et reste allumée derrière les cartes :
+   elle flamboie pendant que le pack s'efface, puis s'éteint en fondu quand la
+   première carte se pose. Toutes les animations se terminent sur un état
+   stable (`both`) au lieu de retomber à zéro. */
+
+.aura-stage {
+  position: relative;
+  width: min(62vw, 320px, 46vh);
+  aspect-ratio: 520 / 760;
+  display: grid;
+  place-items: center;
+}
+
+/* L'aura reste dans le cadre de la carte : débordant librement, elle
+   agrandissait la zone défilante de l'écran (barre de défilement et contenu
+   qui se décale de 7 px au moment où elle s'allume). Un masque radial la fait
+   s'éteindre avant les bords, donc aucune découpe visible. */
+.pack-aura {
   position: absolute;
-  inset: -14%;
-  z-index: 5;
-  border-radius: 9999px;
-  background: radial-gradient(circle, var(--burst, rgba(255, 255, 255, 0.2)) 0%, transparent 62%);
-  animation: reveal-burst 900ms ease-out forwards;
+  inset: 0;
+  background: radial-gradient(circle, var(--aura), transparent 62%);
+  -webkit-mask-image: radial-gradient(closest-side, #000 42%, transparent 100%);
+  mask-image: radial-gradient(closest-side, #000 42%, transparent 100%);
+  filter: blur(10px);
+  animation: aura-bloom 720ms 120ms ease-out both;
   pointer-events: none;
 }
 
-@keyframes reveal-burst {
+.pack-rays {
+  position: absolute;
+  inset: 0;
+  background: repeating-conic-gradient(
+    from 0deg,
+    var(--aura-soft) 0deg 2deg,
+    transparent 2deg 16deg
+  );
+  -webkit-mask-image: radial-gradient(circle, #000 10%, transparent 62%);
+  mask-image: radial-gradient(circle, #000 10%, transparent 62%);
+  animation: aura-rays 900ms 140ms ease-out both;
+  pointer-events: none;
+}
+
+.aura-seed {
+  width: 34%;
+  aspect-ratio: 1;
+  border-radius: 9999px;
+  background: radial-gradient(circle, #ffffff, var(--aura) 58%, transparent 72%);
+  filter: blur(2px);
+  animation: aura-seed 720ms 120ms ease-out both;
+}
+
+/* Onde de choc : un anneau qui s'élargit une fois, au moment où le pack cède.
+   Même galbe que la carte : en cercle, il ne restait que quatre arcs dans les
+   coins du cadre. */
+.aura-ring {
+  position: absolute;
+  inset: 4%;
+  border-radius: 1rem;
+  border: 2px solid var(--aura);
+  box-shadow: 0 0 24px var(--aura-soft);
+  opacity: 0;
+  animation: aura-ring 900ms 160ms ease-out both;
+  pointer-events: none;
+}
+
+/* Poussière lumineuse qui monte du pack ouvert. */
+.aura-motes {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.aura-mote {
+  position: absolute;
+  left: calc(50% + var(--mote-x, 0px));
+  bottom: 22%;
+  width: 3px;
+  height: 3px;
+  border-radius: 9999px;
+  background: var(--aura);
+  box-shadow: 0 0 8px var(--aura);
+  opacity: 0;
+  animation: aura-mote 1100ms var(--mote-delay, 0ms) ease-out both;
+}
+
+@keyframes aura-bloom {
   0% {
-    opacity: 0.85;
-    transform: scale(0.55);
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  38% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.82;
+    transform: scale(1.12);
+  }
+}
+
+@keyframes aura-rays {
+  0% {
+    opacity: 0;
+    transform: scale(0.55) rotate(-8deg);
+  }
+  38% {
+    opacity: 0.55;
+  }
+  100% {
+    opacity: 0.38;
+    transform: scale(1.16) rotate(18deg);
+  }
+}
+
+@keyframes aura-seed {
+  0% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  34% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 0.55;
+    transform: scale(1.2);
+  }
+}
+
+@keyframes aura-ring {
+  0% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  30% {
+    opacity: 0.75;
   }
   100% {
     opacity: 0;
@@ -542,34 +2214,162 @@ body {
   }
 }
 
-.reveal-rays {
-  position: absolute;
-  inset: -32%;
-  z-index: 4;
-  background: repeating-conic-gradient(
-    from 0deg,
-    var(--burst) 0deg 2deg,
-    transparent 2deg 17deg
-  );
-  -webkit-mask-image: radial-gradient(circle, rgba(0, 0, 0, 0.9) 18%, transparent 66%);
-  mask-image: radial-gradient(circle, rgba(0, 0, 0, 0.9) 18%, transparent 66%);
-  opacity: 0;
-  animation: reveal-rays 900ms ease-out forwards;
-  pointer-events: none;
-}
-
-@keyframes reveal-rays {
+@keyframes aura-mote {
   0% {
     opacity: 0;
-    transform: scale(0.7) rotate(0deg);
+    transform: translateY(0) scale(0.5);
   }
-  28% {
-    opacity: 0.4;
+  25% {
+    opacity: 1;
   }
   100% {
     opacity: 0;
-    transform: scale(1.12) rotate(40deg);
+    transform: translateY(-110px) scale(1);
   }
+}
+
+/* ————— Étincelles des cartes rares —————
+
+   Au-dessus de Rare : une gerbe de points projetés autour de la carte, une
+   onde de choc et un halo. Tout est piloté par `transform` et `opacity`, et
+   chaque teinte vient de la rareté de la carte. */
+
+.reveal-sparks {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  pointer-events: none;
+  color: #c4b5fd;
+}
+
+.reveal-sparks[data-rarity="UR"] {
+  color: #fcd34d;
+}
+
+.reveal-sparks[data-rarity="L"] {
+  color: #ffeebe;
+}
+
+.reveal-spark {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--spark-size, 2px);
+  height: var(--spark-size, 2px);
+  margin: calc(var(--spark-size, 2px) / -2);
+  border-radius: 9999px;
+  background: currentColor;
+  box-shadow: 0 0 10px currentColor;
+  opacity: 0;
+  animation: spark-fly 900ms var(--spark-delay, 0ms) cubic-bezier(0.16, 0.84, 0.3, 1) both;
+}
+
+@keyframes spark-fly {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0) scale(0.4);
+  }
+  14% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--spark-x, 0), var(--spark-y, 0), 0) scale(1);
+  }
+}
+
+.reveal-sparks .reveal-ring {
+  position: absolute;
+  inset: 3%;
+  border-radius: 1.1rem;
+  border: 2px solid currentColor;
+  box-shadow:
+    0 0 24px currentColor,
+    inset 0 0 24px -8px currentColor;
+  opacity: 0;
+  animation: card-ring 760ms 60ms ease-out both;
+}
+
+@keyframes card-ring {
+  0% {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  22% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.08);
+  }
+}
+
+/* ————— 3. Les cartes, empilées ————— */
+
+.stack-scene {
+  position: relative;
+  display: block;
+  /* La carte de révélation occupe la scène : elle grandit avec la fenêtre,
+     sans jamais dépasser ce qui reste lisible sur petit écran. */
+  width: min(86vw, 380px, 52vh);
+  aspect-ratio: 3 / 4;
+  /* Laisse respirer les cartes qui dépassent sous la pile. */
+  margin-bottom: 14px;
+  border: 0;
+  padding: 0;
+  background: none;
+  cursor: pointer;
+  outline: none;
+}
+
+.stack-scene:focus-visible {
+  box-shadow: 0 0 0 2px rgba(182, 255, 46, 0.85);
+  border-radius: 1rem;
+}
+
+.stack-card {
+  position: absolute;
+  inset: 0;
+  border-radius: 1rem;
+  transition:
+    transform 460ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 300ms ease;
+}
+
+/* La carte du dessus sort de l'aura et se pose sur la pile : elle monte, se
+   redresse et se met à l'échelle — uniquement `transform` et `opacity`, donc
+   l'animation reste sur le compositeur même sur mobile. */
+.deal-in {
+  animation: deal-in 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes deal-in {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 28px, 0) rotate(2.5deg) scale(0.9);
+  }
+  55% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+  }
+}
+
+.deck-thumb {
+  position: relative;
+  display: block;
+  width: 34px;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  border-radius: 0.375rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: #0b0b12;
+}
+
+.deck-thumb-back {
+  opacity: 0.45;
 }
 
 .reveal-pop {
@@ -587,27 +2387,196 @@ body {
   }
 }
 
+/* Reflet qui traverse la carte au moment où elle se pose : la lumière passe
+   une seule fois, de gauche à droite, plus franche sur les hautes raretés.
+   L'enveloppe clippe le reflet aux coins de la carte ; les pastilles « Nouveau »
+   restent dehors, elles ne doivent pas être rognées. */
+.reveal-sheen {
+  position: absolute;
+  inset: 0;
+  z-index: 15;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+  /* Intensité de la passe, par rareté. */
+  --sheen: 0.18;
+}
+
+.reveal-sheen[data-rarity="UC"] {
+  --sheen: 0.22;
+}
+
+.reveal-sheen[data-rarity="R"] {
+  --sheen: 0.3;
+}
+
+.reveal-sheen[data-rarity="SR"] {
+  --sheen: 0.42;
+}
+
+.reveal-sheen[data-rarity="UR"] {
+  --sheen: 0.55;
+}
+
+.reveal-sheen[data-rarity="L"] {
+  --sheen: 0.68;
+}
+
+.reveal-sheen-bar {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    102deg,
+    transparent 34%,
+    rgba(255, 255, 255, 0.85) 47%,
+    rgba(255, 255, 255, 0.25) 56%,
+    transparent 68%
+  );
+  opacity: 0;
+  transform: translateX(-120%);
+  /* Passe lente au début, franche au milieu : le reflet reste lisible à
+     l'œil au lieu de balayer la carte en un clignotement. */
+  animation: reveal-sheen 900ms 170ms cubic-bezier(0.45, 0, 0.55, 1) both;
+}
+
+@keyframes reveal-sheen {
+  0% {
+    opacity: 0;
+    transform: translateX(-120%);
+  }
+  16% {
+    opacity: var(--sheen, 0.18);
+  }
+  58% {
+    opacity: var(--sheen, 0.18);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(120%);
+  }
+}
+
+/* Éclat plein écran au moment où la carte se pose, teinté par la rareté.
+   Pas de `mix-blend-mode` : un blend sur tout l'écran force le navigateur à
+   recomposer l'image entière à chaque image de l'animation, et c'est ce qui
+   faisait ramer la révélation sur mobile. L'opacité et la transformation
+   suffisent, et restent sur le compositeur. */
+.reveal-flash {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  background: radial-gradient(circle at 50% 45%, rgba(255, 255, 255, 0.18), transparent 62%);
+  animation: reveal-flash 480ms ease-out forwards;
+  will-change: opacity, transform;
+  backface-visibility: hidden;
+}
+
+.reveal-flash[data-rarity="UC"] {
+  background: radial-gradient(circle at 50% 45%, rgba(74, 222, 158, 0.3), transparent 62%);
+}
+
+.reveal-flash[data-rarity="SR"] {
+  background: radial-gradient(circle at 50% 45%, rgba(143, 126, 255, 0.4), transparent 64%);
+}
+
+.reveal-flash[data-rarity="UR"] {
+  background: radial-gradient(circle at 50% 45%, rgba(255, 198, 74, 0.46), transparent 64%);
+}
+
+/* Platine chaud : plus d'arc-en-ciel, comme le reste des hautes raretés. */
+.reveal-flash[data-rarity="L"] {
+  background: radial-gradient(circle at 50% 45%, rgba(255, 238, 190, 0.5), transparent 66%);
+}
+
+@keyframes reveal-flash {
+  /* Opacité seule : une échelle plein écran obligeait à repeindre tout le
+     viewport à chaque image, pour un halo à peine plus large. */
+  0% {
+    opacity: 0;
+  }
+  14% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  /* Pas d'éclat : la révélation reste lisible sans clignotement. */
+  .reveal-flash {
+    display: none;
+  }
+
+  /* Pas d'inclinaison : la carte reste à plat, le reflet suit quand même. */
+  .card-face {
+    transform: none;
+    transition: box-shadow 300ms ease;
+  }
+
+  /* Packs : l'inclinaison reste, mais le passage au repos → redressé est
+     instantané (aucune transition). */
+  .pack-poster,
+  .pack-poster:hover,
+  .pack-poster:focus-visible,
+  .pack-poster[data-selected="true"],
+  button:focus-visible .pack-poster {
+    transition: none;
+  }
+
   .card-deal,
   .pack-float,
+  .pack-stage,
+  .pack-cast,
+  .pack-stage[data-tearing="true"],
+  .pack-stage[data-tearing="true"] .pack-strip,
+  .pack-stage[data-tearing="true"] .pack-body,
   .rarity-shine,
   .card-face[data-rarity="UR"],
   .card-face[data-rarity="L"],
-  .card-face[data-rarity="L"] .holo,
   .card-face[data-rarity="UR"].card-shine::after,
   .card-face[data-rarity="L"].card-shine::after,
-  .reveal-glow,
-  .reveal-halo,
-  .reveal-stage[data-ready="true"] .reveal-aura,
-  .reveal-stage[data-charging="true"] .reveal-halo,
-  .reveal-stage[data-charging="true"] .reveal-back,
-  .reveal-burst,
-  .reveal-rays,
-  .reveal-pop {
+  .deal-in,
+  .reveal-pop,
+  .reveal-sheen-bar,
+  .pack-cut,
+  .pack-aura,
+  .pack-rays,
+  .aura-seed,
+  .aura-ring,
+  .aura-mote,
+  .reveal-spark,
+  .reveal-sparks .reveal-ring {
     animation: none;
   }
 
-  .reveal-inner {
+  .stack-card,
+  .fan-slot {
     transition: none;
+  }
+}
+
+/* ————— Cadres d'avatar ————— */
+@keyframes frame-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.frame-spin-layer {
+  position: absolute;
+  inset: -60%;
+  border-radius: 9999px;
+  animation: frame-spin 18s linear infinite;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .frame-spin-layer {
+    animation: none !important;
   }
 }

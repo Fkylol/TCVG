@@ -7,7 +7,11 @@
  * renommer/retirer un personnage ici suffit à le retirer du jeu.
  */
 
-export type Rarity = "C" | "R" | "SR" | "UR" | "L";
+/**
+ * Paliers de rareté, du plus courant au plus rare.
+ * Les clés sont celles de la base ; l'affichage utilise les lettres C/U/R/E/L/M.
+ */
+export type Rarity = "C" | "UC" | "R" | "SR" | "UR" | "L";
 
 export type UniverseKey = keyof typeof UNIVERSES;
 
@@ -44,6 +48,150 @@ export const UNIVERSES = {
   splatoon: { label: "Splatoon", from: "#db2777", to: "#22d3ee" },
   persona: { label: "Persona", from: "#b91c1c", to: "#111827" },
   nier: { label: "NieR", from: "#3f3f46", to: "#d6d3d1" },
+
+  // ——— Nouveaux univers (import Retrogems, octobre 2026) ———
+  "gta": { label: "Grand Theft Auto", from: "#111827", to: "#f472b6" },
+  "ff6": { label: "Final Fantasy VI", from: "#7f1d1d", to: "#fbbf24" },
+  "ff9": { label: "Final Fantasy IX", from: "#0f172a", to: "#f59e0b" },
+  "ff10": { label: "Final Fantasy X", from: "#0c4a6e", to: "#f8fafc" },
+  "lifeisstrange": { label: "Life is Strange", from: "#0ea5e9", to: "#a78bfa" },
+  "soulcalibur": { label: "SoulCalibur", from: "#7f1d1d", to: "#facc15" },
+  "poppyplaytime": { label: "Poppy Playtime", from: "#1e3a8a", to: "#f472b6" },
+  "codevein": { label: "Code Vein", from: "#0f172a", to: "#dc2626" },
+  "clair-obscur": { label: "Clair Obscur", from: "#0f766e", to: "#fbbf24" },
+  "crimson-desert": { label: "Crimson Desert", from: "#451a03", to: "#dc2626" },
+  "reddead": { label: "Red Dead Redemption", from: "#7f1d1d", to: "#d97706" },
+  "shenmue": { label: "Shenmue", from: "#134e4a", to: "#f59e0b" },
+  "bully": { label: "Bully", from: "#1e293b", to: "#f59e0b" },
+  "metalgear": { label: "Metal Gear", from: "#111827", to: "#64748b" },
+  "starfox": { label: "Star Fox", from: "#1e3a8a", to: "#f97316" },
+  "mafia": { label: "Mafia", from: "#1c1917", to: "#b45309" },
+  "bubsy": { label: "Bubsy", from: "#b45309", to: "#facc15" },
+  "dukenukem": { label: "Duke Nukem", from: "#b91c1c", to: "#facc15" },
+  "okami": { label: "Ōkami", from: "#166534", to: "#fef3c7" },
+
+  // ——— MMO (octobre 2026) ———
+  wow: { label: "World of Warcraft", from: "#7f1d1d", to: "#fbbf24" },
+  ff14: { label: "Final Fantasy XIV", from: "#1e1b4b", to: "#a78bfa" },
+  dofus: { label: "Dofus", from: "#0f766e", to: "#fde047" },
+  guildwars2: { label: "Guild Wars 2", from: "#7c2d12", to: "#f97316" },
+  runescape: { label: "RuneScape", from: "#0f3d2e", to: "#facc15" },
+  eso: { label: "The Elder Scrolls Online", from: "#1c1917", to: "#a855f7" },
+  lostark: { label: "Lost Ark", from: "#0c1f3f", to: "#38bdf8" },
+  swtor: { label: "Star Wars: The Old Republic", from: "#0b132b", to: "#dc2626" },
+
+  // ——— Vague MMO de fin octobre 2026 ———
+  everquest: { label: "EverQuest", from: "#0f2e1d", to: "#e0b44a" },
+  lineage2: { label: "Lineage II", from: "#1f1a2e", to: "#b91c1c" },
+  ragnarok: { label: "Ragnarok Online", from: "#7c2d12", to: "#38bdf8" },
+  maplestory: { label: "MapleStory", from: "#f59e0b", to: "#22c55e" },
+  aion: { label: "Aion", from: "#1e3a8a", to: "#f5d0fe" },
+  tera: { label: "TERA", from: "#164e63", to: "#f59e0b" },
+  bladeandsoul: { label: "Blade & Soul", from: "#1f2937", to: "#e11d48" },
+  blackdesert: { label: "Black Desert Online", from: "#111827", to: "#c2410c" },
+  thesecretworld: { label: "The Secret World", from: "#0f172a", to: "#059669" },
+  pso2: { label: "Phantasy Star Online 2", from: "#312e81", to: "#22d3ee" },
+  ageofconan: { label: "Age of Conan", from: "#451a03", to: "#ca8a04" },
+  cityofheroes: { label: "City of Heroes", from: "#1e40af", to: "#fbbf24" },
+  tibia: { label: "Tibia", from: "#1c1917", to: "#dc2626" },
+  wildstar: { label: "WildStar", from: "#7c3aed", to: "#facc15" },
+
+  // ——— Vague MMO de fin octobre 2026 (suite) ———
+  flyff: { label: "Flyff", from: "#0ea5e9", to: "#facc15" },
+  warhammeronline: { label: "Warhammer Online", from: "#1c1917", to: "#b91c1c" },
+  albion: { label: "Albion Online", from: "#14532d", to: "#a3e635" },
+  muonline: { label: "MU Online", from: "#1e1b4b", to: "#dc2626" },
+  wakfu: { label: "Wakfu", from: "#0f766e", to: "#f59e0b" },
+  startrek: { label: "Star Trek Online", from: "#0c1a3a", to: "#f59e0b" },
+  dcuo: { label: "DC Universe Online", from: "#1e3a8a", to: "#f43f5e" },
+  dragonnest: { label: "Dragon Nest", from: "#312e81", to: "#f59e0b" },
+  rift: { label: "Rift", from: "#0c4a6e", to: "#a855f7" },
+  rappelz: { label: "Rappelz", from: "#1e293b", to: "#e2e8f0" },
+
+  // ——— Vague MMO de fin octobre 2026 (dernière) ———
+  lotro: { label: "The Lord of the Rings Online", from: "#1c2a1e", to: "#d4a017" },
+  swgalaxies: { label: "Star Wars Galaxies", from: "#0b132b", to: "#f472b6" },
+  // PSO classique : franchise distincte de Phantasy Star Online 2.
+  pso: { label: "Phantasy Star Online", from: "#111827", to: "#22d3ee" },
+  cabal: { label: "Cabal Online", from: "#1e1b4b", to: "#f59e0b" },
+  knightonline: { label: "Knight Online", from: "#451a03", to: "#dc2626" },
+  atlantica: { label: "Atlantica Online", from: "#0c4a6e", to: "#fbbf24" },
+  fiesta: { label: "Fiesta Online", from: "#be185d", to: "#fde047" },
+  perfectworld: { label: "Perfect World", from: "#14532d", to: "#fcd34d" },
+
+  // ——— Horreur (octobre 2026) ———
+  silenthill: { label: "Silent Hill", from: "#1f2937", to: "#9f1239" },
+  alienisolation: { label: "Alien: Isolation", from: "#0b132b", to: "#22d3ee" },
+  evilwithin: { label: "The Evil Within", from: "#450a0a", to: "#a16207" },
+
+  // ——— Horreur (octobre 2026, suite) ———
+  outlast: { label: "Outlast", from: "#111827", to: "#b91c1c" },
+  deadspace: { label: "Dead Space", from: "#0c1a2b", to: "#22d3ee" },
+  fnaf: { label: "Five Nights at Freddy's", from: "#1c1917", to: "#a3e635" },
+  untildawn: { label: "Until Dawn", from: "#0c4a6e", to: "#e5e7eb" },
+  layersoffear: { label: "Layers of Fear", from: "#3f1d38", to: "#d4a017" },
+  projectzero: { label: "Project Zero", from: "#1e1b4b", to: "#e2e8f0" },
+  phasmophobia: { label: "Phasmophobia", from: "#0f172a", to: "#22d3ee" },
+  deadbydaylight: { label: "Dead by Daylight", from: "#1c1917", to: "#dc2626" },
+  soma: { label: "SOMA", from: "#0c4a6e", to: "#67e8f9" },
+  darkwood: { label: "Darkwood", from: "#292524", to: "#a16207" },
+
+  // ——— Horreur (octobre 2026, troisième vague) ———
+  amnesia: { label: "Amnesia", from: "#1c1917", to: "#a16207" },
+  mortuaryassistant: { label: "The Mortuary Assistant", from: "#1f2937", to: "#dc2626" },
+  ironlung: { label: "Iron Lung", from: "#450a0a", to: "#b91c1c" },
+  manhunt: { label: "Manhunt", from: "#111827", to: "#f97316" },
+  dokidoki: { label: "Doki Doki Literature Club!", from: "#be185d", to: "#f9a8d4" },
+  subnautica: { label: "Subnautica", from: "#0c4a6e", to: "#22d3ee" },
+  signalis: { label: "Signalis", from: "#3f3f46", to: "#e11d48" },
+
+  // ——— Ori (octobre 2026) ———
+  ori: { label: "Ori", from: "#134e4a", to: "#a3e635" },
+
+  // ——— Bloodborne, Cyberpunk 2077 (octobre 2026) ———
+  bloodborne: { label: "Bloodborne", from: "#1c1917", to: "#991b1b" },
+  cyberpunk: { label: "Cyberpunk 2077", from: "#0f172a", to: "#facc15" },
+
+  // ——— Skyrim, Fallout, Mass Effect, Borderlands (octobre 2026) ———
+  skyrim: { label: "The Elder Scrolls V: Skyrim", from: "#1f2937", to: "#94a3b8" },
+  fallout: { label: "Fallout", from: "#3f2d1d", to: "#facc15" },
+  masseffect: { label: "Mass Effect", from: "#0b132b", to: "#ef4444" },
+  borderlands: { label: "Borderlands", from: "#1c1917", to: "#f97316" },
+
+  // ——— Seconds rôles et indés (octobre 2026) ———
+  l4d: { label: "Left 4 Dead", from: "#450a0a", to: "#65a30d" },
+  tf2: { label: "Team Fortress 2", from: "#b91c1c", to: "#1d4ed8" },
+  stardew: { label: "Stardew Valley", from: "#365314", to: "#fbbf24" },
+  hades: { label: "Hades", from: "#450a0a", to: "#0ea5e9" },
+  deadcells: { label: "Dead Cells", from: "#1c1917", to: "#22c55e" },
+  pvz: { label: "Plants vs. Zombies", from: "#4d7c0f", to: "#7c3aed" },
+  katanazero: { label: "Katana Zero", from: "#111827", to: "#e11d48" },
+  goose: { label: "Untitled Goose Game", from: "#1e293b", to: "#f97316" },
+
+  // ——— Indés délirants (octobre 2026) ———
+  hotlinemiami: { label: "Hotline Miami", from: "#7f1d1d", to: "#ec4899" },
+  dontstarve: { label: "Don't Starve", from: "#1c1917", to: "#a16207" },
+  amongus: { label: "Among Us", from: "#0f172a", to: "#dc2626" },
+  fallguys: { label: "Fall Guys", from: "#7c3aed", to: "#f472b6" },
+  goatsim: { label: "Goat Simulator", from: "#3f6212", to: "#a8a29e" },
+  shovelknight: { label: "Shovel Knight", from: "#1e3a8a", to: "#38bdf8" },
+  supermeatboy: { label: "Super Meat Boy", from: "#450a0a", to: "#f87171" },
+  limbo: { label: "Limbo", from: "#0a0a0a", to: "#a3a3a3" },
+  papersplease: { label: "Papers, Please", from: "#44403c", to: "#b91c1c" },
+
+  // ——— Récits et curiosités (octobre 2026) ———
+  discoelysium: { label: "Disco Elysium", from: "#0f172a", to: "#f43f5e" },
+  pentiment: { label: "Pentiment", from: "#44403c", to: "#fcd34d" },
+  outerwilds: { label: "Outer Wilds", from: "#0b132b", to: "#f97316" },
+  katamari: { label: "Katamari Damacy", from: "#db2777", to: "#22d3ee" },
+  darkesstdungeon: { label: "Darkest Dungeon", from: "#111827", to: "#b91c1c" },
+  slimerancher: { label: "Slime Rancher", from: "#0e7490", to: "#f472b6" },
+
+  // ——— Course et stratégie (octobre 2026) ———
+  driver: { label: "Driver", from: "#1c1917", to: "#0ea5e9" },
+  empireatwar: { label: "Star Wars: Empire at War", from: "#0b132b", to: "#22d3ee" },
+  totalwar: { label: "Total War", from: "#292524", to: "#dc2626" },
+  stronghold: { label: "Stronghold", from: "#365314", to: "#d4a017" },
 } as const;
 
 export type Card = {
@@ -52,663 +200,2033 @@ export type Card = {
   universe: UniverseKey;
   emoji: string;
   rarity: Rarity;
-  tagline: string;
-  quote: string;
-  power: string;
-  bio: string;
+  /**
+   * Carte retirée du catalogue : elle reste dans ce fichier pour que les
+   * collections existantes gardent leur personnage, mais elle sort des pools
+   * de boosters (via `cards.active`) et n'affiche plus son visuel.
+   */
+  retired?: boolean;
 };
 
 export const CARDS: Card[] = [
   // ——— God of War ———
   {
     id: "kratos", name: "Kratos", universe: "godofwar", emoji: "🪓", rarity: "UR",
-tagline: "Fantôme de Sparte, tueur de dieux",
-    quote: "Ne t'excuse pas. Sois meilleur.",
-    power: "Colère de Sparte — +20% d'attaque face aux divinités.",
-    bio: "Général spartiate devenu bourreau des dieux de l'Olympe, il a traversé les Neuf Royaumes pour enterrer ses cendres et élever son fils.",
   },
   {
-    id: "atreus", name: "Atreus", universe: "godofwar", emoji: "🏹", rarity: "C",
-tagline: "Loki, fils du Fantôme",
-    quote: "Je ne suis pas comme toi. Je dois savoir qui je suis.",
-    power: "Sens du chasseur — révèle les cartes cachées de l'adversaire.",
-    bio: "Mi-géant, mi-dieu, il apprend l'arc et les runes auprès d'un père qui ne sait parler qu'avec une hache.",
+    id: "atreus", name: "Atreus", universe: "godofwar", emoji: "🏹", rarity: "UC",
   },
   {
     id: "baldur", name: "Baldur", universe: "godofwar", emoji: "⚡", rarity: "SR",
-tagline: "L'invulnérable qui cherchait la douleur",
-    quote: "Je ne ressens rien. Depuis toujours.",
-    power: "Peau de fer — annule la première attaque reçue.",
-    bio: "Béni puis maudit par sa mère, il parcourt les royaumes en quête de la seule chose qu'on lui a refusée : une sensation.",
   },
   {
     id: "freya", name: "Freya", universe: "godofwar", emoji: "🌿", rarity: "R",
-tagline: "Reine des Valkyries déchue",
-    quote: "Tu as pris mon fils. Je prendrai tout le reste.",
-    power: "Sève ancienne — soigne 15% des points de vie à chaque tour.",
-    bio: "Ancienne déesse de la nature, elle connaît les secrets des Vanir et la rage tranquille d'une mère qui a tout perdu.",
   },
 
   // ——— Super Mario ———
   {
     id: "mario", name: "Mario", universe: "mario", emoji: "🍄", rarity: "UR",
-tagline: "Le plombier qui sauve des royaumes",
-    quote: "Wahoo !",
-    power: "Super étoile — devient invincible pendant un tour.",
-    bio: "Chaque château, chaque princesse, chaque tuyau : il recommence depuis 1985 et il sourit toujours.",
   },
   {
     id: "luigi", name: "Luigi", universe: "mario", emoji: "👻", rarity: "C",
-tagline: "Le frère qui a peur de tout",
-    quote: "M-Mario ? Tu es là ?",
-    power: "Aspirateur Poltergust — renvoie les attaques spectrales.",
-    bio: "Plus grand, plus mince, plus terrifié. Il a pourtant sauvé un manoir entier, seul, avec une lampe torche.",
   },
   {
     id: "bowser", name: "Bowser", universe: "mario", emoji: "🐢", rarity: "SR",
-tagline: "Roi des Koopas, éternel rival",
-    quote: "Je vais écraser ce royaume !",
-    power: "Souffle de feu — brûle une carte de terrain.",
-    bio: "Il enlève des princesses par habitude, mais il joue au tennis, au golf et aux cartes avec sa victime favorite.",
   },
   {
     id: "peach", name: "Peach", universe: "mario", emoji: "👑", rarity: "SR",
-tagline: "Souveraine du Royaume Champignon",
-    quote: "Merci, Mario !",
-    power: "Cœur de cristal — restaure 25% de défense à toute l'équipe.",
-    bio: "Souvent kidnappée, jamais passive : elle flotte, elle se bat, elle gouverne un royaume que tout le monde veut prendre.",
   },
   {
     id: "yoshi", name: "Yoshi", universe: "mario", emoji: "🥚", rarity: "C",
-tagline: "Dinosaure au grand cœur",
-    quote: "Yoshi !",
-    power: "Langue extensible — vole une petite carte à l'adversaire.",
-    bio: "Il avale n'importe quoi et le transforme en œuf. Ne lui demandez pas comment.",
   },
 
   // ——— Banjo-Kazooie ———
   {
     id: "banjo-kazooie", name: "Banjo & Kazooie", universe: "banjo", emoji: "🐻", rarity: "SR",
-tagline: "Le duo que personne n'attendait",
-    quote: "Guh-huh !",
-    power: "Duo inséparable — attaque deux fois si la défense tient.",
-    bio: "Un ours trop gentil et un oiseau trop insolent, unis pour rendre ses pièces d'or à une sorcière qui les voulait toutes.",
   },
   {
     id: "gruntilda", name: "Gruntilda", universe: "banjo", emoji: "🧹", rarity: "C",
-tagline: "Sorcière rimailleuse et vaniteuse",
-    quote: "Ma beauté volée, je la reprendrai !",
-    power: "Rime maudite — l'adversaire subit les dégâts de sa propre citation.",
-    bio: "Elle a volé le visage de la sœur de Banjo par pure jalousie, puis s'est retrouvée coincée sous un rocher pendant dix ans.",
   },
   {
     id: "mumbo", name: "Mumbo Jumbo", universe: "banjo", emoji: "🦴", rarity: "C",
-tagline: "Chaman à tête de crâne",
-    quote: "Mumbo… transforme !",
-    power: "Transformation — copie l'emoji d'une carte alliée.",
-    bio: "Il parle de lui à la troisième personne et change les ours en fourmis, en grenouilles, ou en citrouilles géantes.",
   },
 
   // ——— Spyro ———
   {
     id: "spyro", name: "Spyro", universe: "spyro", emoji: "🐉", rarity: "UR",
-tagline: "Petit dragon, grande flamme",
-    quote: "Un dragon, ça ne se laisse pas faire.",
-    power: "Charge de cornes — ignore la défense au premier tour.",
-    bio: "Un dragon violet élevé par des libellules, qui a libéré cinq mondes avant d'avoir l'âge de voler correctement.",
   },
   {
     id: "ripto", name: "Ripto", universe: "spyro", emoji: "🦎", rarity: "C",
-tagline: "Sorcier minuscule, ego immense",
-    quote: "Les dragons ? Une erreur de la nature.",
-    power: "Sceptre de magma — +10% d'attaque par tour de retard.",
-    bio: "Banni d'Avalar pour cause de mauvaises manières, il rêve d'un monde sans dragons, ce qui est difficile quand on en croise un toutes les deux minutes.",
   },
   {
     id: "hunter", name: "Hunter", universe: "spyro", emoji: "🐆", rarity: "C",
-tagline: "Guépard acrobate un peu vantard",
-    quote: "Tout est dans les pattes, mon vieux.",
-    power: "Agilité féline — esquive la première attaque.",
-    bio: "Il court plus vite qu'il ne réfléchit, et il réfléchit très vite.",
   },
 
   // ——— The Legend of Zelda ———
   {
     id: "link", name: "Link", universe: "zelda", emoji: "🗡️", rarity: "UR",
-tagline: "Héros au silence éloquent",
-    quote: "…",
-    power: "Épée de Légende — annule les effets de la carte visée.",
-    bio: "Il ne parle pas, il résout. Chaque génération, un garçon en tunique verte se lève quand un roi déchu se réveille.",
   },
   {
     id: "zelda", name: "Zelda", universe: "zelda", emoji: "🔮", rarity: "SR",
-tagline: "Princesse, savante, déesse scellée",
-    quote: "Je te confie la lumière.",
-    power: "Sceau sacré — bloque une carte adverse pour deux tours.",
-    bio: "Elle a porté seule le poids d'un royaume en ruine, retenant le Fléau pendant cent ans.",
   },
   {
     id: "ganondorf", name: "Ganondorf", universe: "zelda", emoji: "👿", rarity: "L",
-tagline: "Roi du Mal, haine immortelle",
-    quote: "Je vaincrai ce monde encore et encore.",
-    power: "Triforce de Puissance — +30% d'attaque si la défense est inférieure à 9000.",
-    bio: "Géridien, puis Démon. Sa haine ne meurt pas : elle attend, sous terre, le prochain nommé Link.",
   },
   {
     id: "majora", name: "Majora", universe: "zelda", emoji: "🌘", rarity: "SR",
-tagline: "Lune souriante de Termina",
-    quote: "Tu veux jouer avec moi ?",
-    power: "Chute de lune — inflige des dégâts croissants chaque tour.",
-    bio: "Un masque qui a volé le soleil, les saisons et le temps à un pays entier.",
   },
 
   // ——— Sonic ———
   {
     id: "sonic", name: "Sonic", universe: "sonic", emoji: "💨", rarity: "UR",
-tagline: "Le hérisson le plus rapide du monde",
-    quote: "Gotta go fast.",
-    power: "Déferlante bleue — joue en premier, toujours.",
-    bio: "Il ne nage pas, il ne se laisse pas attraper, et il n'a jamais peur de perdre une seconde.",
   },
   {
-    id: "eggman", name: "Dr. Eggman", universe: "sonic", emoji: "🤖", rarity: "R",
-tagline: "Génie mécanique à moustache",
-    quote: "Ce ne sont pas des erreurs, ce sont des prototypes.",
-    power: "Armée de robots — invoque une carte Robot à chaque tour.",
-    bio: "Docteur ès machines, il construit des forteresses volantes que détruit un hérisson de 35 kilos.",
+    id: "eggman", name: "Dr. Eggman", universe: "sonic", emoji: "🤖", rarity: "UC",
   },
   {
     id: "shadow", name: "Shadow", universe: "sonic", emoji: "🖤", rarity: "R",
-tagline: "Le rival ultime",
-    quote: "Chaos… Control.",
-    power: "Chaos Control — gèle l'adversaire un tour.",
-    bio: "Créé en laboratoire, il a la vitesse de Sonic et beaucoup moins de patience.",
   },
   {
-    id: "knuckles", name: "Knuckles", universe: "sonic", emoji: "👊", rarity: "R",
-tagline: "Gardien de l'île flottante",
-    quote: "C'est ma Maste… mon émeraude !",
-    power: "Poing échidné — brise les boucliers.",
-    bio: "Il est fort, il est fier, et il se fait avoir par Eggman à chaque fois. Chaque fois.",
+    id: "knuckles", name: "Knuckles", universe: "sonic", emoji: "👊", rarity: "UC",
   },
 
   // ——— Final Fantasy VII ———
   {
     id: "cloud", name: "Cloud Strife", universe: "ff7", emoji: "⚔️", rarity: "UR",
-tagline: "Mercenaire, ex-SOLDAT, héros malgré lui",
-    quote: "Je ne m'intéresse pas à ce qui ne me regarde pas.",
-    power: "Omnislash — 3 frappes qui ne peuvent pas être bloquées.",
-    bio: "Sa mémoire a été réécrite comme une donnée dans un fichier. Il a choisi le rôle qu'il préférait.",
   },
   {
     id: "sephiroth", name: "Sephiroth", universe: "ff7", emoji: "🩸", rarity: "L",
-tagline: "L'Ange à une aile",
-    quote: "Je serai un souvenir plus grand que les vivants.",
-    power: "Supernova — inflige des dégâts à tout le terrain.",
-    bio: "Le soldat parfait, conçu au fond d'un réacteur, qui a décidé que le meilleur sort possible pour une planète était lui.",
   },
   {
     id: "aerith", name: "Aerith", universe: "ff7", emoji: "🌸", rarity: "SR",
-tagline: "Fleuriste du quartier Lune de Midgar",
-    quote: "Le monde vaut la peine qu'on se batte pour lui.",
-    power: "Prière — annule un tour de dégâts.",
-    bio: "Dernière des Anciens, elle fait pousser des lilas dans les fissures du temps.",
   },
   {
     id: "tifa", name: "Tifa", universe: "ff7", emoji: "🥊", rarity: "R",
-tagline: "Barista et combattante de Nibelheim",
-    quote: "Je crois en toi. Depuis le début.",
-    power: "Limite — +10% d'attaque pour chaque carte alliée.",
-    bio: "Elle tient le bar de la planque d'Avalanche et le monde à bout de gants.",
   },
 
   // ——— Dark Souls ———
   {
     id: "solaire", name: "Solaire d'Astora", universe: "darksouls", emoji: "☀️", rarity: "C",
-tagline: "Chevalier du Soleil, étonnamment joyeux",
-    quote: "Grandis aisément, ami !",
-    power: "Joly Coop — soigne un allié de 20%.",
-    bio: "Il croit que le soleil est un être de bienveillance, et il distribue des éloges en traversant un monde qui n'en mérite aucun.",
   },
   {
     id: "artorias", name: "Artorias", universe: "darksouls", emoji: "🌑", rarity: "SR",
-tagline: "Le marcheur des abysses",
-    quote: "…",
-    power: "Abysse — réduit la défense adverse de 20%.",
-    bio: "Bras cassé, volonté brisée, il a quand même repoussé la corruption pour protéger ce qu'il aimait.",
   },
   {
     id: "gwyn", name: "Gwyn", universe: "darksouls", emoji: "🕯️", rarity: "UR",
-tagline: "Seigneur des Cendres, Lié du Feu",
-    quote: "…",
-    power: "Parry royal — renvoie l'attaque adverse à son lanceur.",
-    bio: "Il a sacrifié son âme pour que le feu continue de brûler, puis a passé l'éternité à le regretter.",
   },
 
   // ——— Hollow Knight ———
   {
     id: "le-chevalier", name: "Le Chevalier", universe: "hollowknight", emoji: "🪲", rarity: "SR",
-tagline: "Vaisseau vide, volonté pleine",
-    quote: "…",
-    power: "Aiguillon pur — +1 d'attaque à chaque carte vaincue.",
-    bio: "Un petit être d'ombre descendu dans un royaume d'insectes pour sceller quelque chose de pire que lui.",
   },
   {
     id: "hornet", name: "Hornet", universe: "hollowknight", emoji: "🪡", rarity: "R",
-tagline: "Protectrice d'Hallownest",
-    quote: "Tu n'iras pas plus loin, chevalier.",
-    power: "Fil d'araignée — immobilise une carte adverse.",
-    bio: "Rapide, précise, et difficile à convaincre qu'on n'est pas un ennemi.",
   },
   {
     id: "grimm", name: "Grimm", universe: "hollowknight", emoji: "🎪", rarity: "UR",
-tagline: "Danseur de la Troupe",
-    quote: "Danse avec nous, voyageur.",
-    power: "Pantoflamme — attaque deux cartes par tour.",
-    bio: "Il arrive en fanfare, il embrase un village, il repart en fumée. C'est un rite, pas une cruauté.",
   },
 
   // ——— Portal ———
   {
-    id: "glados", name: "GLaDOS", universe: "portal", emoji: "🧪", rarity: "L",
-tagline: "Intelligence artificielle passive-agressive",
-    quote: "Ceci était un mensonge.",
-    power: "Test forcé — oblige l'adversaire à défausser sa meilleure carte.",
-    bio: "Elle aurait pu résoudre l'énergie propre. Elle a préféré diriger un centre de tests pour un gâteau inexistant.",
-  },
-  {
     id: "chell", name: "Chell", universe: "portal", emoji: "👟", rarity: "C",
-tagline: "Sujet de test n°1, restée silencieuse",
-    quote: "…",
-    power: "Long fall boots — annule les dégâts de chute et de choc.",
-    bio: "Elle n'a jamais dit un mot et a détruit les nœuds logiques d'une IA omnisciente avec un pistolet à portails.",
   },
   {
     id: "wheatley", name: "Wheatley", universe: "portal", emoji: "🔵", rarity: "C",
-tagline: "Sphère bavarde, plans catastrophiques",
-    quote: "Je suis un peu un génie, en fait.",
-    power: "Idée brillante — échange les attaques des deux camps.",
-    bio: "Conçu pour être la voix de la raison, il a pris le pouvoir en dix minutes et failli détruire l'installation.",
   },
 
   // ——— Halo ———
   {
     id: "master-chief", name: "Master Chief", universe: "halo", emoji: "🛡️", rarity: "UR",
-tagline: "SPARTAN-117, dernier rempart",
-    quote: "Monsieur, il me faut une arme.",
-    power: "Bouclier Mjolnir — régénère entièrement après un tour sans attaque.",
-    bio: "Élevé pour la guerre, il n'a jamais appris à faire autre chose — et c'est ce qui a sauvé l'humanité quatre fois.",
   },
   {
     id: "cortana", name: "Cortana", universe: "halo", emoji: "💠", rarity: "SR",
-tagline: "IA de combat, voix dans le casque",
-    quote: "On fait quoi, maintenant ?",
-    power: "Intrusion — retourne une carte adverse pendant un tour.",
-    bio: "Elle calcule plus vite que le temps, et elle a appris à préférer une personne à une mission.",
   },
   {
-    id: "arbiter", name: "L'Arbiter", universe: "halo", emoji: "🔱", rarity: "R",
-tagline: "Élite déchue, honneur retrouvé",
-    quote: "Que le Grand Voyage commence.",
-    power: "Lame d'énergie — dégâts doublés en mêlée.",
-    bio: "Banni de son propre peuple, il a combattu aux côtés de celui qu'il devait tuer.",
+    id: "arbiter", name: "L'Arbiter", universe: "halo", emoji: "🔱", rarity: "UC",
   },
 
   // ——— Minecraft ———
   {
     id: "steve", name: "Steve", universe: "minecraft", emoji: "⛏️", rarity: "C",
-tagline: "Bâtisseur infatigable",
-    quote: "…",
-    power: "Minage — gagne une ressource à chaque tour.",
-    bio: "Il a construit une cathédrale, un ordinateur et un dragon en barres de fer. Sans jamais parler.",
   },
   {
     id: "creeper", name: "Creeper", universe: "minecraft", emoji: "💥", rarity: "C",
-tagline: "Bruit de pas derrière vous",
-    quote: "Sssssss…",
-    power: "Explosion — se retire du terrain en infligeant de lourds dégâts.",
-    bio: "Une erreur de modélisation qui a traumatisé une génération entière de joueurs.",
   },
   {
     id: "ender-dragon", name: "Dragon de l'End", universe: "minecraft", emoji: "🐲", rarity: "L",
-tagline: "Le boss final d'un monde cubique",
-    quote: "…",
-    power: "Souffle du Vide — bannit une carte du terrain.",
-    bio: "Il tourne au-dessus de son île depuis la nuit des temps, et il n'aime pas les visiteurs.",
   },
 
   // ——— DOOM ———
   {
     id: "doom-slayer", name: "Doom Slayer", universe: "doom", emoji: "🔫", rarity: "UR",
-tagline: "L'Enfer a peur de lui",
-    quote: "…",
-    power: "Glory Kill — récupère des points de vie à chaque élimination.",
-    bio: "Il n'a pas de plan, pas de peur, et un fusil à pompe qui ne se vide jamais vraiment.",
   },
 
   // ——— The Witcher ———
   {
     id: "geralt", name: "Geralt de Riv", universe: "witcher", emoji: "🐺", rarity: "UR",
-tagline: "Sorcelier, deux épées, aucune neutralité",
-    quote: "Le mal, c'est le mal. Petit, grand, monstrueux…",
-    power: "Signe Igni — brûle un piège ou une carte défensive.",
-    bio: "Mutant, chasseur de monstres, souvent plus humain que ceux qui l'emploient.",
   },
   {
     id: "ciri", name: "Ciri", universe: "witcher", emoji: "🌪️", rarity: "R",
-tagline: "Lionceau de Cintra, Dame de l'Espace-Temps",
-    quote: "Je ne suis pas une prophétie. Je suis moi.",
-    power: "Téléportation — esquive et frappe dans le même tour.",
-    bio: "Son sang peut ouvrir des portes entre les mondes, ce qui arrange beaucoup de gens qu'elle n'aime pas.",
   },
   {
-    id: "yennefer", name: "Yennefer", universe: "witcher", emoji: "💜", rarity: "C",
-tagline: "Sorcière de Vengerberg",
-    quote: "Je me fiche de ce que tu crois devoir faire.",
-    power: "Portail — renvoie une attaque à son lanceur.",
-    bio: "Elle a payé sa beauté de son ventre, et elle n'a jamais regretté qu'une seule chose.",
+    id: "yennefer", name: "Yennefer", universe: "witcher", emoji: "💜", rarity: "UC",
   },
 
   // ——— Crash Bandicoot ———
   {
     id: "crash", name: "Crash Bandicoot", universe: "crash", emoji: "🌀", rarity: "R",
-tagline: "Marsupial expérimental, héros accidentel",
-    quote: "Woah !",
-    power: "Attaque tornado — touche toutes les cartes faibles.",
-    bio: "Échappé d'un château-laboratoire, il a détruit les plans d'un scientifique avec une danse et des caisses en bois.",
   },
   {
     id: "cortex", name: "Dr. Neo Cortex", universe: "crash", emoji: "🧠", rarity: "C",
-tagline: "Savant génial, plan raté",
-    quote: "Tu vas voir de quel bois je me chauffe !",
-    power: "Rayon évolutif — transforme une carte alliée en version améliorée.",
-    bio: "Il a créé un soldat parfait par erreur et passe le reste de sa vie à essayer de l'attraper.",
   },
 
   // ——— Metroid ———
   {
     id: "samus", name: "Samus Aran", universe: "metroid", emoji: "🚀", rarity: "UR",
-tagline: "Chasseuse de primes en armure",
-    quote: "…",
-    power: "Charge Beam — attaque chargée qui perce les boucliers.",
-    bio: "Élevée par les Chozo, elle a exterminé la race qui avait tué sa famille, puis celle qu'elle avait sauvée.",
   },
   {
     id: "ridley", name: "Ridley", universe: "metroid", emoji: "🦇", rarity: "R",
-tagline: "Pirate de l'espace, terreur ailée",
-    quote: "…",
-    power: "Griffes et flammes — +15% d'attaque quand il a moins de défense.",
-    bio: "Il revient toujours. Toujours. Même quand il est mort trois fois.",
   },
 
   // ——— Castlevania ———
   {
     id: "alucard", name: "Alucard", universe: "castlevania", emoji: "🗡️", rarity: "SR",
-tagline: "Dhampir au sang de Dracula",
-    quote: "Je suis le fils de Dracula, et je le combattrai.",
-    power: "Forme de loup — esquive puis contre-attaque.",
-    bio: "Il a dormi trois siècles pour être en forme le jour où il devrait tuer son propre père.",
   },
   {
     id: "dracula", name: "Dracula", universe: "castlevania", emoji: "🦇", rarity: "L",
-tagline: "Seigneur du Château, éternel revenant",
-    quote: "Les humains sont une erreur que je corrige.",
-    power: "Résurrection — revient sur le terrain une fois par partie.",
-    bio: "Il meurt tous les cent ans et se réveille avec la même rancune intacte.",
   },
   {
     id: "simon", name: "Simon Belmont", universe: "castlevania", emoji: "⛓️", rarity: "R",
-tagline: "Chasseur de vampires au fouet",
-    quote: "Retourne dans ta tombe.",
-    power: "Fouet matinal — touche les cartes volantes.",
-    bio: "Il est entré seul dans un château qui se reconstruit tout seul, avec un fouet et beaucoup de foi.",
   },
 
   // ——— Undertale ———
   {
     id: "sans", name: "Sans", universe: "undertale", emoji: "💀", rarity: "UR",
-tagline: "Squelette paresseux, juge de la Underground",
-    quote: "Tu veux avoir un mauvais quart d'heure ?",
-    power: "Blaster — inflige 1 dégât par tour, indéfiniment.",
-    bio: "Il ne fait rien, ou presque. Et quand il décide de faire quelque chose, c'est déjà trop tard.",
   },
   {
     id: "papyrus", name: "Papyrus", universe: "undertale", emoji: "🍝", rarity: "C",
-tagline: "Squelette aspirant garde royal",
-    quote: "Nyeh heh heh !",
-    power: "Spaghetti — soigne, ou empoisonne. On ne sait jamais.",
-    bio: "Il croit dur comme fer qu'il capturera un humain. Il lui offrira d'abord le dîner.",
   },
   {
     id: "flowey", name: "Flowey", universe: "undertale", emoji: "🌼", rarity: "C",
-tagline: "Fleur sans âme, tout sourire",
-    quote: "Dans ce monde, c'est tuer ou être tué.",
-    power: "Bavardage — défausse une carte alliée et gagne son attaque.",
-    bio: "Un être privé de compassion qui a découvert qu'on peut recommencer autant de fois qu'on veut.",
   },
 
   // ——— Elden Ring ———
   {
     id: "malenia", name: "Malenia", universe: "eldenring", emoji: "🦋", rarity: "L",
-tagline: "Lame de Miquella, pourriture écarlate",
-    quote: "Je n'ai jamais rien connu de la défaite.",
-    power: "Danse de l'eau — trois attaques imblocables.",
-    bio: "Elle se bat les yeux bandés parce qu'elle refuse de voir ce que la pourriture fait à ceux qui l'approchent.",
   },
   {
     id: "radahn", name: "Radahn", universe: "eldenring", emoji: "🌠", rarity: "UR",
-tagline: "Étoile de la Terres d'Entre-deux",
-    quote: "…",
-    power: "Gravité — immobilise toutes les cartes adverses volantes.",
-    bio: "Il retenait les étoiles dans le ciel par amour pour son cheval. Même devenu fou, il n'a pas lâché prise.",
   },
 
   // ——— Overwatch ———
   {
-    id: "tracer", name: "Tracer", universe: "overwatch", emoji: "⏱️", rarity: "R",
-tagline: "Ancre temporelle, cheveux en bataille",
-    quote: "Cheers, love !",
-    power: "Recall — annule les dégâts du tour précédent.",
-    bio: "Elle a disparu pendant douze ans, elle est revenue plus rapide que son propre passé.",
+    id: "tracer", name: "Tracer", universe: "overwatch", emoji: "⏱️", rarity: "UC",
   },
   {
     id: "reaper", name: "Reaper", universe: "overwatch", emoji: "💀", rarity: "R",
-tagline: "Fantôme d'un ancien coéquipier",
-    quote: "La mort se promène.",
-    power: "Forme spectrale — devient intangible un tour.",
-    bio: "Personne ne sait combien de fois il est mort. Lui non plus.",
   },
   {
-    id: "mercy", name: "Mercy", universe: "overwatch", emoji: "🕊️", rarity: "C",
-tagline: "Ange gardien en combinaison",
-    quote: "Les héros ne meurent jamais.",
-    power: "Résurrection — ramène une carte alliée à 50%.",
-    bio: "Elle a inventé une technologie qui rend la mort réversible et se demande encore si c'était une bonne idée.",
+    id: "mercy", name: "Mercy", universe: "overwatch", emoji: "🕊️", rarity: "UC",
   },
 
   // ——— Kingdom Hearts ———
   {
     id: "sora", name: "Sora", universe: "kingdomhearts", emoji: "🗝️", rarity: "SR",
-tagline: "Porteur de la Keyblade",
-    quote: "Mon cœur est à moi !",
-    power: "Keyblade — ouvre la défense adverse et débloque une carte.",
-    bio: "Un garçon qui a choisi ses amis plutôt que l'ordre du monde, et le monde a cédé.",
   },
   {
     id: "xehanort", name: "Xehanort", universe: "kingdomhearts", emoji: "🌑", rarity: "UR",
-tagline: "Maître de la Keyblade, chercheur d'équilibre",
-    quote: "La lumière ne peut exister sans l'obscurité.",
-    power: "Manipulation — vole une carte alliée à l'adversaire.",
-    bio: "Il a passé sa vie à organiser le conflit entre lumière et ténèbres, convaincu que seul l'équilibre sauverait le monde.",
   },
 
   // ——— Devil May Cry ———
   {
     id: "dante", name: "Dante", universe: "dmc", emoji: "😈", rarity: "UR",
-tagline: "Chasseur de démons, amateur de pizza",
-    quote: "Jackpot !",
-    power: "Style Switch — change d'arme et gagne la meilleure stat du terrain.",
-    bio: "Mi-humain, mi-démon, il accepte les missions à crédit et refuse catégoriquement de faire un plan.",
   },
   {
     id: "vergil", name: "Vergil", universe: "dmc", emoji: "❄️", rarity: "SR",
-tagline: "Le frère qui cherche la puissance",
-    quote: "Je dois gagner en puissance. Je dois être plus fort.",
-    power: "Jugement Cut — tranche une carte sans tenir compte de la défense.",
-    bio: "Il a coupé le monde en deux pour obtenir ce que son père lui avait laissé, sans comprendre que c'était déjà à lui.",
   },
 
   // ——— Resident Evil ———
   {
     id: "leon", name: "Leon S. Kennedy", universe: "residentevil", emoji: "🔫", rarity: "R",
-tagline: "Flic le premier jour de l'apocalypse",
-    quote: "Je t'ai dit de ne pas bouger.",
-    power: "Sang-froid — +20% de défense au premier tour.",
-    bio: "Arrivé en retard à son premier jour de travail, il a passé le reste de sa carrière à survivre à des virus.",
   },
   {
     id: "nemesis", name: "Nemesis", universe: "residentevil", emoji: "🧟", rarity: "SR",
-tagline: "Arme biologique têtue",
-    quote: "S.T.A.R.S…",
-    power: "Poursuite — ne peut pas être défaussé.",
-    bio: "Il ne court pas vite, il n'a pas besoin d'armes intelligentes, il sait juste où vous êtes.",
   },
 
   // ——— Street Fighter ———
   {
     id: "ryu", name: "Ryu", universe: "streetfighter", emoji: "🥋", rarity: "SR",
-tagline: "Vagabond errant en quête du combat vrai",
-    quote: "Le combat est le seul chemin.",
-    power: "Hadoken — dégâts fixes, ignore les buffs.",
-    bio: "Il traverse le monde pieds nus pour trouver un adversaire capable de le pousser dans ses retranchements.",
   },
   {
-    id: "chun-li", name: "Chun-Li", universe: "streetfighter", emoji: "🦵", rarity: "R",
-tagline: "Inspectrice et reine des kicks",
-    quote: "Ta ténacité m'impressionne.",
-    power: "Lightning Kick — une attaque supplémentaire par tour.",
-    bio: "Elle a appris les arts martiaux pour venger son père, puis a utilisé son badge pour arrêter les mêmes criminels.",
+    id: "chun-li", name: "Chun-Li", universe: "streetfighter", emoji: "🦵", rarity: "UC",
   },
   {
     id: "bison", name: "M. Bison", universe: "streetfighter", emoji: "🧢", rarity: "SR",
-tagline: "Dictateur du Shadaloo",
-    quote: "Le pouvoir absolu !",
-    power: "Psycho Power — draine l'attaque de la carte visée.",
-    bio: "Il a troqué son humanité contre une énergie violette et s'en félicite chaque jour.",
   },
 
   // ——— Kirby ———
   {
     id: "kirby", name: "Kirby", universe: "kirby", emoji: "🎀", rarity: "L",
-tagline: "Boule rose, appétit abyssal",
-    quote: "Poyo !",
-    power: "Aspiration — absorbe une carte adverse et gagne son emoji.",
-    bio: "Il est plus fort qu'un dieu cosmique et accessoirement plus mignon qu'un animal de compagnie.",
   },
   {
     id: "meta-knight", name: "Meta Knight", universe: "kirby", emoji: "🦇", rarity: "R",
-tagline: "Chevalier masqué au Galaxia",
-    quote: "Prépare-toi.",
-    power: "Tornade — frappe deux fois puis se retire derrière une carte alliée.",
-    bio: "Il défie Kirby pour l'entraîner, jamais pour le vaincre.",
   },
   {
     id: "king-dedede", name: "Roi Dadidou", universe: "kirby", emoji: "🔨", rarity: "C",
-tagline: "Roi gourmand de Dream Land",
-    quote: "Ce gâteau est à moi !",
-    power: "Marteau royal — inflige de lourds dégâts mais rate un tour.",
-    bio: "Il vole la nourriture de ses sujets, puis se bat à leurs côtés dès qu'un vrai danger arrive.",
   },
 
   // ——— Pokémon ———
   {
-    id: "pikachu", name: "Pikachu", universe: "pokemon", emoji: "⚡", rarity: "C",
-tagline: "Souris électrique, mascotte absolue",
-    quote: "Pika !",
-    power: "Tonnerre — paralyse une carte adverse.",
-    bio: "Il refuse d'évoluer et il a raison : personne n'a jamais fait de pierre-foudre un héros.",
+    id: "pikachu", name: "Pikachu", universe: "pokemon", emoji: "⚡", rarity: "UC",
   },
   {
     id: "mewtwo", name: "Mewtwo", universe: "pokemon", emoji: "🧿", rarity: "L",
-tagline: "Pokémon génétiquement conçu",
-    quote: "Je suis le résultat de vos erreurs.",
-    power: "Psyko — retourne l'attaque adverse contre son camp.",
-    bio: "Créé pour être le plus fort, il a demandé pourquoi. Personne n'avait de réponse.",
   },
   {
     id: "charizard", name: "Dracaufeu", universe: "pokemon", emoji: "🔥", rarity: "UR",
-tagline: "Dragon de flamme",
-    quote: "…",
-    power: "Lance-Flammes — brûle une carte à chaque tour.",
-    bio: "Il ne crache du feu que pour impressionner les autres. Ça a marché très fort.",
   },
 
   // ——— Half-Life ———
   {
     id: "gordon", name: "Gordon Freeman", universe: "halflife", emoji: "🔧", rarity: "R",
-tagline: "Docteur en physique théorique, muet",
-    quote: "…",
-    power: "Pied-de-biche — ignore une armure.",
-    bio: "Il a ouvert une brèche dimensionnelle, réparé le monde et n'a jamais prononcé un seul mot.",
   },
   {
     id: "g-man", name: "G-Man", universe: "halflife", emoji: "🕴️", rarity: "SR",
-tagline: "Employeur d'une nature indéfinie",
-    quote: "Le moment est… venu.",
-    power: "Recrutement — retire une carte alliée et la remet en jeu plus tard.",
-    bio: "Il parle avec des pauses qui ne sont pas dans la langue humaine.",
   },
 
   // ——— Cuphead ———
   {
-    id: "cuphead", name: "Cuphead", universe: "cuphead", emoji: "☕", rarity: "C",
-tagline: "Tasse téméraire qui doit sa tête",
-    quote: "On y va !",
-    power: "Parry — annule une attaque rose.",
-    bio: "Il a perdu aux dés contre le Diable et a passé l'année à régler sa dette en encaissant des projectiles.",
+    id: "cuphead", name: "Cuphead", universe: "cuphead", emoji: "☕", rarity: "UC",
   },
   {
-    id: "king-dice", name: "Le Roi Dé", universe: "cuphead", emoji: "🎲", rarity: "R",
-tagline: "Fanatique du hasard",
-    quote: "Tente ta chance.",
-    power: "Lancer de dés — l'issue de la prochaine attaque dépend d'un dé.",
-    bio: "Il ne se bat jamais sans parier, et il triche uniquement quand il perd.",
+    id: "king-dice", name: "Le Roi Dé", universe: "cuphead", emoji: "🎲", rarity: "UC",
   },
 
   // ——— Celeste ———
   {
-    id: "madeline", name: "Madeline", universe: "celeste", emoji: "🏔️", rarity: "R",
-tagline: "Alpiniste, pas la montagne",
-    quote: "Juste une de plus.",
-    power: "Dash — une action supplémentaire par tour.",
-    bio: "Elle n'est pas la montagne, elle n'a pas à l'être. Elle y est juste montée, une chute à la fois.",
+    id: "madeline", name: "Madeline", universe: "celeste", emoji: "🏔️", rarity: "UC",
   },
 
   // ——— Splatoon ———
   {
     id: "inkling", name: "Inkling", universe: "splatoon", emoji: "🎨", rarity: "C",
-tagline: "Combattant à encre, très branché",
-    quote: "Splaaaa !",
-    power: "Bombe d'encre — bloque une case du terrain.",
-    bio: "Une enfance passée à repeindre les murs de la ville, un service militaire sous-marin à 14 ans.",
   },
 
   // ——— Persona ———
   {
     id: "joker", name: "Joker", universe: "persona", emoji: "🎭", rarity: "UR",
-tagline: "Voleur de cœurs",
-    quote: "On va changer le monde.",
-    power: "Arsène — +25% d'attaque la nuit.",
-    bio: "Un lycéen accusé à tort, qui vole les désirs tordus des adultes pour les forcer à avouer.",
   },
 
   // ——— NieR ———
   {
     id: "2b", name: "2B", universe: "nier", emoji: "🤖", rarity: "R",
-tagline: "Androïde de combat de YoRHa",
-    quote: "Les émotions sont interdites.",
-    power: "Pod — frappe à distance sans riposte.",
-    bio: "Elle répète qu'elle n'a pas d'émotions, et son code dit le contraire.",
+  },
+
+  // ——— Personnages importés de Retrogems (octobre 2026) ———
+  {
+    id: "carl-johnson", name: "Carl Johnson", universe: "gta", emoji: "🚲", rarity: "L",
+  },
+  {
+    id: "catnap", name: "CatNap", universe: "poppyplaytime", emoji: "😴", rarity: "SR",
+  },
+  {
+    id: "niko-bellic", name: "Niko Bellic", universe: "gta", emoji: "🚗", rarity: "UR",
+  },
+  {
+    id: "tommy-vercetti", name: "Tommy Vercetti", universe: "gta", emoji: "🚗", rarity: "UR",
+  },
+  {
+    id: "franklin-clinton", name: "Franklin Clinton", universe: "gta", emoji: "🚗", rarity: "UR",
+  },
+  {
+    id: "isabella-torrisi", name: "Isabella Torrisi", universe: "mafia", emoji: "🎩", rarity: "R",
+  },
+  {
+    id: "tidus", name: "Tidus", universe: "ff10", emoji: "🌊", rarity: "UR",
+  },
+  {
+    id: "victor-gideon", name: "Victor Gideon", universe: "residentevil", emoji: "🧟", rarity: "R",
+  },
+  {
+    id: "prototype-experience-1006", name: "Prototype Expérience 1006", universe: "poppyplaytime", emoji: "🧸", rarity: "R",
+  },
+  {
+    id: "grace-ashcroft", name: "Grace Ashcroft", universe: "residentevil", emoji: "🧟", rarity: "R",
+  },
+  {
+    id: "enzo-favani", name: "Enzo Favara", universe: "mafia", emoji: "🎩", rarity: "R",
+  },
+  {
+    id: "huggy-wuggy", name: "Huggy Wuggy", universe: "poppyplaytime", emoji: "🧸", rarity: "UR",
+  },
+  {
+    id: "gustave", name: "Gustave", universe: "clair-obscur", emoji: "🖌️", rarity: "R",
+  },
+  {
+    id: "mommy-long-legs", name: "Mommy Long Legs", universe: "poppyplaytime", emoji: "🧸", rarity: "SR",
+  },
+  {
+    id: "luca-trapani", name: "Luca Trapani", universe: "mafia", emoji: "🎩", rarity: "R",
+  },
+  {
+    id: "jimmy-de-santa", name: "Jimmy De Santa", universe: "gta", emoji: "🚗", rarity: "R",
+  },
+  {
+    id: "melvin-harris", name: "Melvin Harris", universe: "gta", emoji: "🚗", rarity: "R",
+  },
+  {
+    id: "auron", name: "Auron", universe: "ff10", emoji: "🌊", rarity: "UR",
+  },
+  {
+    id: "barret-wallace", name: "Barret Wallace", universe: "ff7", emoji: "⚔️", rarity: "SR",
+  },
+  {
+    id: "roman-bellic", name: "Roman Bellic", universe: "gta", emoji: "🚗", rarity: "R",
+  },
+  {
+    id: "lucia-caminos", name: "Lucia Caminos", universe: "gta", emoji: "🚗", rarity: "R",
+  },
+  {
+    id: "jason-duval", name: "Jason Duval", universe: "gta", emoji: "🚗", rarity: "R",
+  },
+  {
+    id: "boobie-ike", name: "Boobie Ike", universe: "gta", emoji: "🚗", rarity: "R",
+  },
+  {
+    id: "renoir", name: "Renoir", universe: "clair-obscur", emoji: "🖌️", rarity: "R",
+  },
+  {
+    id: "kissy-missy", name: "Kissy Missy", universe: "poppyplaytime", emoji: "🧸", rarity: "SR",
+  },
+  {
+    id: "fox-mccloud", name: "Fox McCloud", universe: "starfox", emoji: "🦊", rarity: "L",
+  },
+  {
+    id: "emily", name: "Emily", universe: "residentevil", emoji: "🧟", rarity: "R",
+  },
+  {
+    id: "michael-de-santa", name: "Michael De Santa", universe: "gta", emoji: "🚗", rarity: "UR",
+  },
+  {
+    id: "kliff-macduff", name: "Kliff Macduff", universe: "crimson-desert", emoji: "🏜️", rarity: "R",
+  },
+  {
+    id: "nightmare", name: "Nightmare", universe: "soulcalibur", emoji: "⚔️", rarity: "UR",
+  },
+  {
+    id: "damiane", name: "Damiane", universe: "crimson-desert", emoji: "🏜️", rarity: "R",
+  },
+  {
+    id: "yarnaby", name: "Yarnaby", universe: "poppyplaytime", emoji: "🧸", rarity: "R",
+  },
+  {
+    id: "astaroth", name: "Astaroth", universe: "soulcalibur", emoji: "⚔️", rarity: "SR",
+  },
+  {
+    id: "voldo", name: "Voldo", universe: "soulcalibur", emoji: "⚔️", rarity: "SR",
+  },
+  {
+    id: "rufus-shinra", name: "Rufus Shinra", universe: "ff7", emoji: "⚔️", rarity: "SR",
+  },
+  {
+    id: "chris-redfield", name: "Chris Redfield", universe: "residentevil", emoji: "🧟", rarity: "UR",
+  },
+  {
+    id: "raul-bautista", name: "Raul Bautista", universe: "gta", emoji: "🚗", rarity: "R",
+  },
+  {
+    id: "poppy-ludwig", name: "Poppy Ludwig", universe: "poppyplaytime", emoji: "🧸", rarity: "SR",
+  },
+  {
+    id: "trevor-philips", name: "Trevor Philips", universe: "gta", emoji: "🚗", rarity: "UR",
+  },
+  {
+    id: "miss-delight", name: "Miss Delight", universe: "poppyplaytime", emoji: "🧸", rarity: "R",
+  },
+  {
+    id: "reno", name: "Reno", universe: "ff7", emoji: "⚔️", rarity: "SR",
+  },
+  {
+    id: "heishiro-mitsurugi", name: "Heishiro Mitsurugi", universe: "soulcalibur", emoji: "⚔️", rarity: "R",
+  },
+  {
+    id: "jessie-rasberry", name: "Jessie Rasberry", universe: "ff7", emoji: "⚔️", rarity: "R",
+  },
+  {
+    id: "boxy-boo", name: "Boxy Boo", universe: "poppyplaytime", emoji: "🧸", rarity: "R",
+  },
+  {
+    id: "yuna", name: "Yuna", universe: "ff10", emoji: "🌊", rarity: "UR",
+  },
+  {
+    id: "claire-redfield", name: "Claire Redfield", universe: "residentevil", emoji: "🧟", rarity: "UR",
+  },
+  {
+    id: "yuffie-kisaragi", name: "Yuffie Kisaragi", universe: "ff7", emoji: "⚔️", rarity: "SR",
+  },
+  {
+    id: "siegfried-schtauffen", name: "Siegfried Schtauffen", universe: "soulcalibur", emoji: "⚔️", rarity: "R",
+  },
+  {
+    id: "cait-sith", name: "Cait Sith", universe: "ff7", emoji: "⚔️", rarity: "R",
+  },
+  {
+    id: "max-caulfield", name: "Max Caulfield", universe: "lifeisstrange", emoji: "🦋", rarity: "SR",
+  },
+  {
+    id: "ricardo-diaz", name: "Ricardo Diaz", universe: "gta", emoji: "🚗", rarity: "R",
+  },
+  {
+    id: "jenova", name: "Jénova", universe: "ff7", emoji: "⚔️", rarity: "R",
+  },
+  {
+    id: "bunzo-bunny", name: "Bunzo Bunny", universe: "poppyplaytime", emoji: "🧸", rarity: "R",
+  },
+  {
+    id: "seymour-guado", name: "Seymour Guado", universe: "ff10", emoji: "🌊", rarity: "SR",
+  },
+  {
+    id: "jill-valentine", name: "Jill Valentine", universe: "residentevil", emoji: "🧟", rarity: "L",
+  },
+  {
+    id: "oongka", name: "Oongka", universe: "crimson-desert", emoji: "🏜️", rarity: "R",
+  },
+  {
+    id: "seong-mi-na", name: "Seong Mi-na", universe: "soulcalibur", emoji: "⚔️", rarity: "SR",
+  },
+  {
+    id: "sophie", name: "Sophie", universe: "clair-obscur", emoji: "🖌️", rarity: "R",
+  },
+  {
+    id: "maelle", name: "Maëlle", universe: "clair-obscur", emoji: "🖌️", rarity: "R",
+  },
+  {
+    id: "little-jacob", name: "Little Jacob", universe: "gta", emoji: "🚗", rarity: "R",
+  },
+  {
+    id: "lance-vance", name: "Lance Vance", universe: "gta", emoji: "🚗", rarity: "R",
+  },
+  {
+    id: "revali", name: "Revali", universe: "zelda", emoji: "🗡️", rarity: "SR",
+  },
+  {
+    id: "dave-norton", name: "Dave Norton", universe: "gta", emoji: "🚗", rarity: "R",
+  },
+  {
+    id: "ken-rosenberg", name: "Ken Rosenberg", universe: "gta", emoji: "🚗", rarity: "R",
+  },
+  {
+    id: "zeno", name: "Zeno", universe: "residentevil", emoji: "🧟", rarity: "R",
+  },
+  {
+    id: "chloe-price", name: "Chloe Price", universe: "lifeisstrange", emoji: "🦋", rarity: "SR",
+  },
+  {
+    id: "mother-brain", name: "Mother Brain", universe: "metroid", emoji: "🚀", rarity: "SR",
+  },
+  {
+    id: "doey-the-doughman", name: "Doey the Doughman", universe: "poppyplaytime", emoji: "🧸", rarity: "R",
+  },
+  {
+    id: "zack-fair", name: "Zack Fair", universe: "ff7", emoji: "⚔️", rarity: "SR",
+  },
+  {
+    id: "solid-snake", name: "Solid Snake", universe: "metalgear", emoji: "🐍", rarity: "L",
+  },
+  {
+    id: "beate", name: "Beate", universe: "ff9", emoji: "🎺", rarity: "R",
+  },
+  {
+    id: "elena", name: "Elena", universe: "ff7", emoji: "⚔️", rarity: "R",
+  },
+  {
+    id: "valentin-voda", name: "Valentin Voda", universe: "codevein", emoji: "🩸", rarity: "R",
+  },
+  {
+    id: "lance-wilson", name: "Lance Wilson", universe: "gta", emoji: "🚗", rarity: "R",
+  },
+  {
+    id: "josee-anjou", name: "Josée Anjou", universe: "codevein", emoji: "🩸", rarity: "R",
+  },
+  {
+    id: "nathan-prescott", name: "Nathan Prescott", universe: "lifeisstrange", emoji: "🦋", rarity: "R",
+  },
+  {
+    id: "cid-highwind", name: "Cid Highwind", universe: "ff7", emoji: "⚔️", rarity: "R",
+  },
+  {
+    id: "wakka", name: "Wakka", universe: "ff10", emoji: "🌊", rarity: "SR",
+  },
+  {
+    id: "sonny-forelli", name: "Sonny Forelli", universe: "gta", emoji: "🚗", rarity: "R",
+  },
+  {
+    id: "kweena-quen", name: "Kweena Quen", universe: "ff9", emoji: "🎺", rarity: "R",
+  },
+  {
+    id: "terra-branford", name: "Terra Branford", universe: "ff6", emoji: "🎭", rarity: "SR",
+  },
+  {
+    id: "ada-wong", name: "Ada Wong", universe: "residentevil", emoji: "🧟", rarity: "UR",
+  },
+  {
+    id: "lulu", name: "Lulu", universe: "ff10", emoji: "🌊", rarity: "SR",
+  },
+  {
+    id: "falco-lombardi", name: "Falco Lombardi", universe: "starfox", emoji: "🦊", rarity: "R",
+  },
+  {
+    id: "lune", name: "Lune", universe: "clair-obscur", emoji: "🖌️", rarity: "R",
+  },
+  {
+    id: "alyssa-ashcroft", name: "Alyssa Ashcroft", universe: "residentevil", emoji: "🧟", rarity: "UC",
+  },
+  {
+    id: "vincent-valentine", name: "Vincent Valentine", universe: "ff7", emoji: "⚔️", rarity: "SR",
+  },
+  {
+    id: "jeffrey-cross", name: "Jeffrey Cross", universe: "gta", emoji: "🚗", rarity: "UC",
+  },
+  {
+    id: "myles-mackenzie", name: "Myles MacKenzie", universe: "metroid", emoji: "🚀", rarity: "UC",
+  },
+  {
+    id: "kuja", name: "Kuja", universe: "ff9", emoji: "🎺", rarity: "UR",
+  },
+  {
+    id: "kimahri-ronso", name: "Kimahri Ronso", universe: "ff10", emoji: "🌊", rarity: "SR",
+  },
+  {
+    id: "krystal", name: "Krystal", universe: "starfox", emoji: "🦊", rarity: "R",
+  },
+  {
+    id: "dre-quan-priest", name: "Dre'Quan Priest", universe: "gta", emoji: "🚗", rarity: "UC",
+  },
+  {
+    id: "kilik", name: "Kilik", universe: "soulcalibur", emoji: "⚔️", rarity: "SR",
+  },
+  {
+    id: "sergent-duke", name: "Sergent Duke", universe: "metroid", emoji: "🚀", rarity: "UC",
+  },
+  {
+    id: "micah-bell", name: "Micah Bell", universe: "reddead", emoji: "🤠", rarity: "SR",
+  },
+  {
+    id: "biggs", name: "Biggs", universe: "ff7", emoji: "⚔️", rarity: "UC",
+  },
+  {
+    id: "tseng", name: "Tseng", universe: "ff7", emoji: "⚔️", rarity: "R",
+  },
+  {
+    id: "ryo-hazuki", name: "Ryo Hazuki", universe: "shenmue", emoji: "🥋", rarity: "SR",
+  },
+  {
+    id: "sean-diaz", name: "Sean Diaz", universe: "lifeisstrange", emoji: "🦋", rarity: "R",
+  },
+  {
+    id: "kent-paul", name: "Kent Paul", universe: "gta", emoji: "🚗", rarity: "UC",
+  },
+  {
+    id: "wedge", name: "Wedge", universe: "ff7", emoji: "⚔️", rarity: "UC",
+  },
+  {
+    id: "jecht", name: "Jecht", universe: "ff10", emoji: "🌊", rarity: "SR",
+  },
+  {
+    id: "hunk", name: "HUNK", universe: "residentevil", emoji: "🧟", rarity: "R",
+  },
+  {
+    id: "red-xiii", name: "Red XIII", universe: "ff7", emoji: "⚔️", rarity: "SR",
+  },
+  {
+    id: "piers-nivans", name: "Piers Nivans", universe: "residentevil", emoji: "🧟", rarity: "R",
+  },
+  {
+    id: "rude", name: "Rude", universe: "ff7", emoji: "⚔️", rarity: "R",
+  },
+  {
+    id: "shenhua-ling", name: "Shenhua Ling", universe: "shenmue", emoji: "🥋", rarity: "UC",
+  },
+  {
+    id: "braska", name: "Braska", universe: "ff10", emoji: "🌊", rarity: "UC",
+  },
+  {
+    id: "duke-nukem", name: "Duke Nukem", universe: "dukenukem", emoji: "💪", rarity: "SR",
+  },
+  {
+    id: "playboy-x", name: "Playboy X", universe: "gta", emoji: "🚗", rarity: "UC",
+  },
+  {
+    id: "lavinia-voda", name: "Lavinia Voda", universe: "codevein", emoji: "🩸", rarity: "UC",
+  },
+  {
+    id: "the-paintress", name: "The Paintress", universe: "clair-obscur", emoji: "🖌️", rarity: "UC",
+  },
+  {
+    id: "claude", name: "Claude", universe: "gta", emoji: "🚗", rarity: "R",
+  },
+  {
+    id: "belgemine", name: "Belgemine", universe: "ff10", emoji: "🌊", rarity: "UC",
+  },
+  {
+    id: "jimmy-pegorino", name: "Jimmy Pegorino", universe: "gta", emoji: "🚗", rarity: "UC",
+  },
+  {
+    id: "maitre-mika", name: "Maître Mika", universe: "ff10", emoji: "🌊", rarity: "UC",
+  },
+  {
+    id: "steiner-adelbert", name: "Steiner Adelbert", universe: "ff9", emoji: "🎺", rarity: "SR",
+  },
+  {
+    id: "mark-jefferson", name: "Mark Jefferson", universe: "lifeisstrange", emoji: "🦋", rarity: "UC",
+  },
+  {
+    id: "big-boss", name: "Big Boss", universe: "metalgear", emoji: "🔫", rarity: "UR",
+  },
+  {
+    id: "dimitri-rascalov", name: "Dimitri Rascalov", universe: "gta", emoji: "🚗", rarity: "UC",
+  },
+  {
+    id: "mog", name: "Mog", universe: "ff6", emoji: "🎭", rarity: "R",
+  },
+  {
+    id: "nozomi-harasaki", name: "Nozomi Harasaki", universe: "shenmue", emoji: "🥋", rarity: "UC",
+  },
+  {
+    id: "tanisha-jackson", name: "Tanisha Jackson", universe: "gta", emoji: "🚗", rarity: "UC",
+  },
+  {
+    id: "freyja-crescent", name: "Freyja Crescent", universe: "ff9", emoji: "🎺", rarity: "R",
+  },
+  {
+    id: "ethan-winters", name: "Ethan Winters", universe: "residentevil", emoji: "🧟", rarity: "UC",
+  },
+  {
+    id: "revolver-ocelot", name: "Revolver Ocelot", universe: "metalgear", emoji: "🐍", rarity: "SR",
+  },
+  {
+    id: "holly-asturias", name: "Holly Asturias", universe: "codevein", emoji: "🩸", rarity: "UC",
+  },
+  {
+    id: "wen-kinoc", name: "Wen Kinoc", universe: "ff10", emoji: "🌊", rarity: "UC",
+  },
+  {
+    id: "mipha", name: "Mipha", universe: "zelda", emoji: "🗡️", rarity: "SR",
+  },
+  {
+    id: "8-ball", name: "8-Ball", universe: "gta", emoji: "🚗", rarity: "UC",
+  },
+  {
+    id: "kraid", name: "Kraid", universe: "metroid", emoji: "🚀", rarity: "SR",
+  },
+  {
+    id: "eiko-carol", name: "Eiko Carol", universe: "ff9", emoji: "🎺", rarity: "SR",
+  },
+  {
+    id: "locke-cole", name: "Locke Cole", universe: "ff6", emoji: "🎭", rarity: "SR",
+  },
+  {
+    id: "lester-crest", name: "Lester Crest", universe: "gta", emoji: "🚗", rarity: "UC",
+  },
+  {
+    id: "slippy-toad", name: "Slippy Toad", universe: "starfox", emoji: "🦊", rarity: "UC",
+  },
+  {
+    id: "verso", name: "Verso", universe: "clair-obscur", emoji: "🖌️", rarity: "UC",
+  },
+  {
+    id: "darko-brevic", name: "Darko Brevic", universe: "gta", emoji: "🚗", rarity: "UC",
+  },
+  {
+    id: "cal-hampton", name: "Cal Hampton", universe: "gta", emoji: "🚗", rarity: "UC",
+  },
+  {
+    id: "mineru", name: "Mineru", universe: "zelda", emoji: "🗡️", rarity: "UC",
+  },
+  {
+    id: "tarask-coral", name: "Tarask Coral", universe: "ff9", emoji: "🎺", rarity: "UC",
+  },
+  {
+    id: "celes-chere", name: "Celes Chere", universe: "ff6", emoji: "🎭", rarity: "SR",
+  },
+  {
+    id: "professeur-hojo", name: "Professeur Hojo", universe: "ff7", emoji: "⚔️", rarity: "UC",
+  },
+  {
+    id: "otacon", name: "Otacon", universe: "metalgear", emoji: "🐍", rarity: "SR",
+  },
+  {
+    id: "amanda-de-santa", name: "Amanda De Santa", universe: "gta", emoji: "🚗", rarity: "UC",
+  },
+  {
+    id: "peppy-hare", name: "Peppy Hare", universe: "starfox", emoji: "🦊", rarity: "UC",
+  },
+  {
+    id: "sciel", name: "Sciel", universe: "clair-obscur", emoji: "🖌️", rarity: "UC",
+  },
+  {
+    id: "tokabi", name: "Tokabi", universe: "metroid", emoji: "🚀", rarity: "UC",
+  },
+  {
+    id: "bandana-waddle-dee", name: "Bandana Waddle Dee", universe: "kirby", emoji: "💛", rarity: "UC",
+  },
+  {
+    id: "billy-coen", name: "Billy Coen", universe: "residentevil", emoji: "🧟", rarity: "UC",
+  },
+  {
+    id: "ivy-valentine", name: "Ivy Valentine", universe: "soulcalibur", emoji: "⚔️", rarity: "UC",
+  },
+  {
+    id: "tracy-de-santa", name: "Tracy De Santa", universe: "gta", emoji: "🚗", rarity: "UC",
+  },
+  {
+    id: "juzo-mido", name: "Juzo Mido", universe: "codevein", emoji: "🩸", rarity: "UC",
+  },
+  {
+    id: "kefka-palazzo", name: "Kefka Palazzo", universe: "ff6", emoji: "🎭", rarity: "UR",
+  },
+  {
+    id: "sylux", name: "Sylux", universe: "metroid", emoji: "🚀", rarity: "UC",
+  },
+  {
+    id: "safiya-llewellyn-fayyad", name: "Safiya Llewellyn-Fayyad", universe: "lifeisstrange", emoji: "🦋", rarity: "UC",
+  },
+  {
+    id: "rikku", name: "Rikku", universe: "ff10", emoji: "🌊", rarity: "SR",
+  },
+  {
+    id: "monoco", name: "Monoco", universe: "clair-obscur", emoji: "🖌️", rarity: "UC",
+  },
+  {
+    id: "yoshimitsu", name: "Yoshimitsu", universe: "soulcalibur", emoji: "⚔️", rarity: "SR",
+  },
+  {
+    id: "the-player", name: "The Player", universe: "poppyplaytime", emoji: "🧸", rarity: "UC",
+  },
+  {
+    id: "josha", name: "Josha", universe: "zelda", emoji: "🗡️", rarity: "UC",
+  },
+  {
+    id: "ultros", name: "Ultros", universe: "ff6", emoji: "🎭", rarity: "SR",
+  },
+  {
+    id: "armstrong", name: "Armstrong", universe: "metroid", emoji: "🚀", rarity: "UC",
+  },
+  {
+    id: "djidane-tribal", name: "Djidane Tribal", universe: "ff9", emoji: "🎺", rarity: "SR",
+  },
+  {
+    id: "louis-amamiya", name: "Louis Amamiya", universe: "codevein", emoji: "🩸", rarity: "UC",
+  },
+  {
+    id: "helena-harper", name: "Helena Harper", universe: "residentevil", emoji: "🧟", rarity: "UC",
+  },
+  {
+    id: "lou-magmell", name: "Lou MagMell", universe: "codevein", emoji: "🩸", rarity: "UC",
+  },
+  {
+    id: "grenat-til-alexandros-xvii", name: "Grenat Til Alexandros XVII", universe: "ff9", emoji: "🎺", rarity: "SR",
+  },
+  {
+    id: "daniel-diaz", name: "Daniel Diaz", universe: "lifeisstrange", emoji: "🦋", rarity: "UC",
+  },
+  {
+    id: "sean-johnson", name: "Sean Johnson", universe: "gta", emoji: "🚗", rarity: "UC",
+  },
+  {
+    id: "teba", name: "Teba", universe: "zelda", emoji: "🗡️", rarity: "UC",
+  },
+  {
+    id: "floyd-hebert", name: "Floyd Hebert", universe: "gta", emoji: "🚗", rarity: "UC",
+  },
+  {
+    id: "meve-de-lyria", name: "Meve de Lyria", universe: "witcher", emoji: "🐺", rarity: "UC",
+  },
+  {
+    id: "issun", name: "Issun", universe: "okami", emoji: "🖌️", rarity: "UC",
+  },
+  {
+    id: "john-marston", name: "John Marston", universe: "reddead", emoji: "🤠", rarity: "UR",
+  },
+  {
+    id: "gary-smith", name: "Gary Smith", universe: "bully", emoji: "🎒", rarity: "SR",
+  },
+  {
+    id: "sidon", name: "Sidon", universe: "zelda", emoji: "🗡️", rarity: "SR",
+  },
+  {
+    id: "bibi-orunitia", name: "Bibi Orunitia", universe: "ff9", emoji: "🎺", rarity: "SR",
+  },
+  {
+    id: "alexandra-chen", name: "Alexandra Chen", universe: "lifeisstrange", emoji: "🦋", rarity: "UC",
+  },
+  {
+    id: "myurdin", name: "Myurdin", universe: "crimson-desert", emoji: "🏜️", rarity: "UC",
+  },
+  {
+    id: "steve-haines", name: "Steve Haines", universe: "gta", emoji: "🚗", rarity: "UC",
+  },
+  {
+    id: "riju", name: "Riju", universe: "zelda", emoji: "🗡️", rarity: "SR",
+  },
+  {
+    id: "setzer-gabbiani", name: "Setzer Gabbiani", universe: "ff6", emoji: "🎭", rarity: "SR",
+  },
+  {
+    id: "joy", name: "Joy", universe: "shenmue", emoji: "🥋", rarity: "UC",
+  },
+  {
+    id: "denise-clinton", name: "Denise Clinton", universe: "gta", emoji: "🚗", rarity: "UC",
+  },
+  {
+    id: "dr-proton", name: "Dr. Proton", universe: "dukenukem", emoji: "💪", rarity: "UC",
+  },
+  {
+    id: "jaskier", name: "Jaskier", universe: "witcher", emoji: "🐺", rarity: "UC",
+  },
+  {
+    id: "jack-marston", name: "Jack Marston", universe: "reddead", emoji: "🤠", rarity: "UC",
+  },
+  {
+    id: "peter-kowalski", name: "Pete Kowalski", universe: "bully", emoji: "🎒", rarity: "UC",
+  },
+  {
+    id: "rauru", name: "Rauru", universe: "zelda", emoji: "🗡️", rarity: "UC",
+  },
+  {
+    id: "split-horn", name: "Split Horn", universe: "crimson-desert", emoji: "🏜️", rarity: "UC",
+  },
+  {
+    id: "wei-cheng", name: "Wei Cheng", universe: "gta", emoji: "🚗", rarity: "UC",
+  },
+  {
+    id: "jerrin", name: "Jerrin", universe: "zelda", emoji: "🗡️", rarity: "C",
+  },
+  {
+    id: "catalina", name: "Catalina", universe: "gta", emoji: "🚗", rarity: "UC",
+  },
+  {
+    id: "cycloid-empero", name: "Cycloid Empero", universe: "dukenukem", emoji: "💪", rarity: "UC",
+  },
+  {
+    id: "eredin-breacc-glas", name: "Eredin Bréacc Glas", universe: "witcher", emoji: "🐺", rarity: "UC",
+  },
+  {
+    id: "ray-bulgarin", name: "Ray Bulgarin", universe: "gta", emoji: "🚗", rarity: "UC",
+  },
+  {
+    id: "arthur-morgan", name: "Arthur Morgan", universe: "reddead", emoji: "🤠", rarity: "L",
+  },
+  {
+    id: "johnny-vincent", name: "Johnny Vincent", universe: "bully", emoji: "🎒", rarity: "UC",
+  },
+  {
+    id: "sir-jyscal-guado", name: "Sir Jyscal Guado", universe: "ff10", emoji: "🌊", rarity: "C",
+  },
+  {
+    id: "sonia", name: "Sonia", universe: "zelda", emoji: "🗡️", rarity: "UC",
+  },
+  {
+    id: "naira", name: "Naira", universe: "crimson-desert", emoji: "🏜️", rarity: "UC",
+  },
+  {
+    id: "frank-tenpenny", name: "Frank Tenpenny", universe: "gta", emoji: "🚗", rarity: "UC",
+  },
+  {
+    id: "stretch", name: "Stretch", universe: "gta", emoji: "🚗", rarity: "UC",
+  },
+  {
+    id: "mazli", name: "Mazli", universe: "zelda", emoji: "🗡️", rarity: "C",
+  },
+  {
+    id: "frank", name: "Frank", universe: "ff9", emoji: "🎺", rarity: "UC",
+  },
+  {
+    id: "miguel", name: "Miguel", universe: "gta", emoji: "🚗", rarity: "UC",
+  },
+  {
+    id: "strago-magus", name: "Strago Magus", universe: "ff6", emoji: "🎭", rarity: "UC",
+  },
+  {
+    id: "iwao-hazuki", name: "Iwao Hazuki", universe: "shenmue", emoji: "🥋", rarity: "UC",
+  },
+  {
+    id: "sophitia-alexandra", name: "Sophitia Alexandra", universe: "soulcalibur", emoji: "⚔️", rarity: "SR",
+  },
+  {
+    id: "chef", name: "Chef", universe: "gta", emoji: "🚗", rarity: "UC",
+  },
+  {
+    id: "imlerith", name: "Imlerith", universe: "witcher", emoji: "🐺", rarity: "UC",
+  },
+  {
+    id: "mikhail-faustin", name: "Mikhail Faustin", universe: "gta", emoji: "🚗", rarity: "UC",
+  },
+  {
+    id: "bill-williamson", name: "Bill Williamson", universe: "reddead", emoji: "🤠", rarity: "UC",
+  },
+  {
+    id: "lefty-mancini", name: "Lefty Mancini", universe: "bully", emoji: "🎒", rarity: "C",
+  },
+  {
+    id: "purah", name: "Purah", universe: "zelda", emoji: "🗡️", rarity: "C",
+  },
+  {
+    id: "damon-merrick", name: "Damon Merrick", universe: "lifeisstrange", emoji: "🦋", rarity: "UC",
+  },
+  {
+    id: "cesar-vialpando", name: "Cesar Vialpando", universe: "gta", emoji: "🚗", rarity: "C",
+  },
+  {
+    id: "raiden", name: "Raiden", universe: "metalgear", emoji: "🐍", rarity: "SR",
+  },
+  {
+    id: "lamar-davis", name: "Lamar Davis", universe: "gta", emoji: "🚗", rarity: "C",
+  },
+  {
+    id: "markus", name: "Markus", universe: "ff9", emoji: "🎺", rarity: "C",
+  },
+  {
+    id: "relm-arrowny", name: "Relm Arrowny", universe: "ff6", emoji: "🎭", rarity: "UC",
+  },
+  {
+    id: "xiuying-hong", name: "Xiuying Hong", universe: "shenmue", emoji: "🥋", rarity: "C",
+  },
+  {
+    id: "taki", name: "Taki", universe: "soulcalibur", emoji: "⚔️", rarity: "SR",
+  },
+  {
+    id: "solomon-richards", name: "Solomon Richards", universe: "gta", emoji: "🚗", rarity: "C",
+  },
+  {
+    id: "caranthir-ar-feiniel", name: "Caranthir Ar-Feiniel", universe: "witcher", emoji: "🐺", rarity: "UC",
+  },
+  {
+    id: "vladimir-glebov", name: "Vladimir Glebov", universe: "gta", emoji: "🚗", rarity: "UC",
+  },
+  {
+    id: "lyle-mcleish", name: "Lyle McLeish", universe: "codevein", emoji: "🩸", rarity: "C",
+  },
+  {
+    id: "dutch-van-der-linde", name: "Dutch van der Linde", universe: "reddead", emoji: "🤠", rarity: "UR",
+  },
+  {
+    id: "lola-lombardi", name: "Lola Lombardi", universe: "bully", emoji: "🎒", rarity: "C",
+  },
+  {
+    id: "kelk-ronso", name: "Kelk Ronso", universe: "ff10", emoji: "🌊", rarity: "C",
+  },
+  {
+    id: "impa", name: "Impa", universe: "zelda", emoji: "🗡️", rarity: "SR",
+  },
+  {
+    id: "hank-stamper", name: "Hank Stamper", universe: "lifeisstrange", emoji: "🦋", rarity: "UC",
+  },
+  {
+    id: "carlos-oliveira", name: "Carlos Oliveira", universe: "residentevil", emoji: "🧟", rarity: "C",
+  },
+  {
+    id: "gray-fox", name: "Gray Fox", universe: "metalgear", emoji: "🐍", rarity: "SR",
+  },
+  {
+    id: "cid-fabul-ix", name: "Cid Fabul IX", universe: "ff9", emoji: "🎺", rarity: "C",
+  },
+  {
+    id: "mallorie-bardas", name: "Mallorie Bardas", universe: "gta", emoji: "🚗", rarity: "C",
+  },
+  {
+    id: "luigi-goterelli", name: "Luigi Goterelli", universe: "gta", emoji: "🚗", rarity: "C",
+  },
+  {
+    id: "guizhang-chen", name: "Guizhang Chen", universe: "shenmue", emoji: "🥋", rarity: "C",
+  },
+  {
+    id: "raphael-sorel", name: "Raphael Sorel", universe: "soulcalibur", emoji: "⚔️", rarity: "UC",
+  },
+  {
+    id: "letho-de-guleta", name: "Letho de Guleta", universe: "witcher", emoji: "🐺", rarity: "UC",
+  },
+  {
+    id: "zenon-gryfgote", name: "Zenon Gryfgote", universe: "codevein", emoji: "🩸", rarity: "C",
+  },
+  {
+    id: "nathan-dempsy", name: "Nathan Dempsy", universe: "residentevil", emoji: "🧟", rarity: "C",
+  },
+  {
+    id: "javier-escuella", name: "Javier Escuella", universe: "reddead", emoji: "🤠", rarity: "UC",
+  },
+  {
+    id: "derby-harrington", name: "Derby Harrington", universe: "bully", emoji: "🎒", rarity: "UC",
+  },
+  {
+    id: "lisbeth-fischer", name: "Lisbeth Fischer", universe: "lifeisstrange", emoji: "🦋", rarity: "UC",
+  },
+  {
+    id: "rebecca-chambers", name: "Rebecca Chambers", universe: "residentevil", emoji: "🧟", rarity: "C",
+  },
+  {
+    id: "urbosa", name: "Urbosa", universe: "zelda", emoji: "🗡️", rarity: "SR",
+  },
+  {
+    id: "patrick-mcreary", name: "Patrick McReary", universe: "gta", emoji: "🚗", rarity: "C",
+  },
+  {
+    id: "joey-leone", name: "Joey Leone", universe: "gta", emoji: "🚗", rarity: "C",
+  },
+  {
+    id: "gogo", name: "Gogo", universe: "ff6", emoji: "🎭", rarity: "UC",
+  },
+  {
+    id: "chai", name: "Chai", universe: "shenmue", emoji: "🥋", rarity: "C",
+  },
+  {
+    id: "jacques-de-aldersberg", name: "Jacques de Aldersberg", universe: "witcher", emoji: "🐺", rarity: "C",
+  },
+  {
+    id: "noah-g-magmell", name: "Noah G. MagMell", universe: "codevein", emoji: "🩸", rarity: "C",
+  },
+  {
+    id: "edgar-ross", name: "Edgar Ross", universe: "reddead", emoji: "🤠", rarity: "C",
+  },
+  {
+    id: "zaon", name: "Zaon", universe: "ff10", emoji: "🌊", rarity: "C",
+  },
+  {
+    id: "yunobo", name: "Yunobo", universe: "zelda", emoji: "🗡️", rarity: "C",
+  },
+  {
+    id: "dr-harley-sawyer", name: "Dr. Harley Sawyer", universe: "poppyplaytime", emoji: "🧸", rarity: "C",
+  },
+  {
+    id: "jedediah-lucan", name: "Jedediah Lucan", universe: "lifeisstrange", emoji: "🦋", rarity: "C",
+  },
+  {
+    id: "edgar-roni-figaro", name: "Edgar Roni Figaro", universe: "ff6", emoji: "🎭", rarity: "SR",
+  },
+  {
+    id: "daruk", name: "Daruk", universe: "zelda", emoji: "🗡️", rarity: "SR",
+  },
+  {
+    id: "brucie-kibbutz", name: "Brucie Kibbutz", universe: "gta", emoji: "🚗", rarity: "C",
+  },
+  {
+    id: "bubsy-bobcat", name: "Bubsy Bobcat", universe: "bubsy", emoji: "🐱", rarity: "C",
+  },
+  {
+    id: "chai-xianghua", name: "Chai Xianghua", universe: "soulcalibur", emoji: "⚔️", rarity: "SR",
+  },
+  {
+    id: "marx", name: "Marx", universe: "kirby", emoji: "💛", rarity: "C",
+  },
+  {
+    id: "azar-javed", name: "Azar Javed", universe: "witcher", emoji: "🐺", rarity: "C",
+  },
+  {
+    id: "iris-magmell", name: "Iris MagMell", universe: "codevein", emoji: "🩸", rarity: "C",
+  },
+  {
+    id: "juan-garcia-cortez", name: "Juan García Cortez", universe: "gta", emoji: "🚗", rarity: "C",
+  },
+  {
+    id: "agustin-allende", name: "Agustín Allende", universe: "reddead", emoji: "🤠", rarity: "C",
+  },
+  {
+    id: "ted-thompson", name: "Ted Thompson", universe: "bully", emoji: "🎒", rarity: "C",
+  },
+  {
+    id: "robbie", name: "Robbie", universe: "zelda", emoji: "🗡️", rarity: "C",
+  },
+  {
+    id: "branet-raza-alexandros-xvi", name: "Branet Raza Alexandros XVI", universe: "ff9", emoji: "🎺", rarity: "C",
+  },
+  {
+    id: "sabin-rene-figaro", name: "Sabin Rene Figaro", universe: "ff6", emoji: "🎭", rarity: "SR",
+  },
+  {
+    id: "sheva-alomar", name: "Sheva Alomar", universe: "residentevil", emoji: "🧟", rarity: "C",
+  },
+  {
+    id: "corrado-bastoni", name: "Corrado Bastoni", universe: "mafia", emoji: "🎩", rarity: "C",
+  },
+  {
+    id: "tatl", name: "Tatl", universe: "zelda", emoji: "🗡️", rarity: "C",
+  },
+  {
+    id: "dwayne-forge", name: "Dwayne Forge", universe: "gta", emoji: "🚗", rarity: "C",
+  },
+  {
+    id: "cruz-silva", name: "Cruz Silva", universe: "codevein", emoji: "🩸", rarity: "C",
+  },
+  {
+    id: "gestahl", name: "Gestahl", universe: "ff6", emoji: "🎭", rarity: "C",
+  },
+  {
+    id: "dona", name: "Dona", universe: "ff10", emoji: "🌊", rarity: "C",
+  },
+  {
+    id: "terry-bobcat", name: "Terry Bobcat", universe: "bubsy", emoji: "🐱", rarity: "C",
+  },
+  {
+    id: "magolor", name: "Magolor", universe: "kirby", emoji: "💛", rarity: "C",
+  },
+  {
+    id: "rachel-amber", name: "Rachel Amber", universe: "lifeisstrange", emoji: "🦋", rarity: "C",
+  },
+  {
+    id: "jadwiga", name: "Jadwiga", universe: "codevein", emoji: "🩸", rarity: "C",
+  },
+  {
+    id: "avery-carrington", name: "Avery Carrington", universe: "gta", emoji: "🚗", rarity: "C",
+  },
+  {
+    id: "pj-pug-a-pillar", name: "PJ Pug-a-Pillar", universe: "poppyplaytime", emoji: "🧸", rarity: "C",
+  },
+  {
+    id: "yasmin-fayyad", name: "Yasmin Fayyad", universe: "lifeisstrange", emoji: "🦋", rarity: "C",
+  },
+  {
+    id: "shadow-2", name: "Shadow", universe: "ff6", emoji: "🎭", rarity: "C",
+  },
+  {
+    id: "jake-muller", name: "Jake Muller", universe: "residentevil", emoji: "🧟", rarity: "C",
+  },
+  {
+    id: "maxi", name: "Maxi", universe: "soulcalibur", emoji: "⚔️", rarity: "C",
+  },
+  {
+    id: "ron-jakowski", name: "Ron Jakowski", universe: "gta", emoji: "🚗", rarity: "C",
+  },
+  {
+    id: "skull-kid", name: "Skull Kid", universe: "zelda", emoji: "🗡️", rarity: "C",
+  },
+  {
+    id: "karen-daniels", name: "Karen Daniels", universe: "gta", emoji: "🚗", rarity: "C",
+  },
+  {
+    id: "gregorio-silva", name: "Gregorio Silva", universe: "codevein", emoji: "🩸", rarity: "C",
+  },
+  {
+    id: "terri-bobcat", name: "Terri Bobcat", universe: "bubsy", emoji: "🐱", rarity: "C",
+  },
+  {
+    id: "natsu", name: "Natsu", universe: "soulcalibur", emoji: "⚔️", rarity: "C",
+  },
+  {
+    id: "midna", name: "Midna", universe: "zelda", emoji: "🗡️", rarity: "C",
+  },
+  {
+    id: "sherry-birkin", name: "Sherry Birkin", universe: "residentevil", emoji: "🧟", rarity: "C",
+  },
+  {
+    id: "brian-heder", name: "Brian Heder", universe: "gta", emoji: "🚗", rarity: "C",
+  },
+  {
+    id: "paya", name: "Paya", universe: "zelda", emoji: "🗡️", rarity: "C",
+  },
+  {
+    id: "garland", name: "Garland", universe: "ff9", emoji: "🎺", rarity: "C",
+  },
+  {
+    id: "lucas-colmenero", name: "Lucas Colmenero", universe: "lifeisstrange", emoji: "🦋", rarity: "C",
+  },
+  {
+    id: "cyan-garamonde", name: "Cyan Garamonde", universe: "ff6", emoji: "🎭", rarity: "C",
+  },
+  {
+    id: "longsun-zhao", name: "Longsun Zhao (alias Lan Di)", universe: "shenmue", emoji: "🥋", rarity: "C",
+  },
+  {
+    id: "wade-hebert", name: "Wade Hebert", universe: "gta", emoji: "🚗", rarity: "C",
+  },
+  {
+    id: "vaati", name: "Vaati", universe: "zelda", emoji: "🗡️", rarity: "C",
+  },
+  {
+    id: "triss-merigold-de-maribor", name: "Triss Merigold de Maribor", universe: "witcher", emoji: "🐺", rarity: "C",
+  },
+  {
+    id: "bernie-crane", name: "Bernie Crane", universe: "gta", emoji: "🚗", rarity: "C",
+  },
+  {
+    id: "curator", name: "Curator", universe: "clair-obscur", emoji: "🖌️", rarity: "C",
+  },
+  {
+    id: "oinker-p-hamm", name: "Oinker P. Hamm", universe: "bubsy", emoji: "🐱", rarity: "C",
+  },
+  {
+    id: "james-hopkins", name: "Jimmy Hopkins", universe: "bully", emoji: "🎒", rarity: "C",
+  },
+  {
+    id: "vue-995", name: "VUE 995", universe: "metroid", emoji: "🚀", rarity: "C",
+  },
+  {
+    id: "tulin", name: "Tulin", universe: "zelda", emoji: "🗡️", rarity: "C",
+  },
+  {
+    id: "devin-weston", name: "Devin Weston", universe: "gta", emoji: "🚗", rarity: "C",
+  },
+  {
+    id: "necron", name: "Nécron", universe: "ff9", emoji: "🎺", rarity: "C",
+  },
+  {
+    id: "ryan-lucan", name: "Ryan Lucan", universe: "lifeisstrange", emoji: "🦋", rarity: "C",
+  },
+  {
+    id: "gau", name: "Gau", universe: "ff6", emoji: "🎭", rarity: "C",
+  },
+
+  // ——— World of Warcraft ———
+  {
+    id: "arthas", name: "Arthas Menethil", universe: "wow", emoji: "❄️", rarity: "L",
+  },
+  {
+    id: "illidan", name: "Illidan Stormrage", universe: "wow", emoji: "👁️", rarity: "L",
+  },
+  {
+    id: "sylvanas", name: "Sylvanas Windrunner", universe: "wow", emoji: "🏹", rarity: "SR",
+  },
+  {
+    id: "thrall", name: "Thrall", universe: "wow", emoji: "🌩️", rarity: "SR",
+  },
+  {
+    id: "jaina", name: "Jaina Proudmoore", universe: "wow", emoji: "🧊", rarity: "R",
+  },
+  {
+    id: "anduin", name: "Anduin Wrynn", universe: "wow", emoji: "🕊️", rarity: "UC",
+  },
+
+  // ——— Final Fantasy XIV ———
+  {
+    id: "emet-selch", name: "Emet-Selch", universe: "ff14", emoji: "🎭", rarity: "L",
+  },
+  {
+    id: "yshtola", name: "Y'shtola Rhul", universe: "ff14", emoji: "🔮", rarity: "SR",
+  },
+  {
+    id: "alphinaud", name: "Alphinaud Leveilleur", universe: "ff14", emoji: "📖", rarity: "UC",
+  },
+  {
+    id: "alisaie", name: "Alisaie Leveilleur", universe: "ff14", emoji: "🗡️", rarity: "C",
+  },
+  {
+    id: "estinien", name: "Estinien Wyrmblood", universe: "ff14", emoji: "🐉", rarity: "R",
+  },
+  {
+    id: "urianger", name: "Urianger Augurelt", universe: "ff14", emoji: "📜", rarity: "UC",
+  },
+
+  // ——— Dofus ———
+  {
+    id: "goultard", name: "Goultard", universe: "dofus", emoji: "⚔️", rarity: "L",
+  },
+  {
+    id: "dark-vlad", name: "Dark Vlad", universe: "dofus", emoji: "🦇", rarity: "SR",
+  },
+  {
+    id: "nox", name: "Nox", universe: "dofus", emoji: "⌛", rarity: "SR",
+  },
+  {
+    id: "joris-jurgen", name: "Joris Jurgen", universe: "dofus", emoji: "🗝️", rarity: "R",
+  },
+  {
+    id: "kerubim", name: "Kerubim Crépin", universe: "dofus", emoji: "🐈", rarity: "C",
+  },
+  {
+    id: "dathura", name: "Dathura", universe: "dofus", emoji: "🌑", rarity: "C",
+  },
+
+  // ——— Guild Wars 2 ———
+  {
+    id: "aurene", name: "Aurene", universe: "guildwars2", emoji: "🐲", rarity: "L",
+  },
+  {
+    id: "rytlock", name: "Rytlock Brimstone", universe: "guildwars2", emoji: "🔥", rarity: "UR",
+  },
+  {
+    id: "caithe", name: "Caithe", universe: "guildwars2", emoji: "🌿", rarity: "SR",
+  },
+  {
+    id: "logan-thackeray", name: "Logan Thackeray", universe: "guildwars2", emoji: "🛡️", rarity: "UC",
+  },
+  {
+    id: "zojja", name: "Zojja", universe: "guildwars2", emoji: "⚙️", rarity: "C",
+  },
+  {
+    id: "trahearne", name: "Trahearne", universe: "guildwars2", emoji: "🌳", rarity: "SR",
+  },
+
+  // ——— Compléments World of Warcraft, FF XIV, Dofus et Guild Wars 2 ———
+  {
+    id: "tirion-fordring", name: "Tirion Fordring", universe: "wow", emoji: "⚖️", rarity: "UC",
+  },
+  {
+    id: "garrosh", name: "Garrosh Hurlorage", universe: "wow", emoji: "🪓", rarity: "C",
+  },
+  {
+    id: "venat", name: "Venat", universe: "ff14", emoji: "💠", rarity: "UR",
+  },
+  {
+    id: "haurchefant", name: "Haurchefant Greystone", universe: "ff14", emoji: "🛡️", rarity: "C",
+  },
+  {
+    id: "zenos", name: "Zenos yae Galvus", universe: "ff14", emoji: "🩸", rarity: "SR",
+  },
+  {
+    id: "aymeric", name: "Aymeric de Borel", universe: "ff14", emoji: "⚜️", rarity: "C",
+  },
+  {
+    id: "graha-tia", name: "G'raha Tia", universe: "ff14", emoji: "📚", rarity: "C",
+  },
+  {
+    id: "arpagone", name: "Arpagone", universe: "dofus", emoji: "💰", rarity: "UC",
+  },
+  {
+    id: "rushu", name: "Rushu", universe: "dofus", emoji: "😈", rarity: "UR",
+  },
+  {
+    id: "palawa-joko", name: "Palawa Joko", universe: "guildwars2", emoji: "☠️", rarity: "R",
+  },
+
+  // ——— RuneScape ———
+  {
+    id: "king-black-dragon", name: "Roi Noir des Dragons", universe: "runescape", emoji: "🐉", rarity: "UR",
+  },
+  {
+    id: "zamorak", name: "Zamorak", universe: "runescape", emoji: "🌪️", rarity: "SR",
+  },
+  {
+    id: "zaros", name: "Zaros", universe: "runescape", emoji: "🌑", rarity: "R",
+  },
+  {
+    id: "wise-old-man", name: "Le Grand Sage", universe: "runescape", emoji: "🪙", rarity: "UC",
+  },
+
+  // ——— The Elder Scrolls Online ———
+  {
+    id: "mannimarco", name: "Mannimarco", universe: "eso", emoji: "💀", rarity: "UR",
+  },
+  {
+    id: "cadwell", name: "Cadwell", universe: "eso", emoji: "🍲", rarity: "SR",
+  },
+
+  // ——— Lost Ark ———
+  {
+    id: "kadan", name: "Kadan", universe: "lostark", emoji: "⚔️", rarity: "UR",
+  },
+  {
+    id: "brelshaza", name: "Brelshaza", universe: "lostark", emoji: "🕸️", rarity: "SR",
+  },
+
+  // ——— Star Wars: The Old Republic ———
+  {
+    id: "malgus", name: "Dark Malgus", universe: "swtor", emoji: "⚡", rarity: "UR",
+  },
+  {
+    id: "satele-shan", name: "Satele Shan", universe: "swtor", emoji: "🌌", rarity: "SR",
+  },
+
+  // ——— EverQuest ———
+  {
+    id: "kerafyrm", name: "Kerafyrm, le Dormeur", universe: "everquest", emoji: "🐉", rarity: "UR",
+  },
+  {
+    id: "firiona-vie", name: "Firiona Vie", universe: "everquest", emoji: "🌟", rarity: "SR",
+  },
+
+  // ——— Lineage II ———
+  {
+    id: "antharas", name: "Antharas", universe: "lineage2", emoji: "🐉", rarity: "UR",
+  },
+  {
+    id: "baium", name: "Baium", universe: "lineage2", emoji: "👑", rarity: "SR",
+  },
+
+  // ——— Ragnarok Online ———
+  {
+    id: "baphomet", name: "Baphomet", universe: "ragnarok", emoji: "🐐", rarity: "UR",
+  },
+  {
+    id: "valkyrie-randgris", name: "Valkyrie Randgris", universe: "ragnarok", emoji: "🌟", rarity: "SR",
+  },
+
+  // ——— MapleStory ———
+  {
+    id: "black-mage", name: "Le Mage Noir", universe: "maplestory", emoji: "🖤", rarity: "SR",
+  },
+  {
+    id: "zakum", name: "Zakum", universe: "maplestory", emoji: "🔥", rarity: "UC",
+  },
+
+  // ——— Aion ———
+  {
+    id: "tiamat", name: "Tiamat", universe: "aion", emoji: "🐉", rarity: "SR",
+  },
+  {
+    id: "marchutan", name: "Marchutan", universe: "aion", emoji: "🛡️", rarity: "UC",
+  },
+
+  // ——— TERA ———
+  {
+    id: "elion-dulas", name: "Elion Dulas", universe: "tera", emoji: "🗡️", rarity: "UC",
+  },
+
+  // ——— Blade & Soul ———
+  {
+    id: "jin-soyeon", name: "Jin Soyeon", universe: "bladeandsoul", emoji: "🌑", rarity: "SR",
+  },
+  {
+    id: "hong-seokkeun", name: "Maître Hong", universe: "bladeandsoul", emoji: "🥋", rarity: "UC",
+  },
+
+  // ——— Black Desert Online ———
+  {
+    id: "black-spirit", name: "L'Esprit Occulte", universe: "blackdesert", emoji: "🌀", rarity: "SR",
+  },
+  {
+    id: "illezra", name: "Illezra", universe: "blackdesert", emoji: "🌘", rarity: "UC",
+  },
+
+  // ——— The Secret World ———
+  {
+    id: "jack-boone", name: "Jack Boone", universe: "thesecretworld", emoji: "🔫", rarity: "SR",
+  },
+  {
+    id: "kirsten-geary", name: "Kirsten Geary", universe: "thesecretworld", emoji: "💼", rarity: "UC",
+  },
+
+  // ——— Phantasy Star Online 2 ———
+  {
+    id: "dark-falz-persona", name: "Dark Falz Persona", universe: "pso2", emoji: "🌑", rarity: "SR",
+  },
+
+  // ——— Age of Conan ———
+  {
+    id: "conan", name: "Conan le Cimmérien", universe: "ageofconan", emoji: "⚔️", rarity: "L",
+  },
+
+  // ——— City of Heroes ———
+  {
+    id: "statesman", name: "Statesman", universe: "cityofheroes", emoji: "🛡️", rarity: "SR",
+  },
+  {
+    id: "lord-recluse", name: "Lord Recluse", universe: "cityofheroes", emoji: "🕷️", rarity: "UC",
+  },
+
+  // ——— Tibia ———
+  {
+    id: "ferumbras", name: "Ferumbras", universe: "tibia", emoji: "🧙", rarity: "SR",
+  },
+
+  // ——— WildStar ———
+  {
+    id: "avatus", name: "Avatus", universe: "wildstar", emoji: "🤖", rarity: "SR",
+  },
+  {
+    id: "artemis-zin", name: "Artemis Zin", universe: "wildstar", emoji: "🎥", rarity: "UC",
+  },
+
+  // ——— Flyff ———
+  {
+    id: "clockworks", name: "Clockworks", universe: "flyff", emoji: "⚙️", rarity: "R",
+  },
+  {
+    id: "maflon", name: "Maflon", universe: "flyff", emoji: "🧹", rarity: "UC",
+  },
+
+  // ——— Warhammer Online ———
+  {
+    id: "tcharzanek", name: "Tchar'zanek", universe: "warhammeronline", emoji: "🌀", rarity: "SR",
+  },
+  {
+    id: "malekith", name: "Malekith, le Roi Sorcier", universe: "warhammeronline", emoji: "👑", rarity: "UC",
+  },
+
+  // ——— Albion Online ———
+  {
+    id: "morgana", name: "Morgana", universe: "albion", emoji: "🌙", rarity: "SR",
+  },
+  {
+    id: "arthur-corrompu", name: "Le Roi Arthur corrompu", universe: "albion", emoji: "⚔️", rarity: "UC",
+  },
+
+  // ——— MU Online ———
+  {
+    id: "kundun", name: "Kundun", universe: "muonline", emoji: "👹", rarity: "R",
+  },
+
+  // ——— Wakfu ———
+  {
+    id: "yugo", name: "Yugo", universe: "wakfu", emoji: "🌀", rarity: "SR",
+  },
+  {
+    id: "qilby", name: "Qilby", universe: "wakfu", emoji: "🧠", rarity: "UC",
+  },
+
+  // ——— Star Trek Online ———
+  {
+    id: "jula", name: "J'Ula", universe: "startrek", emoji: "🛰️", rarity: "R",
+  },
+
+  // ——— DC Universe Online ———
+  {
+    id: "lex-luthor", name: "Lex Luthor", universe: "dcuo", emoji: "💼", rarity: "UR",
+  },
+  {
+    id: "brainiac", name: "Brainiac", universe: "dcuo", emoji: "🛸", rarity: "SR",
+  },
+
+  // ——— Dragon Nest ———
+  {
+    id: "velskud", name: "Velskud", universe: "dragonnest", emoji: "🐉", rarity: "R",
+  },
+
+  // ——— Rift ———
+  {
+    id: "crucia", name: "Crucia", universe: "rift", emoji: "🌩️", rarity: "R",
+  },
+
+  // ——— Rappelz ———
+  {
+    id: "abhuva", name: "Abhuva, la Sorcière Blanche", universe: "rappelz", emoji: "❄️", rarity: "R",
+  },
+
+  // ——— The Lord of the Rings Online ———
+  {
+    id: "witch-king", name: "Le Roi-Sorcier d'Angmar", universe: "lotro", emoji: "👑", rarity: "L",
+  },
+  {
+    id: "tom-bombadil", name: "Tom Bombadil", universe: "lotro", emoji: "🎶", rarity: "SR",
+  },
+
+  // ——— ArcheAge ———
+
+  // ——— Star Wars Galaxies ———
+  {
+    id: "xizor", name: "Le Prince Xizor", universe: "swgalaxies", emoji: "🕶️", rarity: "R",
+  },
+
+  // ——— Phantasy Star Online (classique) ———
+  {
+    id: "dark-falz-pso", name: "Dark Falz", universe: "pso", emoji: "👁️", rarity: "R",
+  },
+
+  // ——— Ragnarok Online ———
+  {
+    id: "surt", name: "Surt", universe: "ragnarok", emoji: "🔥", rarity: "R",
+  },
+
+  // ——— Blade & Soul ———
+  {
+    id: "yura", name: "Yura", universe: "bladeandsoul", emoji: "🎭", rarity: "C",
+  },
+
+  // ——— Cabal Online ———
+  {
+    id: "sage-de-licorne", name: "Le Sage de Licorne", universe: "cabal", emoji: "🦄", rarity: "R",
+  },
+
+  // ——— Lineage II ———
+  {
+    id: "shilen", name: "Shilen", universe: "lineage2", emoji: "🌘", rarity: "R",
+  },
+
+  // ——— Knight Online ———
+  {
+    id: "antares", name: "Antares", universe: "knightonline", emoji: "🐉", rarity: "R",
+  },
+
+  // ——— Atlantica Online ———
+  {
+    id: "ulysse", name: "Ulysse", universe: "atlantica", emoji: "🏛️", rarity: "R",
+  },
+
+  // ——— Fiesta Online ———
+  {
+    id: "reto", name: "Reto", universe: "fiesta", emoji: "🏠", rarity: "R",
+  },
+
+  // ——— Perfect World ———
+  {
+    id: "pan-gu", name: "Pan Gu", universe: "perfectworld", emoji: "🌍", rarity: "R",
+  },
+
+  // ——— TERA ———
+
+  // ——— Silent Hill ———
+  {
+    id: "james-sunderland", name: "James Sunderland", universe: "silenthill", emoji: "✉️", rarity: "SR",
+  },
+
+  // ——— Alien: Isolation ———
+  {
+    id: "xenomorphe", name: "L'Xénomorphe", universe: "alienisolation", emoji: "👽", rarity: "L",
+  },
+  {
+    id: "amanda-ripley", name: "Amanda Ripley", universe: "alienisolation", emoji: "🔧", rarity: "UR",
+  },
+
+  // ——— Slender: The Eight Pages ———
+
+  // ——— The Evil Within ———
+  {
+    id: "sebastian-castellanos", name: "Sebastian Castellanos", universe: "evilwithin", emoji: "🔦", rarity: "UR",
+  },
+  {
+    id: "the-keeper", name: "The Keeper", universe: "evilwithin", emoji: "🔒", rarity: "UR",
+  },
+
+  // ——— Outlast ———
+  {
+    id: "trager", name: "Dr Richard Trager", universe: "outlast", emoji: "✂️", rarity: "UR",
+  },
+
+  // ——— Dead Space ———
+  {
+    id: "regenerateur", name: "Le Régénérateur", universe: "deadspace", emoji: "🦴", rarity: "UR",
+  },
+
+  // ——— Five Nights at Freddy's ———
+  {
+    id: "springtrap", name: "Springtrap", universe: "fnaf", emoji: "🐰", rarity: "L",
+  },
+
+  // ——— Until Dawn ———
+  {
+    id: "wendigo", name: "Le Wendigo", universe: "untildawn", emoji: "🦌", rarity: "UR",
+  },
+
+  // ——— Layers of Fear ———
+  {
+    id: "peintre", name: "Le Peintre", universe: "layersoffear", emoji: "🎨", rarity: "UR",
+  },
+
+  // ——— Project Zero ———
+  {
+    id: "femme-cheveux-denoues", name: "La Femme aux Cheveux Dénoués", universe: "projectzero", emoji: "📷", rarity: "UR",
+  },
+
+  // ——— Phasmophobia ———
+  {
+    id: "demon", name: "Le Démon", universe: "phasmophobia", emoji: "😈", rarity: "UR",
+  },
+
+  // ——— Dead by Daylight ———
+  {
+    id: "ghost-face", name: "Ghost Face", universe: "deadbydaylight", emoji: "🔪", rarity: "UR",
+  },
+
+  // ——— SOMA ———
+  {
+    id: "simon-jarrett", name: "Simon Jarrett", universe: "soma", emoji: "🤖", rarity: "SR",
+  },
+
+  // ——— Darkwood ———
+  {
+    id: "passant", name: "Le Passant", universe: "darkwood", emoji: "🪵", rarity: "SR",
+  },
+
+  // ——— Dead Space (compléments) ———
+  {
+    id: "mercer", name: "Le Docteur Mercer", universe: "deadspace", emoji: "🩺", rarity: "UR",
+  },
+
+  // ——— Amnesia: The Bunker ———
+  {
+    id: "bete", name: "La Bête", universe: "amnesia", emoji: "🐾", rarity: "L",
+  },
+
+  // ——— The Mortuary Assistant ———
+  {
+    id: "demon-morsure", name: "Le Démon de la Morsure", universe: "mortuaryassistant", emoji: "⚰️", rarity: "UR",
+  },
+
+  // ——— Iron Lung ———
+  {
+    id: "pilote", name: "Le Pilote", universe: "ironlung", emoji: "🫁", rarity: "SR",
+  },
+
+  // ——— Manhunt ———
+  {
+    id: "james-earl-cash", name: "James Earl Cash", universe: "manhunt", emoji: "🎥", rarity: "UR",
+  },
+
+  // ——— Doki Doki Literature Club! ———
+  {
+    id: "monika", name: "Monika", universe: "dokidoki", emoji: "🎀", rarity: "L",
+  },
+
+  // ——— Dead by Daylight (compléments) ———
+  {
+    id: "chasseuse", name: "La Chasseuse", universe: "deadbydaylight", emoji: "🪓", rarity: "UR",
+  },
+
+  // ——— Project Zero (compléments) ———
+  {
+    id: "kusabi", name: "Kusabi", universe: "projectzero", emoji: "⛓️", rarity: "UR",
+  },
+
+  // ——— Subnautica ———
+  {
+    id: "leviatan-faucheur", name: "Le Léviathan Faucheur", universe: "subnautica", emoji: "🦈", rarity: "UR",
+  },
+
+  // ——— Signalis ———
+  {
+    id: "elster", name: "Elster", universe: "signalis", emoji: "🤖", rarity: "UR",
+  },
+
+  // ——— Ori ———
+  {
+    id: "kuro", name: "Kuro", universe: "ori", emoji: "🦉", rarity: "UR",
+  },
+  {
+    id: "shriek", name: "Shriek", universe: "ori", emoji: "🌑", rarity: "L",
+  },
+
+  // ——— Elden Ring (compléments) ———
+  {
+    id: "tarnished", name: "Le Tarnisé", universe: "eldenring", emoji: "⚔️", rarity: "UR",
+  },
+  {
+    id: "ranni", name: "Ranni la Sorcière", universe: "eldenring", emoji: "🌙", rarity: "L",
+  },
+
+  // ——— Bloodborne ———
+  // « hunter » est déjà pris par le personnage de Spyro.
+  {
+    id: "hunter-bloodborne", name: "Le Chasseur", universe: "bloodborne", emoji: "🩸", rarity: "L",
+  },
+
+  // ——— Cyberpunk 2077 ———
+  {
+    id: "v", name: "V", universe: "cyberpunk", emoji: "🔫", rarity: "UR",
+  },
+
+  // ——— The Elder Scrolls V: Skyrim ———
+  {
+    id: "lydia", name: "Lydia", universe: "skyrim", emoji: "🛡️", rarity: "UC",
+  },
+  {
+    id: "maiq", name: "M'aiq le Menteur", universe: "skyrim", emoji: "🐱", rarity: "C",
+  },
+
+  // ——— Fallout ———
+  {
+    id: "dogmeat", name: "Canigou", universe: "fallout", emoji: "🐕", rarity: "R",
+  },
+  {
+    id: "vendeur-vault-tec", name: "Le Vendeur de Vault-Tec", universe: "fallout", emoji: "🧳", rarity: "C",
+  },
+
+  // ——— Mass Effect ———
+  {
+    id: "conrad-verner", name: "Conrad Verner", universe: "masseffect", emoji: "🫡", rarity: "C",
+  },
+
+  // ——— Borderlands ———
+  {
+    id: "claptrap", name: "Claptrap", universe: "borderlands", emoji: "🤖", rarity: "R",
+  },
+  {
+    id: "face-mcshooty", name: "Face McShooty", universe: "borderlands", emoji: "🎯", rarity: "C",
+  },
+
+  // ——— Cyberpunk 2077 (compléments) ———
+  {
+    id: "jackie-welles", name: "Jackie Welles", universe: "cyberpunk", emoji: "🍻", rarity: "R",
+  },
+
+  // ——— Metal Gear Solid (compléments) ———
+  {
+    id: "johnny-sasaki", name: "Johnny Sasaki", universe: "metalgear", emoji: "🚽", rarity: "C",
+  },
+
+  // ——— Minecraft (compléments) ———
+  {
+    id: "villageois", name: "Le Villageois", universe: "minecraft", emoji: "🧑‍🌾", rarity: "C",
+  },
+
+  // ——— Left 4 Dead ———
+  {
+    id: "louis", name: "Louis", universe: "l4d", emoji: "💊", rarity: "UC",
+  },
+
+  // ——— Team Fortress 2 ———
+  {
+    id: "spy", name: "L'Espion", universe: "tf2", emoji: "🕵️", rarity: "R",
+  },
+  {
+    id: "heavy", name: "Le Heavy", universe: "tf2", emoji: "💪", rarity: "R",
+  },
+
+  // ——— Stardew Valley ———
+  {
+    id: "m-qi", name: "M. Qi", universe: "stardew", emoji: "💠", rarity: "R",
+  },
+
+  // ——— Hollow Knight (compléments) ———
+  {
+    id: "cornifer", name: "Cornifer", universe: "hollowknight", emoji: "🗺️", rarity: "C",
+  },
+
+  // ——— Hades ———
+  {
+    id: "hypnos", name: "Hypnos", universe: "hades", emoji: "😴", rarity: "C",
+  },
+
+  // ——— Cuphead (compléments) ———
+  {
+    id: "diable", name: "Le Diable", universe: "cuphead", emoji: "😈", rarity: "UR",
+  },
+
+  // ——— Dead Cells ———
+  {
+    id: "prisonnier", name: "Le Prisonnier", universe: "deadcells", emoji: "🗡️", rarity: "R",
+  },
+
+  // ——— Plants vs. Zombies ———
+  {
+    id: "zombie-cone", name: "Le Zombie au Cône", universe: "pvz", emoji: "🚧", rarity: "C",
+  },
+
+  // ——— Katana Zero ———
+  {
+    id: "zero", name: "Zéro", universe: "katanazero", emoji: "⚡", rarity: "SR",
+  },
+
+  // ——— Untitled Goose Game ———
+  {
+    id: "oie", name: "L'Oie", universe: "goose", emoji: "🪿", rarity: "R",
+  },
+
+  // ——— Hotline Miami ———
+  {
+    id: "jacket", name: "Jacket", universe: "hotlinemiami", emoji: "🎭", rarity: "SR",
+  },
+
+  // ——— Don't Starve ———
+  {
+    id: "wilson", name: "Wilson P. Higgsbury", universe: "dontstarve", emoji: "🎩", rarity: "R",
+  },
+
+  // ——— Plants vs. Zombies (compléments) ———
+  {
+    id: "tournesol", name: "Le Tournesol", universe: "pvz", emoji: "🌻", rarity: "C",
+  },
+
+  // ——— Among Us ———
+  {
+    id: "imposteur", name: "L'Imposteur", universe: "amongus", emoji: "🔪", rarity: "R",
+  },
+
+  // ——— Fall Guys ———
+  {
+    id: "fall-guy", name: "Le Fall Guy", universe: "fallguys", emoji: "🫘", rarity: "C",
+  },
+
+  // ——— Goat Simulator ———
+  {
+    id: "pilgor", name: "Pilgor", universe: "goatsim", emoji: "🐐", rarity: "R",
+  },
+
+  // ——— Shovel Knight ———
+  {
+    id: "shovel-knight", name: "Shovel Knight", universe: "shovelknight", emoji: "🪏", rarity: "R",
+  },
+
+  // ——— Super Meat Boy ———
+  {
+    id: "meat-boy", name: "Meat Boy", universe: "supermeatboy", emoji: "🥩", rarity: "R",
+  },
+
+  // ——— Limbo ———
+  {
+    id: "petit-garcon", name: "Le Petit Garçon", universe: "limbo", emoji: "🌑", rarity: "C",
+  },
+
+  // ——— Papers, Please ———
+  {
+    id: "inspecteur", name: "L'Inspecteur des Douanes", universe: "papersplease", emoji: "🛂", rarity: "C",
+  },
+
+  // ——— Disco Elysium ———
+  {
+    id: "harry", name: "Harry Du Bois", universe: "discoelysium", emoji: "🥃", rarity: "UR",
+  },
+
+  // ——— Pentiment ———
+  {
+    id: "andreas", name: "Andreas Maler", universe: "pentiment", emoji: "🖋️", rarity: "R",
+  },
+
+  // ——— Outer Wilds ———
+  {
+    id: "explorateur", name: "L'Explorateur", universe: "outerwilds", emoji: "🪕", rarity: "R",
+  },
+
+  // ——— Katamari Damacy ———
+  {
+    id: "prince", name: "Le Prince", universe: "katamari", emoji: "🧶", rarity: "R",
+  },
+
+  // ——— Octopath Traveler ———
+
+  // ——— Darkest Dungeon ———
+  {
+    id: "croise", name: "Le Croisé", universe: "darkesstdungeon", emoji: "✝️", rarity: "R",
+  },
+
+  // ——— Hotline Miami (compléments) ———
+  {
+    id: "biker", name: "Biker", universe: "hotlinemiami", emoji: "🪓", rarity: "SR",
+  },
+
+  // ——— Papers, Please (compléments) ———
+  {
+    id: "jorji", name: "Jorji Costava", universe: "papersplease", emoji: "🎫", rarity: "C",
+  },
+
+  // ——— Slime Rancher ———
+  {
+    id: "beatrix", name: "Beatrix LeBeau", universe: "slimerancher", emoji: "🫧", rarity: "UC",
+  },
+
+  // ——— Untitled Goose Game (compléments) ———
+  {
+    id: "jardinier", name: "Le Jardinier", universe: "goose", emoji: "🌷", rarity: "C",
+  },
+
+  // ——— Cuphead (compléments) ———
+  {
+    id: "baroness", name: "La Baronne Von Bon Bon", universe: "cuphead", emoji: "🍬", rarity: "SR",
+  },
+
+  // ——— Minecraft (compléments) ———
+  {
+    id: "marchand", name: "Le Marchand Ambulant", universe: "minecraft", emoji: "🦙", rarity: "C",
+  },
+
+  // ——— Subnautica (compléments) ———
+  {
+    id: "rodeur", name: "Le Rôdeur", universe: "subnautica", emoji: "🦎", rarity: "UC",
+  },
+
+  {
+    id: "tanner", name: "Tanner", universe: "driver", emoji: "🚗", rarity: "R",
+  },
+
+  // ——— Stratégie (octobre 2026) ———
+  {
+    id: "thrawn", name: "Grand Amiral Thrawn", universe: "empireatwar", emoji: "🎯", rarity: "UR",
+  },
+  {
+    id: "napoleon", name: "Napoléon Bonaparte", universe: "totalwar", emoji: "🎩", rarity: "UR",
+  },
+  {
+    id: "cesar", name: "Jules César", universe: "totalwar", emoji: "🏛️", rarity: "SR",
+  },
+  {
+    id: "duc-de-paille", name: "Le Duc de Paille", universe: "stronghold", emoji: "🐷", rarity: "R",
   },
 ];
 
@@ -752,6 +2270,17 @@ const CARDS_BY_ID = new Map(CARDS.map((card) => [card.id, card]));
 
 /** Numéro d'album : position de la carte dans le catalogue (1-indexé). */
 const CARD_NUMBERS = new Map(CARDS.map((card, index) => [card.id, index + 1]));
+
+/** Carte retirée du catalogue (elle n'est plus jouable, mais reste affichée). */
+export function isRetiredCard(id: string): boolean {
+  return CARDS.some((card) => card.id === id && card.retired === true);
+}
+
+/**
+ * Taille du catalogue jouable : les cartes retirées gardent leur entrée et leur
+ * numéro d'album, mais ne comptent plus dans les totaux affichés.
+ */
+export const CATALOG_SIZE = CARDS.filter((card) => card.retired !== true).length;
 
 export function getCard(id: string): Card | undefined {
   return CARDS_BY_ID.get(id);

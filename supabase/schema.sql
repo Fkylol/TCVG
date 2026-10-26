@@ -212,7 +212,7 @@ create table if not exists public.cards (
   id text primary key,
   name text not null,
   universe text not null,
-  rarity text not null check (rarity in ('C', 'R', 'SR', 'UR', 'L')),
+  rarity text not null check (rarity in ('C', 'UC', 'R', 'SR', 'UR', 'L')),
   number integer not null,
   updated_at timestamptz not null default now()
 );
@@ -309,3 +309,10 @@ $$;
 revoke all on function public.set_profile_style(text, text) from public;
 revoke all on function public.set_profile_style(text, text) from anon;
 grant execute on function public.set_profile_style(text, text) to authenticated;
+
+-- ————— Fin du schéma de base —————
+-- Ouverture des boosters : `open_pack(p_slug)` et `buy_booster(p_slug)`
+-- (migration 014). L'ancienne `open_boosters(p_cards, p_count)` recevait les
+-- cartes du client ; elle est supprimée ici pour qu'un `npm run db:migrate`
+-- sans argument ne la réintroduise pas.
+drop function if exists public.open_boosters(text[], integer);

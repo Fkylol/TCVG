@@ -1,9 +1,12 @@
 import { CARDS, type Card, type Rarity } from "./cards";
+import { RARITY_META } from "./rarity";
 
 export type RarityInfo = {
   key: Rarity;
   label: string;
   short: string;
+  /** Nom de la variable CSS de couleur (`--rarity-E`, …). */
+  token: string;
   /** Poids relatif dans le tirage (somme = 1000, soit un pourcentage x10). */
   weight: number;
   ring: string;
@@ -16,19 +19,32 @@ export type RarityInfo = {
 export const RARITY: Record<Rarity, RarityInfo> = {
   C: {
     key: "C",
-    label: "Commun",
-    short: "C",
-    weight: 600,
+    label: RARITY_META.C.name,
+    short: RARITY_META.C.letter,
+    token: RARITY_META.C.token,
+    weight: 620.25,
     ring: "ring-white/15",
     badge: "bg-white/10 text-white/70",
     text: "text-white/70",
     bar: "bg-white/30",
   },
+  UC: {
+    key: "UC",
+    label: RARITY_META.UC.name,
+    short: RARITY_META.UC.letter,
+    token: RARITY_META.UC.token,
+    weight: 250,
+    ring: "ring-emerald-400/50",
+    badge: "bg-emerald-400/15 text-emerald-200",
+    text: "text-emerald-200",
+    bar: "bg-emerald-400",
+  },
   R: {
     key: "R",
-    label: "Rare",
-    short: "R",
-    weight: 250,
+    label: RARITY_META.R.name,
+    short: RARITY_META.R.letter,
+    token: RARITY_META.R.token,
+    weight: 114,
     ring: "ring-sky-400/40",
     badge: "bg-sky-400/15 text-sky-200",
     text: "text-sky-200",
@@ -36,9 +52,10 @@ export const RARITY: Record<Rarity, RarityInfo> = {
   },
   SR: {
     key: "SR",
-    label: "Épique",
-    short: "SR",
-    weight: 100,
+    label: RARITY_META.SR.name,
+    short: RARITY_META.SR.letter,
+    token: RARITY_META.SR.token,
+    weight: 14,
     ring: "ring-violet-400/50",
     badge: "bg-violet-400/15 text-violet-200",
     text: "text-violet-200",
@@ -46,9 +63,10 @@ export const RARITY: Record<Rarity, RarityInfo> = {
   },
   UR: {
     key: "UR",
-    label: "Légendaire",
-    short: "UR",
-    weight: 40,
+    label: RARITY_META.UR.name,
+    short: RARITY_META.UR.letter,
+    token: RARITY_META.UR.token,
+    weight: 1.5,
     ring: "ring-amber-300/60",
     badge: "bg-amber-300/15 text-amber-200",
     text: "text-amber-200",
@@ -56,9 +74,10 @@ export const RARITY: Record<Rarity, RarityInfo> = {
   },
   L: {
     key: "L",
-    label: "Mythique",
-    short: "L",
-    weight: 10,
+    label: RARITY_META.L.name,
+    short: RARITY_META.L.letter,
+    token: RARITY_META.L.token,
+    weight: 0.25,
     ring: "ring-fuchsia-400/70",
     badge: "bg-fuchsia-400/20 text-fuchsia-200",
     text: "text-fuchsia-200",
@@ -66,9 +85,33 @@ export const RARITY: Record<Rarity, RarityInfo> = {
   },
 };
 
-export const RARITY_ORDER: Rarity[] = ["L", "UR", "SR", "R", "C"];
+export const RARITY_ORDER: Rarity[] = ["L", "UR", "SR", "R", "UC", "C"];
 
-export const CARDS_PER_BOOSTER = 3;
+/** Rareté la plus haute d'une liste (L > UR > SR > R > UC > C). */
+export function rarestRarity(rarities: Rarity[]): Rarity {
+  let best: Rarity = "C";
+  for (const rarity of rarities) {
+    if (RARITY_ORDER.indexOf(rarity) < RARITY_ORDER.indexOf(best)) best = rarity;
+  }
+  return best;
+}
+
+/**
+ * Nombre de cartes par booster — constante unique.
+ *
+ * La valeur qui fait foi en base est `booster_types.cards_count` (et
+ * `game_config.cards_per_booster`) : le tirage tourne dans `open_pack()`, donc
+ * côté serveur. Cette constante sert à l'affichage et aux tests de cohérence
+ * (voir tests/game.test.ts, qui vérifie que les 11 packs en base valent 5).
+ */
+export const CARDS_PER_BOOSTER = 5;
+
+/**
+ * Nombre maximum d'envies par joueur. Le déclencheur `wishlist_limit` en base
+ * applique la même valeur : c'est lui qui fait foi, la constante sert à
+ * l'affichage.
+ */
+export const WISHLIST_LIMIT = 200;
 
 /** Durée d'attente avant de gagner un booster supplémentaire. */
 export const BOOSTER_COOLDOWN_MS = 10 * 60 * 1000;
@@ -76,46 +119,30 @@ export const BOOSTER_COOLDOWN_MS = 10 * 60 * 1000;
 /** Nombre maximum de boosters cumulables. */
 export const BOOSTER_STOCK_MAX = 10;
 
-/** Poids cumulés, calculés une fois. */
-const TOTAL_WEIGHT = Object.values(RARITY).reduce((sum, r) => sum + r.weight, 0);
+/** Poids cumulés (somme des raretés = 1000, soit un pourcentage ×10). */
+export const TOTAL_WEIGHT = Object.values(RARITY).reduce((sum, r) => sum + r.weight, 0);
 
-const POOL: Record<Rarity, Card[]> = {
-  C: CARDS.filter((c) => c.rarity === "C"),
-  R: CARDS.filter((c) => c.rarity === "R"),
-  SR: CARDS.filter((c) => c.rarity === "SR"),
-  UR: CARDS.filter((c) => c.rarity === "UR"),
-  L: CARDS.filter((c) => c.rarity === "L"),
-};
-
-export type Random = () => number;
-
-export function rollRarity(random: Random = Math.random): Rarity {
-  let ticket = random() * TOTAL_WEIGHT;
-  for (const info of Object.values(RARITY)) {
-    ticket -= info.weight;
-    if (ticket < 0) return info.key;
-  }
-  return "C";
+/**
+ * Pourcentage lisible en français, sans décimale inutile :
+ * `62 %`, `11,4 %`, `0,15 %`, `0,025 %`.
+ */
+export function formatPercent(share: number): string {
+  const percent = share * 100;
+  const text =
+    percent >= 1
+      ? percent.toFixed(1)
+      : percent >= 0.1
+        ? percent.toFixed(2)
+        : percent.toFixed(3);
+  return `${text.replace(/\.?0+$/, "").replace(".", ",")} %`;
 }
 
-function pickFromPool(rarity: Rarity, random: Random, excluded: Set<string>): Card {
-  const pool = POOL[rarity];
-  const available = pool.filter((card) => !excluded.has(card.id));
-  const candidates = available.length > 0 ? available : pool;
-  return candidates[Math.floor(random() * candidates.length) % candidates.length];
-}
-
-/** Tire un booster : une rareté par slot, sans doublon à l'intérieur du paquet. */
-export function rollBooster(random: Random = Math.random, size = CARDS_PER_BOOSTER): Card[] {
-  const drawn: Card[] = [];
-  const used = new Set<string>();
-  for (let i = 0; i < size; i++) {
-    const card = pickFromPool(rollRarity(random), random, used);
-    used.add(card.id);
-    drawn.push(card);
-  }
-  return drawn;
-}
+/**
+ * Le tirage ne vit plus ici : il est entièrement fait en base par
+ * `public.open_pack()` / `public.buy_booster()` (migration 014), avec un aléa
+ * cryptographique et des replis de pool. Aucun tirage ne doit exister côté
+ * client : le navigateur n'envoie qu'un identifiant de pack.
+ */
 
 /**
  * Stock courant vu du client : part du stock renvoyé par le serveur et ajoute
@@ -141,6 +168,18 @@ export function projectedStock(
 
   const nextAnchor = anchorMs + accrued * BOOSTER_COOLDOWN_MS;
   return { stock: total, nextAt: nextAnchor + BOOSTER_COOLDOWN_MS };
+}
+
+/**
+ * Horloge de référence des compteurs (stock de boosters).
+ *
+ * Lue une fois par rendu serveur : c'est le seul instant cohérent avec les
+ * valeurs renvoyées par la base, et le client repart de cette valeur avant de
+ * la faire avancer lui-même. Isolée ici pour que les composants restent purs
+ * au sens des règles React (aucun `Date.now()` dans leur rendu).
+ */
+export function serverNowMs(): number {
+  return Date.now();
 }
 
 export function formatCountdown(ms: number): string {

@@ -32,14 +32,20 @@ async function main() {
     const functions = await runner.query(
       `select proname from pg_proc p
          join pg_namespace n on n.oid = p.pronamespace
-        where n.nspname = 'public' and proname in ('open_boosters', 'open_booster', 'set_profile_style')
+        where n.nspname = 'public'
+          and proname in ('open_pack', 'buy_booster', 'pack_stats', 'set_profile_style')
         order by proname`,
     );
     const names = functions.map((row) => String(row.proname));
     console.log(`  fonctions : ${names.join(", ") || "(aucune)"}`);
-    if (!names.includes("open_boosters")) throw new Error("open_boosters() absente après migration");
     if (!names.includes("set_profile_style")) throw new Error("set_profile_style() absente après migration");
-    if (names.includes("open_booster")) console.warn("  ⚠ l'ancienne fonction open_booster() existe encore");
+    if (names.includes("open_pack")) {
+      if (!names.includes("pack_stats")) {
+        console.warn("  ⚠ pack_stats() absente : migration 015 non appliquée");
+      }
+    } else {
+      console.warn("  ⚠ open_pack() absente : seules les migrations antérieures à 014 sont appliquées");
+    }
 
     const tables = await runner.query(
       `select table_name from information_schema.tables
