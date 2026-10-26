@@ -1113,6 +1113,27 @@ button:focus-visible .pack-poster[data-flat="true"] {
   opacity: calc(var(--foil-art) * var(--intensity, 0));
 }
 
+/* Copie holo : le foil ne dépend plus de la rareté ni de l'inclinaison. Sans
+   cette règle, une carte tirée brillante portait le badge « Holo » mais gardait
+   exactement le rendu d'une carte normale. */
+.card-face[data-holo="true"] {
+  --foil-art: 0.78;
+  --foil-card: 0.45;
+  --sparkle: 0.95;
+}
+
+/* Sélecteurs plus spécifiques que les règles de rareté : une holo garde sa
+   pellicule animée même quand la carte est Mythique (dont le foil de rareté
+   est mis en pause hors survol). */
+.card-face[data-holo="true"] .card-art .holo {
+  opacity: calc(0.6 + 0.4 * var(--intensity, 0));
+  animation: holo-hue 12s linear infinite;
+}
+
+.card-face[data-holo="true"] > .card-foil {
+  opacity: calc(0.35 + 0.25 * var(--intensity, 0));
+}
+
 /* Reflet spéculaire de la pellicule : une bande blanche qui suit le pointeur.
    Le déplacement passe par `transform` (compositeur) et non par la position
    du dégradé, qui forcerait un repeint à chaque frame. */
@@ -1322,7 +1343,8 @@ button:focus-visible .pack-poster[data-flat="true"] {
   }
 
   .card-face[data-rarity="L"] .holo,
-  .card-face[data-rarity="L"] .card-foil {
+  .card-face[data-rarity="L"] .card-foil,
+  .card-face[data-holo="true"] .holo {
     animation: none;
   }
 

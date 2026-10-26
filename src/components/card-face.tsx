@@ -39,6 +39,7 @@ export function CardFace({
   variant = "normal",
   muted = false,
   retired = false,
+  holo = false,
 }: {
   card: Card;
   size?: Size;
@@ -51,6 +52,8 @@ export function CardFace({
   muted?: boolean;
   /** Carte retirée du catalogue : le visuel est coupé, la carte reste lisible. */
   retired?: boolean;
+  /** Copie brillante : la pellicule holographique est mise en avant. */
+  holo?: boolean;
 }) {
   const { from, to } = getCardGradient(card);
   const rarity = RARITY[card.rarity];
@@ -80,6 +83,7 @@ export function CardFace({
       data-variant={variant}
       data-muted={muted ? "true" : undefined}
       data-retired={gone ? "true" : undefined}
+      data-holo={holo && !gone ? "true" : undefined}
       className={`card-face card-shine ${className}`}
     >
       {/* Foil de la carte entière : posé sous l'illustration, il ne sort que

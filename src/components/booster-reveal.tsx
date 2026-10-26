@@ -392,6 +392,7 @@ export function BoosterReveal({
                           size="xl"
                           className="h-full w-full"
                           variant={entry.variant}
+                          holo={entry.holo}
                         />
                         {/* Reflet qui balaie la carte au moment où elle se pose :
                             une seule passe, plus appuyée sur les hautes raretés. */}
@@ -574,6 +575,7 @@ export function BoosterReveal({
                         size="sm"
                         className="aspect-[3/4]"
                         variant={entry.variant}
+                        holo={entry.holo}
                       />
                       <span className="pointer-events-none absolute inset-x-0 -top-1.5 z-10 flex justify-center gap-1">
                         {entry.isNew ? (
@@ -662,6 +664,7 @@ function RevealGrid({ items }: { items: RevealItem[] }) {
               size="sm"
               className="aspect-[3/4]"
               variant={entry.variant}
+              holo={entry.holo}
             />
             <span className="pointer-events-none absolute inset-x-0 -top-1.5 z-10 flex justify-center gap-1">
               {entry.isNew ? (

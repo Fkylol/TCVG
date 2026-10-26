@@ -165,7 +165,9 @@
 
   // --- CSS --------------------------------------------------------------
   var css = [
-    '#hw-layer{--ww:min(10vw,150px);position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:' + opts.zIndex + '}',
+    // `clamp` : sur un téléphone, 10vw ne faisait que ~37 px et les toiles
+    // disparaissaient ; elles gardent au moins 104 px quelle que soit la largeur.
+    '#hw-layer{--ww:clamp(104px,16vw,150px);position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:' + opts.zIndex + '}',
     '#hw-layer *{pointer-events:none;box-sizing:border-box}',
     '#hw-layer.hw-off{display:none}',
 

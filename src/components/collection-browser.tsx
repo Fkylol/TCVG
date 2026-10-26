@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { recycleAllDuplicates } from "@/app/actions";
@@ -9,10 +10,13 @@ import {
   CARDS,
   UNIVERSES,
   getCard,
+  getCardGradient,
   type Card,
   type Rarity,
   type UniverseKey,
 } from "@/lib/cards";
+import { getCardArt } from "@/lib/card-art";
+import { cardStats } from "@/lib/stats";
 import { RARITY, RARITY_ORDER } from "@/lib/game";
 import type { CardVariant } from "@/lib/variants";
 
@@ -27,6 +31,14 @@ export type CollectionEntry = {
   retired: boolean;
   firstObtainedAt: string;
 };
+
+/** L > UR > … > C, puis puissance + aura, puis nom. */
+function compareCards(a: Card, b: Card): number {
+  const rarity = RARITY_ORDER.indexOf(a.rarity) - RARITY_ORDER.indexOf(b.rarity);
+  if (rarity !== 0) return rarity;
+  const power = cardStats(b).power + cardStats(b).aura - (cardStats(a).power + cardStats(a).aura);
+  return power !== 0 ? power : a.name.localeCompare(b.name, "fr");
+}
 
 type Sorter = (a: Card, b: Card) => number;
 
@@ -44,6 +56,8 @@ type Album = {
   to: string;
   owned: number;
   total: number;
+  /** Meilleure carte possédée de l'univers : elle illustre l'album. */
+  best: Card | null;
 };
 
 export function CollectionBrowser({
@@ -122,8 +136,14 @@ export function CollectionBrowser({
 
   const albums = useMemo<Album[]>(() => {
     const ownedByUniverse = new Map<UniverseKey, number>();
+    const bestByUniverse = new Map<UniverseKey, Card>();
     for (const { card } of owned) {
       ownedByUniverse.set(card.universe, (ownedByUniverse.get(card.universe) ?? 0) + 1);
+
+      // La vignette de l'album est la carte la plus rare piochée dedans ; à
+      // rareté égale, la plus puissante, puis l'ordre alphabétique.
+      const current = bestByUniverse.get(card.universe);
+      if (!current || compareCards(card, current) < 0) bestByUniverse.set(card.universe, card);
     }
 
     const totals = new Map<UniverseKey, number>();
@@ -134,6 +154,7 @@ export function CollectionBrowser({
         key,
         total,
         owned: ownedByUniverse.get(key) ?? 0,
+        best: bestByUniverse.get(key) ?? null,
         label: UNIVERSES[key].label,
         from: UNIVERSES[key].from,
         to: UNIVERSES[key].to,
@@ -308,10 +329,7 @@ export function CollectionBrowser({
                   started ? "hover:brightness-110" : "opacity-55 hover:opacity-90"
                 }`}
               >
-                <span
-                  className="cut h-9 w-9 shrink-0 ring-1 ring-white/15"
-                  style={{ background: `linear-gradient(150deg, ${album.from}, ${album.to})` }}
-                />
+                <AlbumThumb album={album} />
                 <span className="min-w-0 flex-1">
                   <span className="flex items-baseline justify-between gap-2 text-sm">
                     <span className="truncate font-medium">{album.label}</span>
@@ -349,6 +367,7 @@ export function CollectionBrowser({
                   owners={owners[card.id] ?? null}
                   variant={entry.variant}
                   retired={entry.retired}
+                  holo={entry.holoQuantity > 0}
                 />
                 {(entry.holoQuantity > 0 || entry.quantity > 1) && (
                   <div className="mt-1.5 flex items-center justify-end gap-1.5 px-0.5 text-[10px] text-white/40">
@@ -381,5 +400,40 @@ export function CollectionBrowser({
         </div>
       )}
     </div>
+  );
+}
+
+/**
+ * Vignette d'un album : la meilleure carte piochée dans cet univers, ou le
+ * dégradé de l'univers tant qu'il est vide.
+ */
+function AlbumThumb({ album }: { album: Album }) {
+  const [failed, setFailed] = useState(false);
+  const art = album.best ? getCardArt(album.best.id) : null;
+  const gradient = album.best ? getCardGradient(album.best) : album;
+  const showArt = Boolean(art) && !failed;
+
+  return (
+    <span
+      title={album.best?.name}
+      className="cut relative h-12 w-9 shrink-0 overflow-hidden ring-1 ring-white/15"
+      style={{ background: `linear-gradient(150deg, ${gradient.from}, ${gradient.to})` }}
+    >
+      {art && showArt ? (
+        <Image
+          src={art.src}
+          alt=""
+          fill
+          sizes="36px"
+          unoptimized={!art.local}
+          style={art.framing}
+          onError={() => setFailed(true)}
+        />
+      ) : album.best ? (
+        <span className="absolute inset-0 grid place-items-center text-sm" aria-hidden>
+          {album.best.emoji}
+        </span>
+      ) : null}
+    </span>
   );
 }

@@ -10,6 +10,12 @@ type OverlayOptions = {
   boosterPumpkin?: boolean;
   boosterEndpoint?: string;
   zIndex?: number;
+  /** Éclairage à la torche sur une zone (voir `public/events/halloween-overlay.js`). */
+  torch?: boolean;
+  torchTarget?: string;
+  torchRadius?: number;
+  torchDarkness?: number;
+  torchFlicker?: boolean;
   [key: string]: unknown;
 };
 
@@ -53,6 +59,13 @@ export function HalloweenOverlay({
       witch: false,
       boosterPumpkin: true,
       boosterEndpoint: "/api/halloween/booster",
+      // Les boosters baignent dans le noir : la souris fait office de torche et
+      // la pile flanche par instants. Uniquement au survol (pas de tactile).
+      torch: true,
+      torchTarget: "[data-hw-torch]",
+      torchRadius: 190,
+      torchDarkness: 0.9,
+      torchFlicker: true,
       zIndex,
     };
 

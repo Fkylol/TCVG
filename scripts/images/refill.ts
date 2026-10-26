@@ -159,6 +159,99 @@ const CARD_HOST_OVERRIDES: Record<string, string> = {
   "tom-bombadil": "lotr.fandom.com",
 };
 
+/**
+ * Visuels choisis à la main : le wiki et la page sont connus, et souvent le
+ * fichier exact aussi. La page et l'image passent quand même par la
+ * vérification de taille et de hotlink avant d'être enregistrées.
+ */
+const CARD_PINNED: Record<string, { host: string; page: string; file?: string }> = {
+  'king-dedede': { host: 'kirby.fandom.com', page: 'King Dedede', file: '16-dedede.png' },
+  'freyja-crescent': {
+    host: 'finalfantasy.fandom.com',
+    page: 'Freya Crescent',
+    file: 'FFIX CG Render Freya.png',
+  },
+  'tarask-coral': { host: 'finalfantasy.fandom.com', page: 'Amarant Coral', file: 'Amarant 3.jpg' },
+  markus: { host: 'finalfantasy.fandom.com', page: 'Marcus', file: 'Marcus.jpg' },
+  'juzo-mido': {
+    host: 'codevein.fandom.com',
+    page: 'Juzo Mido',
+    file: 'Code-Vein 2018 04-19-18 011.jpg',
+  },
+  'louis-amamiya': {
+    host: 'codevein.fandom.com',
+    page: 'Louis Amamiya',
+    file: 'Louis bio.jpg',
+  },
+  'cruz-silva': {
+    host: 'codevein.fandom.com',
+    page: 'Cruz Silva',
+    file: 'Cruz Silva character draft.jpg',
+  },
+  monoco: {
+    host: 'clair-obscur.fandom.com',
+    page: 'Monoco',
+    file: 'Amandine-marest-3d-mainchar-monoco-default5.jpg',
+  },
+  'dark-vlad': { host: 'dofuswiki.fandom.com', page: 'Dark Vlad (NPC)', file: 'Dark Vlad (NPC).png' },
+  'femme-cheveux-denoues': {
+    host: 'fatalframe.fandom.com',
+    page: 'Long Hair Woman',
+    file: 'Longhairedwoman.png',
+  },
+  passant: { host: 'darkwood.fandom.com', page: 'Protagonist', file: 'Stranger.png' },
+  tarnished: {
+    host: 'eldenring.fandom.com',
+    page: 'The Tarnished (Protagonist)',
+    file: 'ER Character Tarnished 01.png',
+  },
+  heavy: { host: 'teamfortress.fandom.com', page: 'Heavy', file: 'H.W.G.png' },
+  imposteur: {
+    host: 'amongus.fandom.com',
+    page: 'Impostor',
+    file: 'Impostor victory.png',
+  },
+  'petit-garcon': { host: 'limbo.fandom.com', page: 'Nameless Boy', file: 'Unamed.Boy.jpg' },
+  inspecteur: { host: 'papersplease.fandom.com', page: 'Inspector', file: 'Inspector-bw.png' },
+  explorateur: {
+    host: 'outerwilds.fandom.com',
+    page: 'The protagonist',
+    file: 'Protagonist Suit Closeup.JPG',
+  },
+  prince: { host: 'katamari.fandom.com', page: 'The Prince', file: 'Cousins BK 01 Prince.png' },
+  rodeur: { host: 'subnautica.fandom.com', page: 'Stalker', file: 'Stalker Fauna.png' },
+  'firiona-vie': { host: 'eq2.fandom.com', page: 'Firiona Vie (Antonica)', file: 'Firiona Vie (Antonica).jpg' },
+  avatus: { host: 'wildstar.fandom.com', page: 'Avatus', file: 'Avatus Thumbnail.png' },
+  clockworks: { host: 'flyff.fandom.com', page: 'Clockworks', file: 'Clockworks.jpg' },
+  'dr-harley-sawyer': {
+    host: 'poppy-playtime.fandom.com',
+    page: 'Harley Sawyer',
+    file: "Harley sawyer's appearance.jpg",
+  },
+  'lola-lombardi': { host: 'bully.fandom.com', page: 'Lola Lombardi', file: 'Lola.jpg' },
+  'derby-harrington': { host: 'bully.fandom.com', page: 'Derby Harrington', file: 'Derby25.jpg' },
+  antharas: { host: 'lineage2.fandom.com', page: 'Antharas', file: 'Antharas1.jpg' },
+  'kirsten-geary': {
+    host: 'secretworld.fandom.com',
+    page: 'Kirsten Geary',
+    file: 'Kirstengeary desc.jpg',
+  },
+  crucia: { host: 'rift.fandom.com', page: 'Crucia', file: 'Crucia.jpg' },
+  spy: { host: 'teamfortress.fandom.com', page: 'Spy', file: 'Spy Classic.png' },
+  prisonnier: {
+    host: 'deadcells.fandom.com',
+    page: 'The Beheaded',
+    file: 'Beheaded-Island-BG.jpg',
+  },
+  'black-spirit': {
+    host: 'blackdesertonline.fandom.com',
+    page: 'Black Spirit',
+    file: 'BlackSpirit Stage 6.png',
+  },
+  // « Melvin Harris » est le nom complet de Big Smoke dans San Andreas.
+  'melvin-harris': { host: 'grandtheftauto.fandom.com', page: 'Big Smoke', file: 'BigSmoke-GTASA.jpg' },
+};
+
 const MANUAL_ALIASES: Record<string, string[]> = {
   conan: ["Conan"],
   "banjo-kazooie": ["Banjo", "Banjo and Kazooie", "Banjo & Kazooie"],
@@ -400,6 +493,20 @@ async function imageUrl(host: string, file: string): Promise<string | null> {
     const page = Object.values(data.query?.pages ?? {})[0];
     const info = page?.imageinfo?.[0];
     return info?.thumburl ?? info?.url ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/** Image principale (infobox) d'une page, sans passer par la recherche. */
+async function pageLeadImage(host: string, title: string): Promise<string | null> {
+  const url = `${apiEndpoint(`https://${host}`)}?action=query&format=json&origin=*&redirects=1&prop=pageimages&piprop=original&titles=${encodeURIComponent(title)}`;
+  try {
+    const data = await getJson<{
+      query?: { pages?: Record<string, { original?: { source: string } }> };
+    }>(url, { fresh: FRESH });
+    const page = Object.values(data.query?.pages ?? {})[0];
+    return page?.original?.source ?? null;
   } catch {
     return null;
   }
@@ -714,6 +821,43 @@ async function main() {
   let done = 0;
 
   const results = await mapLimit(targets, 6, async (card): Promise<Result> => {
+    const pinned = CARD_PINNED[card.id];
+    if (pinned) {
+      const url = pinned.file
+        ? await imageUrl(pinned.host, pinned.file)
+        : await pageLeadImage(pinned.host, pinned.page);
+      const verdict = url
+        ? await inspectImage(url, { minSide: 128, minRatio: 0.2 })
+        : null;
+      if (url && verdict?.ok) {
+        used.add(dedupeKey(url));
+        done += 1;
+        return {
+          id: card.id,
+          name: card.name,
+          franchise: card.franchise,
+          host: pinned.host,
+          page: pageUrl(pinned.host, pinned.page),
+          file: pinned.file ?? assetName(url),
+          url,
+          status: "found",
+          reason: "visuel choisi sur le wiki de la franchise",
+        };
+      }
+      done += 1;
+      return {
+        id: card.id,
+        name: card.name,
+        franchise: card.franchise,
+        host: pinned.host,
+        page: pageUrl(pinned.host, pinned.page),
+        file: pinned.file ?? null,
+        url,
+        status: "invalid",
+        reason: url ? (verdict?.reason ?? "image refusée") : "fichier introuvable",
+      };
+    }
+
     let host: string | null =
       CARD_HOST_OVERRIDES[card.id] ??
       hostByFranchise.get(card.franchise) ??

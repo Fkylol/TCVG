@@ -289,7 +289,9 @@ export function BoosterPicker({
 
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
         <div>
+          {/* `data-hw-torch` : zone que l'overlay Halloween assombrit. */}
           <ul
+            data-hw-torch
             className="grid grid-cols-2 gap-x-4 gap-y-7 sm:gap-x-5 lg:grid-cols-3 2xl:grid-cols-4"
             aria-label="Les douze boosters"
           >

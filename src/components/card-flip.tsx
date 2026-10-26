@@ -54,6 +54,7 @@ export function CardFlip({
   owners,
   variant = "normal",
   retired = false,
+  holo = false,
 }: {
   card: Card;
   firstObtainedAt: string;
@@ -63,6 +64,8 @@ export function CardFlip({
   variant?: CardVariant;
   /** Carte retirée : visuel coupé, étiquette sur la face et le verso. */
   retired?: boolean;
+  /** Le joueur possède au moins une copie holo. */
+  holo?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [flipped, setFlipped] = useState(false);
@@ -134,6 +137,7 @@ export function CardFlip({
           tilt={false}
           variant={variant}
           retired={retired}
+          holo={holo}
         />
       </button>
 
@@ -188,6 +192,7 @@ export function CardFlip({
                       tilt={false}
                       variant={variant}
                       retired={retired}
+                      holo={holo}
                     />
                   </button>
 
