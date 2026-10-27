@@ -1,6 +1,5 @@
 "use server";
 
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
@@ -10,6 +9,7 @@ import { getPack } from "@/lib/packs";
 import { evaluateFrames, fetchFrameStats } from "@/lib/frames";
 import { resolveSelectedFrame } from "@/lib/frames.config";
 import { BOOSTER_STOCK_MAX, WISHLIST_LIMIT } from "@/lib/game";
+import { currentOrigin } from "@/lib/origin";
 import { CARDS, getCard, type Card } from "@/lib/cards";
 import { toCardVariant, type CardVariant } from "@/lib/variants";
 import {
@@ -20,14 +20,6 @@ import {
   type CardSaleEntry,
   type MarketQuote,
 } from "@/lib/data";
-
-async function currentOrigin(): Promise<string | undefined> {
-  const headerList = await headers();
-  const host = headerList.get("x-forwarded-host") ?? headerList.get("host");
-  if (!host) return undefined;
-  const proto = headerList.get("x-forwarded-proto") ?? "http";
-  return `${proto}://${host}`;
-}
 
 export async function signOut() {
   const supabase = await createClient();

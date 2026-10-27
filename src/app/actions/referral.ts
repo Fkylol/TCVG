@@ -1,18 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { requireSession } from "@/lib/auth";
+import { currentOrigin } from "@/lib/origin";
 import { REFERRAL_CONFIG, REFERRAL_PAGE } from "@/lib/referral/config";
-
-async function currentOrigin(): Promise<string | undefined> {
-  const headerList = await headers();
-  const host = headerList.get("x-forwarded-host") ?? headerList.get("host");
-  if (!host) return undefined;
-  const proto = headerList.get("x-forwarded-proto") ?? "http";
-  return `${proto}://${host}`;
-}
 
 /**
  * « J'ai activé l'A2F, revérifier ».

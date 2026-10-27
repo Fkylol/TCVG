@@ -90,7 +90,15 @@ export async function GET(request: NextRequest) {
       if (data.session) await afterSignIn(supabase, data.session, request);
       return NextResponse.redirect(target);
     }
+    // Le motif exact n'est pas montré au joueur, mais reste dans les journaux :
+    // sans lui, un échec de connexion Discord était impossible à diagnostiquer.
+    console.error("auth_confirm echange", error.message);
   }
+
+  // Un deuxième onglet (ou navigateur) peut avoir déjà ouvert la session :
+  // inutile de renvoyer le joueur vers l'écran de connexion.
+  const { data: existing } = await supabase.auth.getUser();
+  if (existing.user) return NextResponse.redirect(target);
 
   return NextResponse.redirect(`${origin}/login?erreur=confirmation`);
 }
