@@ -86,13 +86,15 @@ La route `src/app/auth/confirm/route.ts` échange le code OAuth contre une sessi
 | `npm run build` | Build de production + typecheck |
 | `npm test` | Tests de la logique de jeu (tirages, poids, cooldown, catalogue) |
 | `npm run lint` | ESLint |
+| `npm run atelier` | Atelier local (ajout, correction, signalements) : démarre le serveur si besoin et ouvre `/atelier/cartes` |
 | `npm run db:chat:seed` | Données de test de L'Agora (faux joueurs, messages, annonces, signalement) |
 
 ## Comment ça marche
 
 - **Booster** : 3 cartes, une rareté tirée par carte selon des poids (60 % / 25 % / 10 % / 4 % / 1 %),
   puis une carte au hasard dans cette rareté, sans doublon dans le pack. Les cartes se révèlent une
-  par une : le dos affiché (`public/booster/dos-carte.jpg`) brille selon la rareté avant de se retourner.
+  par une : le dos affiché (`src/components/card-back.tsx`, dessiné en SVG) prend les couleurs du pack
+  ouvert et brille selon la rareté avant de se retourner.
 - **Stock** : un booster toutes les 10 minutes, **cumulables jusqu'à 10** (ouverts un par un ou tous
   d'un coup). L'accumulation et la consommation sont calculées **en base** par `open_boosters()` dans
   une transaction avec verrou de ligne — impossible à contourner en rejouant la requête.
@@ -347,6 +349,20 @@ vérifient `is_admin()` en base : forcer la route ne donne rien.
   `SUPABASE_SERVICE_ROLE_KEY` ne sont pas configurés, ou si le joueur n'a jamais rejoint le serveur
   du jeu ; la notification in-site, elle, fonctionne toujours.
 
+## Connexion Discord et cadeau de bienvenue
+
+La connexion passe uniquement par Discord (`signInWithDiscord`, retour sur `/auth/confirm`).
+L'origine du retour est calculée dans `src/lib/origin.ts` : HTTPS hors machine locale, car
+`x-forwarded-proto` n'est pas toujours fourni par Cloudflare et `http://tcvg.fun` sortait de la
+liste blanche Supabase — celle-ci renvoyait alors vers sa « Site URL ». Cette dernière doit valoir
+`https://tcvg.fun` (Authentication → URL Configuration). Un échec d'échange de code est journalisé
+et expliqué sur `/login?erreur=confirmation`.
+
+Chaque nouveau compte reçoit **10 boosters** dans `profiles.bonus_boosters` (migration
+`051_bonus_bienvenue.sql`, qui les verse aussi une fois aux comptes existants). Le cadeau est
+tracé dans `booster_grants` (`bienvenue`, `cadeau-10-boosters`), ce qui rend la migration
+rejouable sans verser deux fois.
+
 ## Parrainage
 
 Chaque joueur a un code de 8 caractères (`/invite/<code>`). À sa première connexion
@@ -434,6 +450,64 @@ npm run portraits   # réécrit src/data/portraits.json
   pour retirer l'entrée : la carte retombe sur le rendu généré. Une carte qui quitte
   `src/lib/cards.ts` est supprimée de la base par `npm run db:cards`, copies comprises.
 
+## Atelier : ajouter ou corriger une carte
+
+`npm run atelier` démarre le serveur de développement s'il ne tourne pas déjà et ouvre
+`/atelier/cartes`. L'édition de cartes n'existe qu'en local (elle écrit dans les fichiers du
+projet) : en ligne, `/atelier/cartes` renvoie vers `/atelier/signalements`.
+
+L'onglet **Atelier** de l'en-tête et les pages `/atelier/*` sont réservés aux administrateurs
+(`profiles.is_admin`, function `is_admin()`). En ligne, la file de signalements est lue avec la
+session de l'administrateur (policies de la migration 050) ; en local, elle passe par la
+connexion de maintenance (`.env`), comme les scripts.
+
+1. Tape le nom du personnage, puis « Préparer ». Laisse la franchise sur « Déduire du nom »
+   pour que l'atelier la retrouve seul (page Wikipédia du personnage, alias de franchise type
+   « Warcraft » pour World of Warcraft) ; sinon choisis-la dans la liste.
+2. L'atelier cherche les visuels sur le wiki de la franchise (déduit des portraits déjà au
+   catalogue) puis sur Wikipédia fr/en, vérifie chaque image (taille ≥ 300 px, ratio, type,
+   hotlink) et propose les fichiers de la page qui portent le nom du personnage. Si le wiki n'a
+   pas le beau visuel, colle l'URL d'une image trouvée ailleurs (recherche d'images, site
+   officiel) : elle passe les mêmes contrôles et devient le visuel de la carte — sa licence,
+   elle, n'est pas vérifiée.
+3. Il rédige une fiche à partir de la page retenue, estime la rareté avec la méthode du jeu
+   (pages vues Wikipédia + nombre de langues, comparées au dernier `.popularity/dataset.json`)
+   et reprend le genre dominant de la franchise. Tout est modifiable dans le formulaire, avec
+   un aperçu de la carte au vrai rendu.
+4. « Valider et ajouter au jeu » écrit la carte dans `src/data/atelier-cards.json` (et sa fiche
+   dans `atelier-lore.json`), puis lance `npm run db:cards` pour la recopier en base.
+
+L'aperçu et les vignettes passent par un relais local (`/atelier/image`, réservé au
+développement) : les CDN répondent 403 au referer de `localhost` et l'image resterait vide. Le
+relais joint les en-têtes du site et ne sert que des hôtes publics ; l'URL d'origine, elle, est
+celle qui est enregistrée.
+
+Pour corriger une carte déjà au catalogue, choisis-la dans « Modifier une carte existante » : le
+formulaire reprend son nom, sa franchise, sa rareté, ses genres, sa fiche et son visuel. Valider
+réécrit son entrée dans `atelier-cards.json` sous le même identifiant ; `CARDS` remplace alors la
+carte de base sur place, donc elle n'apparaît pas deux fois et son numéro d'album ne bouge pas.
+
+Les ajouts sont concaténés au catalogue (`CARDS` dans `src/lib/cards.ts`), donc ils prennent les
+numéros d'album suivants sans renuméroter l'existant, et `db:cards` les traite comme les autres.
+Une carte ajoutée puis retirée de `atelier-cards.json` est supprimée de la base au prochain
+`db:cards`, copies comprises.
+
+La rareté estimée est un point de départ : `popularity:*` puis
+`rarity:preview` restent le calcul officiel du catalogue.
+
+### Signalements de carte
+
+Dans sa collection, chaque carte porte un bouton « Signaler » : le joueur choisit un motif
+(visuel, fiche, rareté, autre), écrit ce qui cloche, et le message part dans
+`public.card_reports` (migration 050). Les signalements ne sont lisibles que par
+l'administration (`is_admin()`) et se consultent dans `/atelier/signalements`, page réservée au
+serveur de développement : « Ouvrir dans l'atelier » charge la carte dans le formulaire
+(`/atelier/cartes?edit=<id>`), et le signalement se marque comme traité une fois corrigé.
+
+```bash
+npm run db:migrate -- supabase/migrations/050_signalements_cartes.sql
+```
+
 ## Structure
 
 ```
@@ -498,10 +572,12 @@ sans article propre). **Rien n'a donc été appliqué** — voir `RAPPORT_FINAL.
   `new_card_boost` à 1 rend le tirage uniforme sans redéploiement.
 - **Changer le nombre de cartes par booster** : `CARDS_PER_BOOSTER`. Si tu passes au-delà de 5,
   relève aussi la limite dans `open_booster()` (`array_length(p_cards, 1) > 5`).
-- **Changer l'apparence des cartes** : les six raretés sont définies dans `src/app/globals.css`
-  (tokens `--rarity-*`, fond, bordure, intensité du foil et des paillettes). La route `/dev/holo`
+- **Changer l'apparence des cartes** : les six raretés sont définies dans `src/app/globals.css`  (tokens `--rarity-*`, fond, bordure, intensité du foil et des paillettes). La route `/dev/holo`
   (réservée aux admins) montre les six raretés et les variantes misprint avec un curseur
   d'intensité : c'est le rendu au repos qu'il faut juger, le survol n'existant pas sur mobile.
+  Une copie brillante (`data-holo="true"`, posée par `CardFace`) ne suit pas cette règle : sa
+  pellicule reste allumée à toute rareté, y compris en Commune, et dérive toute seule sans
+  pointeur — une vignette de collection ne s'incline pas, c'est cette dérive qui la trahit.
 - **Ajouter un booster** :
   1. ajoute une entrée dans `PACKS` (`src/lib/packs.ts`) : `id`, nom, sous-titre, genre (`null`
      pour le Mix), palette, facteur de titre et clé d'illustration ;
@@ -516,10 +592,15 @@ sans article propre). **Rien n'a donc été appliqué** — voir `RAPPORT_FINAL.
   encore trop court. `open_pack(slug)` accepte donc n'importe quel pack actif, et refuse seulement
   un pool sous le seuil (`pack_unavailable`) ou un stock vide. La migration `035` rebranche
   `open_pack()` sur le tirage direct défini par les migrations 014 et 015.
-- **Variantes misprint** : trois défauts cosmétiques (`ghosting`, `off_center`, `holo_bleed`) sont
-  tirés par `_draw_cards()` selon `misprint_chance` (0,8 % par carte, dans `game_config`). La
+- **Variantes misprint** : cinq défauts cosmétiques (`ghosting`, `off_center`, `holo_bleed`,
+  `reverse`, `holo_blue`) sont tirés par `_draw_cards()`. `misprint_chance` (0,8 % par carte, dans
+  `game_config`) décide qu'une carte naît défectueuse, puis `variant_weights` répartit les défauts
+  entre eux (migration 055 : les trois historiques à 1, `reverse` à 0,7, `holo_blue` à 0,3). Seules
+  les cinq clés connues sont tirables : un réglage incomplet retombe sur le tirage historique. La
   première variante rencontrée est conservée dans `collection.variant` ; `src/lib/variants.ts`
-  normalise les valeurs et porte les libellés. Aucun effet sur les stats ou la cote.
+  normalise les valeurs et porte les libellés. Aucun effet sur les stats ou la cote. Le rendu de
+  `reverse` (foil sur le cadre, illustration nette) et de `holo_blue` (foil bleu, visible même en
+  Commune) vit dans `globals.css`, section « Variantes misprint ».
 - **Retirer une carte** : supprime son entrée de `src/lib/cards.ts` (et ses lignes dans
   `card-genres.ts`, `card-lore.ts`, `stats.ts`, `portraits.json`) puis lance `npm run db:cards`.
   La carte est effacée de la base comme si elle n'avait jamais existé : ligne `cards`, copies de
@@ -558,6 +639,12 @@ npm run cf:deploy      # publie sur Workers
 
 Sans navigateur (CI), exporte `CLOUDFLARE_API_TOKEN` (template « Edit Cloudflare Workers ») et
 `CLOUDFLARE_ACCOUNT_ID` puis lance `npm run cf:deploy`.
+
+`cf:deploy` ne reconstruit rien : il publie le `.open-next/` produit par `cf:build`. Sur
+**Windows**, `cf:build` échoue sans mode développeur — OpenNext recrée des liens symboliques vers
+`node_modules` (`EPERM: symlink`) ; activer le mode développeur de Windows, ou remplacer ces
+liens par des jonctions dans `node_modules/@opennextjs/aws/dist/build/copyTracedFiles.js` (le
+correctif est perdu à chaque `npm ci`).
 
 ⚠️ Les `NEXT_PUBLIC_*` sont **inlinées au build** : elles doivent être présentes dans l'environnement
 au moment de `cf:build`, pas seulement au runtime.
@@ -656,6 +743,17 @@ La migration est `supabase/migrations/048_halloween.sql` ; son rollback est
 commenté en fin de fichier. L'overlay respecte `prefers-reduced-motion` (la
 sorcière reste dans un coin) et met toutes les animations en pause quand
 l'onglet est caché.
+
+## Animations
+
+Les effets (déchirure des boosters, auras, cadres animés, overlay) tournent **par défaut même
+quand l'appareil est en économie d'énergie** : beaucoup de téléphones passent
+`prefers-reduced-motion: reduce` dès que le mode éco s'enclenche, ce qui éteignait toute
+l'ouverture. Le réglage du profil (« Animations : Toujours / Suivre le système ») écrit
+`localStorage["tcvg:motion"]` et l'attribut `data-motion` de `<html>` : les blocs
+`@media (prefers-reduced-motion: reduce)` de `globals.css` ne s'appliquent qu'en mode
+`auto`, où ils sont préfixés par `html:not([data-motion="full"])`. Le script d'amorçage
+de `layout.tsx` pose l'attribut avant le premier rendu.
 
 ## Overlay Noël
 

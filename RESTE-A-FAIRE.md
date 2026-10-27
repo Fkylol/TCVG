@@ -1,12 +1,12 @@
 # TCVG — état des lieux et reste à faire
 
-_Mis à jour le 24 octobre 2026._
+_Mis à jour le 27 octobre 2026._
 
 ## Où en est le site
 
 - Production : <https://tcvg.fun> — version déployée `7226c860` (classement au score de collection).
 - Base : projet Supabase `jvmozjfibkbkzzpafoos`, migrations `002` à `030` appliquées.
-- Code : `tsc` propre, `lint` propre, `npm test` 175/175, `npm run cf:build` OK.
+- Code : `tsc` propre, `lint` propre (0 erreur), `npm test` 387/387, `npm run cf:build` OK.
 
 ### Étapes livrées
 
@@ -21,13 +21,14 @@ _Mis à jour le 24 octobre 2026._
 | Pied de page | fait | Six entrées : Raretés, Règles, Infos, Nouveautés, Classement, Avis et bugs |
 | Pages publiques | fait | `/regles`, `/infos`, `/nouveautes`, `/classement`, `/avis-et-bugs` |
 | Visuels des boosters | fait | 11 visuels recadrés sur le sachet (520 × 760) dans `public/booster/`, Mix en pack vitrine, un visuel par thème dans la boutique |
-| Ouverture carte par carte | fait | Dos de carte (`dos-carte.jpg`) dont la lueur change de couleur et d'intensité selon la rareté, retournement au clic, récapitulatif ; boosters gratuits et payants |
+| Ouverture carte par carte | fait | Dos de carte dessiné en SVG (`components/card-back.tsx`), aux couleurs du pack ouvert, dont la lueur change de couleur et d'intensité selon la rareté ; retournement au clic, récapitulatif ; boosters gratuits et payants |
 | Avis et bugs par email | fait | Message enregistré dans `public.feedback`, puis notification Resend (`src/lib/email.ts`). Clé dans `.env` en local, secret Cloudflare en production ; destinataire à régler avec `FEEDBACK_EMAIL_TO` |
 | Puissance, aura et qualité | fait | Barème central `STAT_BANDS` + coefficient 0–1 par carte dans `src/lib/stats.ts`, qualité 60/40 (Standard → Relique), affichage fiche + vignette, score de collection sur `/profil`, section dans `/regles` |
 | Classement au score | fait | `leaderboard()` additionne `cards.quality`, synchronisée par `npm run db:cards` ; égalités départagées par personnages puis total ; cadres verrouillés avec jauge de progression |
 | Univers MMO | fait | 24 personnages (WoW, FF XIV, Dofus, Guild Wars 2), genre `mmo`, 12ᵉ booster et ses visuels ; visuels récupérés sur Wikipédia, les wikis Fandom et l'Internet Archive pour Guild Wars 2 |
 | Échanges carte contre carte | code fait, migration à appliquer | `033_echanges.sql` : `chat_offers` + séquestre (même mécanique que le marché), acceptation atomique, contre-proposition, expiration 24 h, `trades_swaps` immuable, notifications et message privé Discord (bot du jeu) ; `/agora/offres`, bouton dans le fil et annonce depuis la fiche d'une carte |
-| Identité visuelle | code fait, à déployer | Noir mat, un seul accent lime, filets d'un pixel, titres en sans serrée sans capitales, boutons et onglets en casse normale ; cyan, halos, biseaux, trame de fond et cartes inclinées retirés. Les visuels de cartes et les posters de boosters ne changent pas |
+| Identité visuelle | fondation et purge du lime faites, reste la passe page par page | Bleu nuit de la vitrine des boosters (`vitrine-boosters.html`) : deux aurores en haut de page, trio cyan / violet / rose à la place du lime, Syne + DM Sans + IBM Plex Mono, logo dessiné, barre du haut en pastille de verre, boutons et onglets en pastilles, panneaux translucides à grands coins arrondis. La fondation (jetons, polices, logo, aurores, atomes, en-tête, pied) est posée, et plus une seule teinte lime ne reste dans `src/` : le jeton `acid`, la courbe de `card-price-chart`, l'éclair de `leaderboard-board` et l'emblème du dos standard sont passés au cyan (`tests/identite.test.ts` le vérifie fichier par fichier). `/boosters` est passé à la scène du mockup (voir la ligne suivante) et l'atelier aussi. Les grands titres ont été ramenés à l'échelle de la vitrine — 48 px au lieu de 72 px sur l'accueil, interlettrage resserré à -0,032em — parce que Syne, large par nature, se lisait comme étiré au-delà. Restent les détails de forme page par page : `/collection`, `/marche`, `/classement`, `/profil`, puis l'agora. Les visuels de cartes et les posters de boosters ne changent pas |
+| Vitrine des boosters | fait | `/boosters` suit la maquette : en-tête centré (sur-titre, titre, phrase, trois pastilles stock / album / compte à rebours), scène d'un seul poster en grand avec une flèche de chaque côté (clic ou touches ←/→), halo aux couleurs du pack choisi qui se fond d'une sélection à l'autre, pastilles de rareté avec leur chance, lot ×1/×5/×10 et bouton dégradé, puis l'étagère des dix packs en bande horizontale (Choisi / Gratuit / Bientôt). La grille de posters et le tiroir mobile ont disparu ; le tirage, les chances, les lots plafonnés et la révélation sont inchangés. Styles dans `globals.css` (`.v-arrow`, `.v-halo`, `.v-shelf`, `.v-shelf-tile`), mouvement réduit compris |
 | Durcissement sécurité | code fait, migration à appliquer | `034_durcissement_privileges.sql` : plus d'insertion directe dans `profiles`, `collection` en lecture seule pour `anon`/`authenticated`, fonctions internes du tirage retirées de l'API publique ; en-têtes de sécurité dans `next.config.ts` |
 | Grille des boosters | code fait, migration à appliquer | `035_packs_toujours_disponibles.sql` : les douze packs sont ouvrables en permanence, `open_pack()` rend l'ouverture directe au tirage et les fonctions de sélection quotidienne sont supprimées. `/boosters` montre les douze posters (2/3/4 colonnes), une seule sélection, tiroir mobile ; un pack sous le seuil reste visible, grisé et non ouvrable |
 
@@ -74,6 +75,25 @@ Migration `supabase/migrations/011_marche.sql` appliquée et testée le 23 octob
 
 - Ordre : `npm run db:migrate <fichier>` puis `npm run db:cards` si le catalogue change, puis `npm run cf:build && npm run cf:deploy`.
 - Vérifié en production : `/classement` en 200 avec les scores, `/nouveautes` à jour, `/profil` protégé (307 sans session).
+
+### D bis. Bug corrigé — « duplicate key » au recadrage (27 octobre 2026)
+
+Symptôme : un simple recadrage de visuel dans l'atelier en ligne échouait sur `duplicate key value violates unique constraint "cards_character_unique"`.
+
+Cause : `?edit=` change sans changer de route, et React réutilise l'instance du client. Les champs d'identité du formulaire en ligne sont non contrôlés (`defaultValue`) et le cadrage vit dans un état : en passant d'une carte à l'autre par la liste, le formulaire gardait la carte précédente. L'enregistrement écrivait alors l'identité de l'ancienne carte sur la nouvelle, ce qui se brisait sur l'unicité du personnage (index `(universe, lower(btrim(name)))`). Reproduit en base : le même appel avec l'identité de la carte affichée passe ; seul un nom étranger entre en collision.
+
+Corrigé :
+
+- `key={current.id}` sur `OnlineCardForm` — le formulaire repart de la carte affichée (identité **et** cadrage) ;
+- migration `057_enregistrement_sans_reecriture.sql` (à appliquer) : `cards` n'est réécrite que si le nom, la rareté ou l'univers changent réellement — un recadrage ne touche plus ni la fiche ni `updated_at` — et un vrai doublon est refusé avec un message en français au lieu de l'erreur PostgreSQL.
+
+La migration a été validée sur la base réelle dans une transaction annulée : recadrage seul accepté sans toucher `updated_at`, identité étrangère refusée, changement réel appliqué.
+
+Symptôme 2 : certaines cartes ne s'ouvraient pas dans l'atelier (page sans formulaire), par exemple « Sciel » en cherchant « Ciel ».
+
+Cause : la liste est plafonnée et suit la recherche ; le lien vers une carte ne conservait pas le terme cherché. La page relisait donc une liste sans le terme, où la carte demandée était absente (limite 300 ou 390 : la liste s'arrête avant les noms en S), et `current` restait `undefined`. Vérifié sur la base : la recherche « Ciel » trouve bien `sciel`, la liste plafonnée ne le contient pas, et la relecture par identifiant le renvoie.
+
+Corrigé : la carte demandée par `?edit=` est relue par son identifiant et placée en tête de liste, le lien de la liste conserve la recherche en cours, et un identifiant inconnu affiche désormais un message au lieu d'une page vide.
 
 ### E. Points mineurs laissés de côté
 

@@ -16,6 +16,37 @@ export type PlannedEntry = {
  */
 export const UPDATES: UpdateEntry[] = [
   {
+    date: "27 octobre 2026",
+    title: "Bleu nuit, verre et dégradé : le site change de peau",
+    items: [
+      "Le noir mat et le vert lime laissent la place au bleu nuit de la vitrine des boosters : deux aurores, cyan à gauche et rose à droite, éclairent le haut de chaque page.",
+      "Les titres passent en Syne, teintée du dégradé cyan, violet et rose ; le texte courant en DM Sans, les chiffres et les sur-titres en IBM Plex Mono.",
+      "Le logo est maintenant dessiné : carré arrondi et cercle tracés dans le dégradé, à côté du mot TCVG. Il reste net à toutes les tailles.",
+      "La barre du haut devient une pastille de verre qui flotte au-dessus du contenu, les boutons et les onglets des pastilles, et les panneaux des plaques translucides à grands coins arrondis.",
+      "Les visuels de cartes, les posters de boosters et les dos de cartes ne changent pas.",
+    ],
+  },
+  {
+    date: "27 octobre 2026",
+    title: "Un dos de carte aux couleurs du pack",
+    items: [
+      "Le dos des cartes est redessiné : cadre fin, treillis de losanges, anneaux concentriques et médaillon en verre portant l'emblème et le mot TCVG.",
+      "Chaque booster a le sien : le dos reprend les couleurs de son pack — vert pour Action-aventure, ambre pour Plateforme, rouge pour Combat — et garde la lueur de la rareté qu'il cache.",
+      "Il est maintenant dessiné par le site plutôt que photographié : net à toutes les tailles, de la vignette du pied de révélation au grand dos plein écran, et plus rien à télécharger.",
+      "La carte qui sort du booster fait exactement la taille du sachet : ni plus large, ni plus haute, elle prend sa place sans que la scène change de gabarit.",
+    ],
+  },
+  {
+    date: "27 octobre 2026",
+    title: "Des rangs plus nobles, des visuels qui se recadrent",
+    items: [
+      "Le podium du classement change de noms : le premier est Souverain, le deuxième Régent, le troisième Vizir.",
+      "Un signalement ouvre désormais la carte concernée d'un seul clic : « Modifier la carte » charge son formulaire dans l'atelier.",
+      "Dans l'atelier, le visuel d'une carte se recadre enfin en ligne : on glisse l'image dans l'aperçu, on zoome, on la garde entière ou on remplit le cadre — y compris pour une photo déjà en place.",
+      "Deux défauts d'impression de plus peuvent sortir d'un booster : reverse, dont le foil passe sur le cadre en laissant l'illustration nette, et holo bleue, tirée en bleu froid. Reverse tombe un peu plus souvent que la bleue.",
+    ],
+  },
+  {
     date: "26 octobre 2026",
     title: "Des visuels partout, des holos qui se voient",
     items: [
@@ -24,6 +55,7 @@ export const UPDATES: UpdateEntry[] = [
       "L'album d'un univers montre désormais la meilleure carte qu'on y a piochée — la plus rare, puis la plus puissante — au lieu d'un simple dégradé.",
       "Une carte tirée brillante ressemble enfin à une holo : sa pellicule iridescente reste allumée et dérive lentement, au lieu de garder le rendu d'une carte normale sous un badge « Holo ».",
       "Sur téléphone, les toiles d'araignée d'Halloween restent visibles (elles tombaient à 37 px de large) et les boosters replongent dans le noir : la souris fait office de torche, avec des baisses de tension.",
+      "Toujours sur téléphone, l'ambiance est allégée pour laisser la page lisible : araignées ramenées dans les coins, brume plus basse et voile plus discret, deux chauves-souris au lieu de quatre, un bonbon toutes les deux secondes, et le bouton 🎃 remonte au-dessus du bouton Agora au lieu de flotter au milieu du contenu.",
     ],
   },
   {
