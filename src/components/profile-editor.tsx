@@ -149,8 +149,14 @@ export function ProfileEditor({
           </div>
         )}
 
-        {/* Deux rangées d'avatars, le reste au défilement horizontal. */}
-        <div className="mt-4 overflow-x-auto pb-2">
+        {/* Deux rangées d'avatars, le reste au défilement horizontal.
+
+            `relative` n'est pas décoratif : les boutons radio `sr-only` sont en
+            position absolue, et sans ancêtre positionné ils se rattachent à la
+            fenêtre au lieu de ce cadre — donc ils échappent à son défilement et
+            étirent la page entière d'une barre horizontale large comme toutes
+            les cartes possédées. */}
+        <div className="relative mt-4 overflow-x-auto pb-2">
           <div className="grid auto-cols-[5.5rem] grid-flow-col grid-rows-2 gap-3">
             <label className="cursor-pointer">
               <input

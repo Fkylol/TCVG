@@ -5,6 +5,7 @@ import test from "node:test";
 
 const read = (file: string) => fs.readFileSync(path.join(process.cwd(), file), "utf8");
 const HEADER = read("src/components/site-header.tsx");
+const ACCUEIL = read("src/app/page.tsx");
 const PROFIL = read("src/app/(game)/profil/page.tsx");
 const MARCHE = read("src/app/(game)/marche/page.tsx");
 
@@ -21,6 +22,15 @@ test("navigation : la barre passe à la ligne au lieu de défiler", () => {
   const nav = HEADER.match(/<nav className="([^"]+)"/)?.[1] ?? "";
   assert.match(nav, /flex-wrap/);
   assert.doesNotMatch(nav, /overflow-x-auto/);
+});
+
+test("navigation : l'accueil garde les onglets d'administration", () => {
+  // La barre ne change pas d'onglets d'une page à l'autre : l'accueil oubliait
+  // `admin` et `atelier`, donc un administrateur ne voyait plus « Admin » en
+  // revenant sur la landing.
+  assert.match(ACCUEIL, /rpc\("is_admin"\)/);
+  assert.match(ACCUEIL, /admin=\{admin\}/);
+  assert.match(ACCUEIL, /atelier=\{canUseAtelier\(profile\?\.username\)\}/);
 });
 
 test("navigation : l'Agora vit dans le marché, plus dans l'en-tête", () => {

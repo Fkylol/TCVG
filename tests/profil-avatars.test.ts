@@ -10,6 +10,12 @@ test("profil : les avatars tiennent sur deux rangées, le reste défile", () => 
   assert.match(EDITOR, /overflow-x-auto/);
   assert.match(EDITOR, /grid-rows-2/);
   assert.match(EDITOR, /grid-flow-col/);
+
+  // Le cadre qui défile doit être positionné : les boutons radio `sr-only` sont
+  // en position absolue, et sans ancêtre positionné ils se rattachent à la
+  // fenêtre — la page entière gagnait alors une barre de défilement horizontale
+  // large comme la collection du joueur.
+  assert.match(EDITOR, /className="relative mt-4 overflow-x-auto pb-2"/);
 });
 
 test("profil : un champ de recherche filtre les avatars", () => {

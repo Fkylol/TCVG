@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { CardFace } from "@/components/card-face";
+import { canUseAtelier } from "@/lib/atelier-access";
 import { getSession } from "@/lib/auth";
 import { getProfile } from "@/lib/data";
 import { REFERRAL_COOKIE } from "@/lib/referral/config";
@@ -26,6 +27,11 @@ export default async function Home() {
   // affiche « Connexion » à un joueur connecté venu cliquer sur le logo.
   const session = await getSession();
   const profile = session ? await getProfile(session.supabase, session.user) : null;
+  // Le drapeau d'administration et l'atelier se calculent ici aussi : sans eux,
+  // la barre du haut perdait ses onglets en revenant sur l'accueil.
+  const admin = session
+    ? (await session.supabase.rpc("is_admin")).data === true
+    : false;
 
   // Bandeau d'invitation : le cookie a été déposé par /invite/<code>. Il ne
   // s'affiche que pour un visiteur pas encore inscrit (un compte existant ne
@@ -42,6 +48,8 @@ export default async function Home() {
         username={profile?.username}
         avatarCardId={profile?.avatarCardId}
         frame={profile?.frame}
+        admin={admin}
+        atelier={canUseAtelier(profile?.username)}
       />
 
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-12 sm:py-16">
