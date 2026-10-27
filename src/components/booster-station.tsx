@@ -147,7 +147,7 @@ export function BoosterStation({
                 <span
                   key={index}
                   className={`h-2 w-5 transition ${
-                    index < available ? "bg-acid" : "bg-white/12"
+                    index < available ? "bg-cyan" : "bg-white/12"
                   }`}
                 />
               ))}
@@ -193,7 +193,7 @@ export function BoosterStation({
           </p>
           <div className="mt-3 h-1.5 overflow-hidden bg-white/10">
             <div
-              className="h-full bg-acid"
+              className="h-full bg-cyan"
               style={{ width: `${Math.min(100, Math.round((uniqueOwned / totalCards) * 100))}%` }}
             />
           </div>

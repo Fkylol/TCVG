@@ -2,8 +2,16 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState, useSyncExternalStore, type CSSProperties } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type CSSProperties,
+  type PointerEvent as ReactPointerEvent,
+} from "react";
 import { BoosterPack } from "@/components/booster-pack";
+import { CardBack } from "@/components/card-back";
 import { CardFace } from "@/components/card-face";
 import { getUniverseLabel, type Card, type Rarity } from "@/lib/cards";
 import { RARITY, rarestRarity } from "@/lib/game";
@@ -11,6 +19,8 @@ import { getCardArt } from "@/lib/card-art";
 import { PACKS, type Pack } from "@/lib/packs";
 import { haptic, setSoundOn, sfx, useSoundOn } from "@/lib/sfx";
 import { VARIANT_LABELS, type CardVariant } from "@/lib/variants";
+import { framingStyle } from "@/lib/framing";
+import { MOTION_EVENT, isMotionForced } from "@/lib/motion";
 
 export type RevealItem = {
   card: Card;
@@ -33,32 +43,20 @@ const AURA: Record<Rarity, { glow: string; soft: string }> = {
   L: { glow: "rgba(255, 238, 190, 0.92)", soft: "rgba(255, 238, 190, 0.34)" },
 };
 
-/** Durée de la déchirure, puis de l'aura avant la première carte. */
-const TEAR_MS = 760;
-const AURA_MS = 820;
+/** Hauteur de la soudure sur le poster, en pourcentage de sa hauteur. */
+const SEAM_Y = 8.4;
 
 /**
- * Délai avant que l'écran n'accepte les clics. Le second clic d'un double-clic
- * sur « Ouvrir » retombait sinon sur la déchirure ou sur « Passer » : le pack
- * s'ouvrait puis disparaissait aussitôt.
+ * Profil de la soudure, fixe plutôt qu'aléatoire : le rendu serveur et le
+ * rendu client doivent produire exactement le même HTML (pas de décalage
+ * d'hydratation). La ligne ondule de part en part, comme un sachet thermoscellé.
  */
-const ARM_MS = 340;
+const SEAM = Array.from({ length: 41 }, (_, index) => ({
+  x: (index / 40) * 100,
+  y: SEAM_Y + Math.sin(index * 2.7) * 0.34 + Math.sin(index * 0.9) * 0.26,
+}));
 
-/**
- * `pack` (booster scellé) → `tearing` (découpe) → `aura` (rareté la plus haute)
- * → `cards` (les cartes s'empilent une à une) → `done` (récapitulatif).
- */
-type Phase = "pack" | "tearing" | "aura" | "cards" | "done";
-
-const REDUCED_MOTION = "(prefers-reduced-motion: reduce)";
-
-/** Raretés qui déclenchent scintillements et onde : au-dessus de Rare. */
-const HOT_RARITIES: Rarity[] = ["SR", "UR", "L"];
-
-/** Au-delà, le récapitulatif quitte l'éventail pour une grille scrollable. */
-const FAN_MAX = 12;
-
-/** Étincelles projetées autour de la carte : direction, portée et retard fixes. */
+/** Étincelles projetées à l'ouverture : direction, portée et retard fixes. */
 const SPARKS = Array.from({ length: 18 }, (_, index) => {
   const angle = (index / 18) * Math.PI * 2 - Math.PI / 2;
   const distance = 118 + ((index * 41) % 84);
@@ -71,28 +69,118 @@ const SPARKS = Array.from({ length: 18 }, (_, index) => {
   };
 });
 
+/**
+ * Délai avant que l'écran n'accepte les clics. Le second clic d'un double-clic
+ * sur « Ouvrir » retombait sinon sur la déchirure : le pack s'ouvrait puis
+ * disparaissait aussitôt.
+ */
+const ARM_MS = 340;
+
+/** Combien de cartes restent visibles dans l'éventail, la première devant. */
+const FAN_VISIBLE = 5;
+
+/** Durée du retournement, puis du départ de la carte vers la rangée du bas. */
+const FLIP_HOLD = 900;
+const LEAVE_MS = 480;
+
+/** Au-delà, le récapitulatif quitte l'éventail pour une grille scrollable. */
+const FAN_MAX = 12;
+
+/** Raretés qui déclenchent scintillements et onde : au-dessus de Rare. */
+const HOT_RARITIES: Rarity[] = ["SR", "UR", "L"];
+
+const REDUCED_MOTION = "(prefers-reduced-motion: reduce)";
+
+/**
+ * `pack` (booster scellé) → `tearing` (la soudure cède) → `fan` (les cartes
+ * sortent et se retournent une à une) → `done` (récapitulatif).
+ *
+ * La déchirure se fait au doigt : on glisse le long du haut du sachet, la
+ * soudure se sépare en suivant le geste, et la bande part quand le doigt
+ * atteint le bord. Un simple appui lance la même ouverture en automatique.
+ */
+type Phase = "pack" | "tearing" | "fan" | "done";
+
+/**
+ * Animations réduites ? Seulement si le joueur a choisi « suivre le système » :
+ * beaucoup de téléphones demandent la réduction dès qu'ils passent en économie
+ * d'énergie, ce qui éteignait toute l'ouverture. Le mode par défaut les garde.
+ */
 function usePrefersReducedMotion() {
   return useSyncExternalStore(
     (onChange) => {
       const query = window.matchMedia(REDUCED_MOTION);
       query.addEventListener("change", onChange);
-      return () => query.removeEventListener("change", onChange);
+      window.addEventListener(MOTION_EVENT, onChange);
+      return () => {
+        query.removeEventListener("change", onChange);
+        window.removeEventListener(MOTION_EVENT, onChange);
+      };
     },
-    () => window.matchMedia(REDUCED_MOTION).matches,
+    () => !isMotionForced() && window.matchMedia(REDUCED_MOTION).matches,
     () => false,
   );
 }
 
+/** Polygone CSS à partir de points en pourcentage. */
+function polygon(points: Array<[number, number]>): string {
+  return `polygon(${points
+    .map(([x, y]) => `${x.toFixed(2)}% ${y.toFixed(2)}%`)
+    .join(",")})`;
+}
+
+/** Hauteur de la soudure à l'abscisse `x` (en pourcentage). */
+function seamYAt(x: number): number {
+  for (let index = 1; index < SEAM.length; index += 1) {
+    const left = SEAM[index - 1];
+    const right = SEAM[index];
+    if (right.x >= x) {
+      const ratio = (x - left.x) / (right.x - left.x || 1);
+      return left.y + (right.y - left.y) * ratio;
+    }
+  }
+  return SEAM[SEAM.length - 1].y;
+}
+
 /**
- * Ouverture d'un booster : on voit d'abord le pack scellé, on le déchire, une
- * aura trahit la meilleure rareté du tirage, puis les cartes se posent l'une
- * sur l'autre. Le tirage est déjà fait côté serveur — cette séquence ne fait
- * que révéler.
- *
- * Le cadre (`.reveal-stage`) garde la taille d'une carte du début à la fin :
- * le pack, l'aura et les cartes s'y superposent, donc rien ne saute entre les
- * étapes. L'aura démarre pendant la déchirure et reste en fondu derrière les
- * cartes, au lieu d'apparaître et de disparaître sur une coupe franche.
+ * Les trois morceaux du sachet pour une avancée de déchirure `progress` :
+ * la bande de gauche (celle que le doigt soulève), la bande de droite (restée
+ * en place) et le corps du pack, découpé sous la soudure.
+ */
+function tearShapes(progress: number) {
+  const x = progress * 100;
+  const y = seamYAt(x);
+
+  const left: Array<[number, number]> = [
+    [0, 0],
+    [x, 0],
+    [x, y],
+  ];
+  for (let index = SEAM.length - 1; index >= 0; index -= 1) {
+    if (SEAM[index].x < x) left.push([SEAM[index].x, SEAM[index].y]);
+  }
+
+  const right: Array<[number, number]> = [
+    [x, 0],
+    [100, 0],
+  ];
+  for (let index = SEAM.length - 1; index >= 0; index -= 1) {
+    if (SEAM[index].x > x) right.push([SEAM[index].x, SEAM[index].y + 0.35]);
+  }
+  right.push([x, y + 0.35]);
+
+  const body: Array<[number, number]> = SEAM.map((point) => [point.x, point.y]);
+  body.push([100, 100], [0, 100]);
+
+  return { left: polygon(left), right: polygon(right), body: polygon(body), x, y };
+}
+
+/**
+ * Ouverture d'un booster : le sachet se déchire au doigt le long de la
+ * soudure, une aura trahit la meilleure rareté du tirage, puis les cartes
+ * sortent en éventail et se retournent au clic, de la plus discrète à la plus
+ * rare. Le tirage est déjà fait côté serveur — cette séquence ne fait que
+ * révéler.
  */
 export function BoosterReveal({
   title,
@@ -105,30 +193,34 @@ export function BoosterReveal({
   title: string;
   subtitle?: string;
   items: RevealItem[];
-  /** Pack à déchirer : le poster est dupliqué dans les deux moitiés. */
+  /** Pack à déchirer : le poster est dupliqué dans les trois morceaux. */
   pack?: Pack;
   onClose: () => void;
   closeLabel?: string;
 }) {
   const [phase, setPhase] = useState<Phase>("pack");
-  const [index, setIndex] = useState(0);
+  const [progress, setProgress] = useState(0);
+  const [revealed, setRevealed] = useState(0);
+  const [flipped, setFlipped] = useState<number | null>(null);
+  const [leaving, setLeaving] = useState<number | null>(null);
   const [armed, setArmed] = useState(false);
   const reduced = usePrefersReducedMotion();
   const soundOn = useSoundOn();
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
-  // Les effets sonores lisent le tirage courant sans le mettre en dépendance :
-  // un parent qui recrée `items` ne doit pas rejouer le son de la même carte.
-  const itemsRef = useRef(items);
+  const frame = useRef<number | null>(null);
+  const stage = useRef<HTMLDivElement>(null);
+  const drag = useRef({ active: false, startX: 0, moved: 0, lastX: 0 });
   // Les visuels sont hotlinkés : sans préchargement, chaque carte révélée
   // attend son aller-retour réseau et s'affiche vide d'abord. On profite donc
   // du pack scellé et de la déchirure pour télécharger tout le tirage.
   const preloaded = useRef<HTMLImageElement[]>([]);
 
   const total = items.length;
-  const item = items[index];
+  const current = items[Math.min(revealed, Math.max(total - 1, 0))];
   const best = rarestRarity(items.map((entry) => entry.card.rarity));
   const aura = AURA[best];
-  const hot = item ? HOT_RARITIES.includes(item.card.rarity) : false;
+  const hot = current ? HOT_RARITIES.includes(current.card.rarity) : false;
+  const shapes = tearShapes(progress);
 
   const newCount = new Set(items.filter((entry) => entry.isNew).map((entry) => entry.card.id)).size;
   const holoCount = items.filter((entry) => entry.holo).length;
@@ -141,26 +233,11 @@ export function BoosterReveal({
   useEffect(
     () => () => {
       for (const timer of timers.current) clearTimeout(timer);
+      if (frame.current !== null) cancelAnimationFrame(frame.current);
+      sfx.stopRip();
     },
     [],
   );
-
-  // Garde le tirage courant sous la main pour les effets, sans le mettre en
-  // dépendance de l'effet sonore (un parent qui recrée le tableau rejouerait
-  // le son de la même carte).
-  useEffect(() => {
-    itemsRef.current = items;
-  }, [items]);
-
-  // Chaque carte posée a son propre son, et une vibration courte calée sur la
-  // rareté : c'est ce qui donne du poids au geste, sans image en plus.
-  useEffect(() => {
-    if (phase !== "cards") return;
-    const entry = itemsRef.current[index];
-    if (!entry) return;
-    sfx.card(entry.card.rarity, { holo: entry.holo });
-    haptic(entry.card.rarity);
-  }, [phase, index]);
 
   // Récapitulatif : un accord discret, jamais plus fort que le tirage.
   useEffect(() => {
@@ -196,35 +273,143 @@ export function BoosterReveal({
     timers.current.push(setTimeout(fn, ms));
   }
 
-  /** Déchire le pack : l'aura prend le relais, puis la première carte. */
-  function tear() {
-    if (!armed || phase !== "pack") return;
+  /** Le sachet cède : le son part, la bande s'envole, les cartes arrivent. */
+  function finishOpen() {
+    if (phase === "done" || phase === "fan") return;
+    setProgress(1);
     setPhase("tearing");
-
-    // Le clic sur « Déchirer » est le geste qui autorise l'audio : le son part
-    // tout de suite, l'aura monte pendant que la déchirure se termine.
-    sfx.tear();
-    later(() => sfx.aura(best), 140);
-
-    // Toutes les cartes défilent, y compris les lots de 5 ou 10 boosters :
-    // sauter au récapitulatif privait le joueur du dévoilement. « Passer »
-    // reste disponible pour qui veut aller droit au but.
-    later(() => setPhase("aura"), reduced ? 80 : TEAR_MS);
-    later(() => setPhase("cards"), reduced ? 180 : TEAR_MS + AURA_MS);
+    sfx.stopRip();
+    sfx.open(best);
+    haptic(best);
+    later(() => setPhase("fan"), reduced ? 60 : 460);
   }
 
-  function advance() {
-    if (phase !== "cards") return;
-    if (index + 1 >= total) {
-      setPhase("done");
+  /** Déchirure automatique : la bande suit une courbe douce jusqu'au bord. */
+  function tearAutomatically() {
+    if (!armed || phase !== "pack") return;
+    const from = progress;
+    if (reduced) {
+      sfx.tear();
+      finishOpen();
       return;
     }
-    setIndex(index + 1);
+    setPhase("tearing");
+    sfx.tear();
+    const start = performance.now();
+    const duration = 620 * (1 - from) + 80;
+
+    const step = (time: number) => {
+      const ratio = Math.min(1, (time - start) / duration);
+      // Départ et arrivée doux : la bande accroche, puis file.
+      const eased = ratio < 0.5 ? 2 * ratio * ratio : 1 - (-2 * ratio + 2) ** 2 / 2;
+      setProgress(from + (1 - from) * eased);
+      if (ratio < 1) {
+        frame.current = requestAnimationFrame(step);
+      } else {
+        frame.current = null;
+        finishOpen();
+      }
+    };
+    frame.current = requestAnimationFrame(step);
+  }
+
+  /** Le doigt quitte la soudure avant le bord : la bande se remet en place. */
+  function settleBack() {
+    const from = progress;
+    if (reduced || from <= 0) {
+      setProgress(0);
+      setPhase("pack");
+      return;
+    }
+    const start = performance.now();
+    const step = (time: number) => {
+      const ratio = Math.min(1, (time - start) / 260);
+      setProgress(from * (1 - ratio));
+      if (ratio < 1) frame.current = requestAnimationFrame(step);
+      else {
+        frame.current = null;
+        setPhase("pack");
+      }
+    };
+    frame.current = requestAnimationFrame(step);
+  }
+
+  /** Abscisse du geste, rapportée au poster (5:8) et non au cadre (3:4). */
+  function packX(clientX: number, bounds: DOMRect): number {
+    const width = bounds.height * (5 / 8);
+    const left = bounds.left + (bounds.width - width) / 2;
+    return Math.max(0, Math.min(1, (clientX - left) / width));
+  }
+
+  function onPointerDown(event: ReactPointerEvent<HTMLDivElement>) {
+    if (!armed || phase !== "pack" || !stage.current) return;
+    const bounds = stage.current.getBoundingClientRect();
+    // Seul le haut du sachet se déchire : plus bas, le geste ne fait rien.
+    if (event.clientY - bounds.top > bounds.height * 0.26) return;
+    drag.current = { active: true, startX: event.clientX, moved: 0, lastX: event.clientX };
+    stage.current.setPointerCapture(event.pointerId);
+    setProgress(Math.min(0.1, packX(event.clientX, bounds)));
+  }
+
+  function onPointerMove(event: ReactPointerEvent<HTMLDivElement>) {
+    if (!drag.current.active || !stage.current) return;
+    const bounds = stage.current.getBoundingClientRect();
+    const moved = Math.abs(event.clientX - drag.current.startX);
+    drag.current.moved = Math.max(drag.current.moved, moved);
+
+    const next = Math.max(progress, packX(event.clientX, bounds));
+    const speed = Math.min(1, Math.abs(event.clientX - drag.current.lastX) / 28);
+    drag.current.lastX = event.clientX;
+    if (next > progress && next < 1) sfx.rip(speed);
+
+    if (next >= 0.97) {
+      drag.current.active = false;
+      setProgress(1);
+      finishOpen();
+      return;
+    }
+    setProgress(next);
+  }
+
+  function onPointerUp() {
+    if (!drag.current.active) return;
+    drag.current.active = false;
+    sfx.stopRip();
+    // Un appui sans glissement vaut un clic : l'ouverture part toute seule.
+    if (drag.current.moved < 6) tearAutomatically();
+    else settleBack();
+  }
+
+  function flipCard() {
+    if (phase !== "fan" || flipped !== null || leaving !== null) return;
+    const entry = items[revealed];
+    if (!entry) return;
+    const hold = reduced ? 140 : FLIP_HOLD;
+    const leave = reduced ? 60 : LEAVE_MS;
+
+    setFlipped(revealed);
+    sfx.card(entry.card.rarity, { holo: entry.holo });
+    haptic(entry.card.rarity);
+
+    later(() => setLeaving(revealed), hold);
+    later(() => {
+      const next = revealed + 1;
+      setFlipped(null);
+      setLeaving(null);
+      setRevealed(next);
+      if (next >= total) setPhase("done");
+    }, hold + leave);
   }
 
   function revealAll() {
     if (!armed || phase === "done") return;
     for (const timer of timers.current) clearTimeout(timer);
+    timers.current = [];
+    if (frame.current !== null) cancelAnimationFrame(frame.current);
+    frame.current = null;
+    sfx.stopRip();
+    setFlipped(null);
+    setLeaving(null);
     setPhase("done");
   }
 
@@ -236,30 +421,31 @@ export function BoosterReveal({
 
   // Espace / Entrée / flèche droite : carte suivante, sans quitter le clavier.
   useEffect(() => {
-    if (phase !== "cards") return;
+    if (phase !== "fan") return;
     function onKey(event: KeyboardEvent) {
       if (event.key === " " || event.key === "Enter" || event.key === "ArrowRight") {
         event.preventDefault();
-        advance();
+        flipCard();
       }
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   });
 
-  const revealed = phase === "done" ? total : phase === "cards" ? index + 1 : 0;
-  const remaining = total - revealed;
-  const rarity = item ? RARITY[item.card.rarity] : null;
+  const visible = items.slice(revealed, revealed + FAN_VISIBLE);
+  const rarity = current ? RARITY[current.card.rarity] : null;
+  const held = flipped !== null ? items[flipped] : null;
 
   const stageStyle = {
     "--aura": aura.glow,
     "--aura-soft": aura.soft,
+    "--rip-progress": progress,
   } as CSSProperties;
 
   return (
     <div className="reveal-screen" style={stageStyle} role="dialog" aria-modal="true" aria-label={title}>
-      {phase === "cards" && item && (
-        <span key={`flash-${index}`} className="reveal-flash" data-rarity={item.card.rarity} aria-hidden />
+      {held && (
+        <span key={`flash-${flipped}`} className="reveal-flash" data-rarity={held.card.rarity} aria-hidden />
       )}
 
       {/* Barre pleine page : sortie à gauche, nom du booster au centre,
@@ -273,9 +459,9 @@ export function BoosterReveal({
           <p className="truncate text-[11px] text-white/40">
             {subtitle ?? "Booster"}
             {phase === "tearing"
-              ? " · déchirure…"
-              : phase === "aura"
-                ? " · une aura s'échappe…"
+              ? " · la soudure cède…"
+              : phase === "fan"
+                ? " · retourne les cartes"
                 : phase === "pack"
                   ? " · booster scellé"
                   : ""}
@@ -310,11 +496,21 @@ export function BoosterReveal({
 
       <div className="reveal-body">
         {phase !== "done" && (
-          <div className="reveal-stage" data-phase={phase} data-heat={hot ? "true" : undefined}>
-            {/* L'aura naît pendant la déchirure et reste derrière les cartes :
-                elle se contente de s'effacer quand la première carte se pose. */}
+          <div
+            ref={stage}
+            className="reveal-stage"
+            data-phase={phase}
+            data-heat={hot ? "true" : undefined}
+            data-torn={progress >= 1 ? "true" : undefined}
+            onPointerDown={onPointerDown}
+            onPointerMove={onPointerMove}
+            onPointerUp={onPointerUp}
+            onPointerCancel={onPointerUp}
+          >
+            {/* L'aura naît avec la déchirure et reste derrière les cartes :
+                elle se contente de s'effacer quand la première carte sort. */}
             {phase !== "pack" && (
-              <div className="aura-stage" data-fading={phase === "cards" ? "true" : undefined} aria-hidden>
+              <div className="aura-stage" data-fading={phase === "fan" ? "true" : undefined} aria-hidden>
                 <span className="pack-aura" />
                 <span className="aura-ring" />
                 <span className="pack-rays" />
@@ -334,82 +530,108 @@ export function BoosterReveal({
                   ))}
                 </span>
               </div>
-            )}
-
-            {(phase === "pack" || phase === "tearing") && (
-              <button
-                type="button"
-                onClick={tear}
-                disabled={phase === "tearing"}
-                aria-label={phase === "pack" ? "Déchirer le booster" : "Déchirure en cours"}
-                className="pack-stage group"
-                data-tearing={phase === "tearing"}
-              >
+            )}            {/* Un appui sur le sachet l'ouvre aussi ; le bouton du pied reste
+                la commande au clavier, et le poster est déjà `aria-hidden`. */}
+            <div
+              className="pack-stage"
+              data-tearing={phase === "tearing" && progress < 1 ? "true" : undefined}
+              data-torn={progress >= 1 ? "true" : undefined}
+              onClick={tearAutomatically}
+            >
                 {/* Ombre au sol : le pack flotte, elle reste posée. */}
                 <span className="pack-cast" aria-hidden />
-                <span className="pack-half pack-strip">
-                  <BoosterPack pack={pack} flat showPrice={false} />
-                </span>
-                <span className="pack-half pack-body">
-                  <BoosterPack pack={pack} flat showPrice={false} />
-                </span>
-                <span className="pack-cut" aria-hidden />
-              </button>
-            )}
 
-            {phase === "cards" && item && (
-              <>
-                <div
-                  role="button"
-                  tabIndex={0}
-                  onClick={advance}
-                  aria-label={
-                    index + 1 >= total
-                      ? "Voir le récapitulatif"
-                      : `Carte suivante (${index + 2} sur ${total})`
-                  }
-                  className="stack-scene"
+                {/* Trois copies du poster : le corps sous la soudure, puis les
+                    deux moitiés de la bande, découpées en direct par le geste. */}
+                <span
+                  className="pack-half pack-body"
+                  style={{ clipPath: shapes.body }}
+                  aria-hidden
                 >
-                  {items.map((entry, position) => {
-                    const depth = index - position;
-                    if (depth < 0 || depth > 2) return null;
-                    return (
-                      <div
-                        key={`${entry.card.id}-${position}`}
-                        className={`stack-card ${depth === 0 ? "deal-in" : ""}`}
-                        style={{
-                          transform:
-                            depth === 0
-                              ? undefined
-                              : `translateY(${depth * 12}px) rotate(${position % 2 ? 1.4 : -1.4}deg)`,
-                          opacity: depth === 0 ? 1 : 0.9,
-                          zIndex: 10 - depth,
-                        }}
-                        aria-hidden={depth !== 0}
-                      >
-                        <CardFace
-                          card={entry.card}
-                          size="xl"
-                          className="h-full w-full"
-                          variant={entry.variant}
-                          holo={entry.holo}
-                        />
-                        {/* Reflet qui balaie la carte au moment où elle se pose :
-                            une seule passe, plus appuyée sur les hautes raretés. */}
-                        {depth === 0 && (
-                          <span
-                            key={`sheen-${index}`}
-                            className="reveal-sheen"
-                            data-rarity={entry.card.rarity}
-                            aria-hidden
-                          >
-                            <span className="reveal-sheen-bar" />
-                          </span>
-                        )}
+                  <BoosterPack pack={pack} flat showPrice={false} />
+                </span>
+                <span
+                  className="pack-half pack-strip pack-strip-right"
+                  style={{ clipPath: shapes.right }}
+                  aria-hidden
+                >
+                  <BoosterPack pack={pack} flat showPrice={false} />
+                </span>
+                <span
+                  className="pack-half pack-strip pack-strip-left"
+                  style={{
+                    clipPath: shapes.left,
+                    transform:
+                      progress >= 1
+                        ? "translate(35%, -140%) rotate(40deg)"
+                        : `rotate(${progress * 18 + 2}deg) translateY(${-progress * 5}px)`,
+                    opacity: progress >= 1 ? 0 : 1,
+                    transformOrigin: `${shapes.x}% 0%`,
+                  }}
+                  aria-hidden
+                >
+                  <BoosterPack pack={pack} flat showPrice={false} />
+                </span>
 
-                        {/* Badges centrés au-dessus de la carte : posés à gauche, ils
-                            recouvraient le nom du personnage. */}
-                        {depth === 0 && (entry.isNew || entry.holo || entry.variant !== "normal") && (
+                {/* La ligne de soudure, révélée derrière le doigt. */}
+                <svg
+                  className="pack-seam"
+                  viewBox="0 0 100 100"
+                  preserveAspectRatio="none"
+                  aria-hidden
+                  focusable="false"
+                  style={{ clipPath: `inset(0 ${100 - shapes.x}% 0 0)` }}
+                >
+                  <polyline
+                    className="pack-seam-line"
+                    points={SEAM.map((point) => `${point.x},${point.y}`).join(" ")}
+                  />
+                </svg>
+
+                <span
+                  className="pack-spark"
+                  style={{
+                    left: `${shapes.x}%`,
+                    top: `${shapes.y}%`,
+                    opacity: progress > 0 && progress < 1 ? 1 : 0,
+                  }}
+                  aria-hidden
+                />
+              <span className="pack-fringe" aria-hidden />
+              <span className="pack-flash" aria-hidden />
+            </div>
+
+            {phase === "fan" && (
+              <>
+                <div className="rip-fan" data-hot={hot ? "true" : undefined}>
+                  {visible.map((entry, slot) => {
+                    const globalIndex = revealed + slot;
+                    const isTop = slot === 0;
+                    const isFlipped = flipped === globalIndex;
+                    const isLeaving = leaving === globalIndex;
+                    const marks = isFlipped && (entry.isNew || entry.holo || entry.variant !== "normal");
+
+                    const inner = (
+                      <>
+                        <span className="rip-card-inner">
+                          <span
+                            className="rip-face rip-face-back"
+                            style={{ "--glow": AURA[entry.card.rarity].glow } as CSSProperties}
+                          >
+                            <CardBack pack={pack} />
+                          </span>
+                          <span className="rip-face rip-face-front">
+                            <CardFace
+                              card={entry.card}
+                              size="xl"
+                              className="h-full w-full"
+                              variant={entry.variant}
+                              holo={entry.holo}
+                            />
+                          </span>
+                        </span>
+
+                        {marks && (
                           <span className="pointer-events-none absolute inset-x-0 -top-2 z-20 flex justify-center gap-1">
                             {entry.isNew && (
                               <span className="chip bg-emerald-400 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-emerald-950">
@@ -428,15 +650,49 @@ export function BoosterReveal({
                             )}
                           </span>
                         )}
+                      </>
+                    );
+
+                    const common = {
+                      className: "rip-card",
+                      "data-slot": slot,
+                      "data-flipped": isFlipped ? "true" : undefined,
+                      "data-leaving": isLeaving ? "true" : undefined,
+                      style: {
+                        "--slot": slot,
+                        "--glow": AURA[entry.card.rarity].glow,
+                        zIndex: 30 - slot,
+                      } as CSSProperties,
+                    } as const;
+
+                    return isTop ? (
+                      <button
+                        key={`${entry.card.id}-${globalIndex}`}
+                        type="button"
+                        {...common}
+                        onClick={flipCard}
+                        aria-label={
+                          isFlipped
+                            ? `${entry.card.name}, ${RARITY[entry.card.rarity].label}`
+                            : `Retourner ${entry.card.name}`
+                        }
+                        aria-disabled={isFlipped || isLeaving}
+                      >
+                        {inner}
+                      </button>
+                    ) : (
+                      <div
+                        key={`${entry.card.id}-${globalIndex}`}
+                        {...common}
+                        aria-hidden
+                      >
+                        {inner}
                       </div>
                     );
                   })}
                 </div>
 
-                {/* Épique et au-dessus : onde de choc et étincelles autour de la
-                    carte. `key` sur l'index pour rejouer l'animation à chaque
-                    nouvelle carte. */}
-                {hot && <RevealSparks key={`sparks-${index}`} rarity={item.card.rarity} />}
+                {held && hot && <RevealSparks key={`sparks-${flipped}`} rarity={held.card.rarity} />}
               </>
             )}
           </div>
@@ -450,64 +706,54 @@ export function BoosterReveal({
               <>
                 <button
                   type="button"
-                  onClick={tear}
+                  onClick={tearAutomatically}
                   disabled={phase === "tearing"}
                   className="btn btn-primary disabled:cursor-wait"
                 >
                   {phase === "tearing" ? "Déchirure…" : "Déchirer le booster"}
                 </button>
                 <p className="text-xs text-white/40">
+                  Glisse le long de la soudure, ou touche le bouton
+                  <span className="text-white/25"> · </span>
                   {total} carte{total > 1 ? "s" : ""} à l&apos;intérieur
                 </p>
               </>
             )}
 
-            {phase === "aura" && (
-              <p className="text-xs uppercase tracking-[0.22em] text-white/45" aria-live="polite">
-                Le booster s&apos;ouvre…
-              </p>
-            )}
-
-            {phase === "cards" && item && rarity && (
+            {phase === "fan" && current && rarity && (
               <>
                 <div className="min-h-14 text-center" aria-live="polite">
-                  <div key={`label-${index}`} className="reveal-pop">
-                    <p className="flex items-center justify-center gap-2 text-sm">
-                      <span className={`chip px-2 py-0.5 text-[10px] font-bold ${rarity.badge}`}>
-                        {rarity.short}
-                      </span>
-                      <span className={`font-semibold ${rarity.text}`}>{rarity.label}</span>
-                    </p>
-                    <p className="display mt-1 text-2xl text-white">{item.card.name}</p>
-                    <p className="mt-0.5 text-xs text-white/45">
-                      {getUniverseLabel(item.card.universe)}
-                      <span className="text-white/25"> · </span>
-                      {item.isNew ? "Nouvelle carte" : `Doublon ×${item.quantity}`}
-                    </p>
-                  </div>
+                  <p className="flex items-center justify-center gap-2 text-sm">
+                    <span className={`chip px-2 py-0.5 text-[10px] font-bold ${rarity.badge}`}>
+                      {rarity.short}
+                    </span>
+                    <span className={`font-semibold ${rarity.text}`}>{rarity.label}</span>
+                  </p>
+                  <p className="display mt-1 text-2xl text-white">{current.card.name}</p>
+                  <p className="mt-0.5 text-xs text-white/45">
+                    {getUniverseLabel(current.card.universe)}
+                    <span className="text-white/25"> · </span>
+                    {current.isNew ? "Nouvelle carte" : `Doublon ×${current.quantity}`}
+                    <span className="text-white/25"> · </span>
+                    {revealed + 1} / {total}
+                  </p>
                 </div>
 
                 {total <= 10 ? (
                   <div className="flex flex-wrap justify-center gap-1.5" aria-hidden>
-                    {items.map((entry, position) => (
-                      <span
-                        key={`thumb-${entry.card.id}-${position}`}
-                        className={`deck-thumb ${position <= index ? "" : "deck-thumb-back"}`}
-                      >
-                        {position <= index ? (
-                          <CardThumb card={entry.card} />
-                        ) : (
-                          <Image
-                            src="/booster/dos-carte.jpg"
-                            alt=""
-                            fill
-                            sizes="40px"
-                            unoptimized
-                            className="object-contain"
-                          />
-                        )}
-                      </span>
-                    ))}
+                    {items.map((entry, position) => {
+                      const shown = position < revealed || position === flipped;
+                      return (
+                        <span
+                          key={`thumb-${entry.card.id}-${position}`}
+                          className={`deck-thumb ${shown ? "" : "deck-thumb-back"} ${
+                            position === revealed ? "deck-thumb-live" : ""
+                          }`}
+                        >
+                          {shown ? <CardThumb card={entry.card} /> : <CardBack pack={pack} />}
+                        </span>
+                      );
+                    })}
                   </div>
                 ) : (
                   <div className="flex flex-wrap items-center gap-1" aria-hidden>
@@ -515,7 +761,7 @@ export function BoosterReveal({
                       <span
                         key={`dot-${entry.card.id}-${position}`}
                         className={`h-1.5 rounded-full transition-all ${
-                          position <= index ? "w-4 bg-acid" : "w-1.5 bg-white/15"
+                          position < revealed ? "w-4 bg-cyan" : "w-1.5 bg-white/15"
                         }`}
                       />
                     ))}
@@ -523,10 +769,15 @@ export function BoosterReveal({
                 )}
 
                 <div className="flex flex-wrap justify-center gap-2">
-                  <button type="button" onClick={advance} className="btn btn-primary">
-                    {index + 1 >= total ? "Voir le récap" : "Carte suivante"}
+                  <button
+                    type="button"
+                    onClick={flipCard}
+                    disabled={flipped !== null || leaving !== null}
+                    className="btn btn-primary"
+                  >
+                    {flipped !== null ? "Retournée" : "Retourner la carte"}
                   </button>
-                  {remaining > 1 && (
+                  {total - revealed > 1 && (
                     <button type="button" onClick={revealAll} className="btn btn-outline">
                       Tout révéler
                     </button>
@@ -534,7 +785,8 @@ export function BoosterReveal({
                 </div>
 
                 <p className="text-[11px] text-white/35">
-                  Espace / Entrée <span className="text-white/20">·</span> carte suivante
+                  Touche la carte <span className="text-white/20">·</span> Espace / Entrée{" "}
+                  <span className="text-white/20">·</span> retourner
                 </p>
               </>
             )}
@@ -549,59 +801,59 @@ export function BoosterReveal({
               <RevealGrid items={items} />
             ) : (
               <ul className="fan-scene">
-              {items.map((entry, position) => {
-                const middle = (items.length - 1) / 2;
-                const offset = position - middle;
-                const step = items.length > 7 ? 5 : 8;
-                return (
-                  <li
-                    key={`${entry.card.id}-${position}`}
-                    className="fan-slot"
-                    style={
-                      {
-                        "--fan-rotate": `${offset * step}deg`,
-                        "--fan-drop": `${Math.abs(offset) ** 1.6 * 2.5}px`,
-                        "--fan-z": position + 1,
-                      } as CSSProperties
-                    }
-                  >
-                    <Link
-                      href={`/card/${entry.card.id}`}
-                      className="card-deal relative block"
-                      style={{ animationDelay: `${Math.min(position, 12) * 45}ms` }}
+                {items.map((entry, position) => {
+                  const middle = (items.length - 1) / 2;
+                  const offset = position - middle;
+                  const step = items.length > 7 ? 5 : 8;
+                  return (
+                    <li
+                      key={`${entry.card.id}-${position}`}
+                      className="fan-slot"
+                      style={
+                        {
+                          "--fan-rotate": `${offset * step}deg`,
+                          "--fan-drop": `${Math.abs(offset) ** 1.6 * 2.5}px`,
+                          "--fan-z": position + 1,
+                        } as CSSProperties
+                      }
                     >
-                      <CardFace
-                        card={entry.card}
-                        size="sm"
-                        className="aspect-[3/4]"
-                        variant={entry.variant}
-                        holo={entry.holo}
-                      />
-                      <span className="pointer-events-none absolute inset-x-0 -top-1.5 z-10 flex justify-center gap-1">
-                        {entry.isNew ? (
-                          <span className="chip bg-emerald-400 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-emerald-950">
-                            Nouveau
-                          </span>
-                        ) : (
-                          <span className="chip bg-black/70 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white/75">
-                            Doublon ×{entry.quantity}
-                          </span>
-                        )}
-                        {entry.holo && (
-                          <span className="chip bg-amber-300 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-amber-950">
-                            Holo
-                          </span>
-                        )}
-                        {entry.variant !== "normal" && (
-                          <span className="chip bg-white/15 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white/80">
-                            {VARIANT_LABELS[entry.variant]}
-                          </span>
-                        )}
-                      </span>
-                    </Link>
-                  </li>
-                );
-              })}
+                      <Link
+                        href={`/card/${entry.card.id}`}
+                        className="card-deal relative block"
+                        style={{ animationDelay: `${Math.min(position, 12) * 45}ms` }}
+                      >
+                        <CardFace
+                          card={entry.card}
+                          size="sm"
+                          className="aspect-[3/4]"
+                          variant={entry.variant}
+                          holo={entry.holo}
+                        />
+                        <span className="pointer-events-none absolute inset-x-0 -top-1.5 z-10 flex justify-center gap-1">
+                          {entry.isNew ? (
+                            <span className="chip bg-emerald-400 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-emerald-950">
+                              Nouveau
+                            </span>
+                          ) : (
+                            <span className="chip bg-black/70 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white/75">
+                              Doublon ×{entry.quantity}
+                            </span>
+                          )}
+                          {entry.holo && (
+                            <span className="chip bg-amber-300 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-amber-950">
+                              Holo
+                            </span>
+                          )}
+                          {entry.variant !== "normal" && (
+                            <span className="chip bg-white/15 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white/80">
+                              {VARIANT_LABELS[entry.variant]}
+                            </span>
+                          )}
+                        </span>
+                      </Link>
+                    </li>
+                  );
+                })}
               </ul>
             )}
 
@@ -761,7 +1013,7 @@ function CardThumb({ card }: { card: Card }) {
       fill
       sizes="40px"
       unoptimized={!art.local}
-      style={art.framing}
+      style={framingStyle(art.framing)}
     />
   );
 }

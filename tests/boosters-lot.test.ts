@@ -67,7 +67,11 @@ test("révélation : tout tirage passe par le dévoilement, récapitulatif en gr
   // Plus de raccourci « trop de cartes → récapitulatif direct » : un lot ×5
   // (25 cartes) se révèle carte par carte, comme un ×1.
   assert.doesNotMatch(REVEAL, /SEQUENCE_MAX/);
-  assert.match(REVEAL, /later\(\(\) => setPhase\("cards"\), reduced \? 180 : TEAR_MS \+ AURA_MS\)/);
+  // L'éventail ne montre que les prochaines cartes ; les suivantes arrivent
+  // au fur et à mesure que la pile se vide.
+  assert.match(REVEAL, /const FAN_VISIBLE = 5/);
+  assert.match(REVEAL, /items\.slice\(revealed, revealed \+ FAN_VISIBLE\)/);
+  assert.match(REVEAL, /later\(\(\) => setPhase\("fan"\), reduced \? 60 : 460\)/);
   assert.match(REVEAL, /const FAN_MAX = 12/);
   assert.match(REVEAL, /items\.length > FAN_MAX \? \(\s*<RevealGrid items=\{items\} \/>/);
   assert.match(REVEAL, /function RevealGrid/);

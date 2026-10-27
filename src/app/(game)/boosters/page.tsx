@@ -1,7 +1,7 @@
 import { BoosterPicker, type PackView } from "@/components/booster-picker";
 import { requireSession } from "@/lib/auth";
 import { getBoosterState, getCollection, getPackStats } from "@/lib/data";
-import { CARDS } from "@/lib/game";
+import { catalogSize } from "@/lib/cards";
 import { MIN_POOL_SIZE, PACKS } from "@/lib/packs";
 
 export const metadata = { title: "Boosters — TCVG" };
@@ -43,7 +43,7 @@ export default async function BoostersPage({
       initialAnchor={booster.profile.lastBoosterAt}
       serverNow={booster.serverNow}
       uniqueOwned={collection.length}
-      totalCards={CARDS.length}
+      totalCards={catalogSize()}
       initialPackId={packParam ?? null}
       openCharacters={persos === "1"}
     />

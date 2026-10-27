@@ -104,7 +104,7 @@ test("ouverture : le poster est déchiré, l'animation peut être passée", () =
 
   // Le booster scellé flotte doucement, avec une ombre posée au sol.
   assert.match(REVEAL, /className="pack-cast"/);
-  assert.match(CSS, /\.pack-stage \{\r?\n  animation: pack-hover/);
+  assert.match(CSS, /\.pack-stage \{[\s\S]*?animation: pack-hover/);
   assert.match(CSS, /@keyframes pack-hover/);
   assert.match(CSS, /\.pack-cast \{[\s\S]*?radial-gradient/);
   // Mouvement réduit : ni flottement ni pulsation d'ombre.
@@ -112,9 +112,16 @@ test("ouverture : le poster est déchiré, l'animation peut être passée", () =
   assert.match(REVEAL, /Passer l'animation/);
   assert.match(REVEAL, /Doublon ×/);
   assert.match(PICKER, /pack=\{packs\.find/);
-  // La soudure de la révélation suit la bande crantée (7 cqw, 16 px mini).
-  assert.match(CSS, /\.pack-strip\s*\{[\s\S]*?max\(16px, 7cqw\)/);
+  // La soudure se déchire au doigt : trois morceaux du même poster, la ligne
+  // de soudure révélée derrière le doigt, et le point qui suit le geste.
+  assert.match(REVEAL, /className="pack-half pack-body"/);
+  assert.match(REVEAL, /pack-strip-right/);
+  assert.match(REVEAL, /pack-strip-left/);
+  assert.match(REVEAL, /onPointerMove/);
+  assert.match(CSS, /\.pack-seam-line\s*\{[\s\S]*?vector-effect: non-scaling-stroke/);
+  assert.match(CSS, /\.pack-spark\s*\{[\s\S]*?box-shadow: 0 0 10px 4px/);
   assert.match(CSS, /\.pack-stage\[data-tearing="true"\]/);
+  assert.match(CSS, /\.pack-stage\[data-torn="true"\] \.pack-fringe/);
 });
 
 test("ouverture : pas d'attente ni de rechargement serveur avant la révélation", () => {
@@ -140,6 +147,18 @@ test("ouverture : pas d'attente ni de rechargement serveur avant la révélation
   }
 });
 
+test("révélation : la carte sort au format du poster, ni plus large ni plus haute", () => {
+  // Le poster du booster et les cartes partagent le même cadre 5/8 : la carte
+  // qui sort du sachet ne peut pas être plus grande que lui, et le passage du
+  // sachet déchiré aux cartes ne change pas de gabarit.
+  assert.match(CSS, /\.pack-poster \{[\s\S]*?aspect-ratio: 5 \/ 8/);
+  assert.match(CSS, /\.reveal-stage \.rip-fan \{[\s\S]*?height: 100%/);
+  assert.match(CSS, /\.reveal-stage \.rip-fan \{[\s\S]*?aspect-ratio: 5 \/ 8/);
+  // La carte du dessus n'est plus agrandie de 5 % par-dessus les suivantes.
+  assert.match(CSS, /scale\(calc\(1 - var\(--slot\) \* 0\.012\)\)/);
+  assert.doesNotMatch(CSS, /scale\(calc\(1\.05 - var\(--slot\)/);
+});
+
 test("révélation : cadre stable et étincelles au-dessus de Rare", () => {
   assert.match(CSS, /\.reveal-stage\s*\{[\s\S]*?display:\s*grid/);
   assert.match(CSS, /\.reveal-stage\s*>\s*\*\s*\{[\s\S]*?grid-area:\s*1\s*\/\s*1/);
@@ -148,6 +167,9 @@ test("révélation : cadre stable et étincelles au-dessus de Rare", () => {
   assert.match(REVEAL, /HOT_RARITIES: Rarity\[\] = \["SR", "UR", "L"\]/);
   assert.match(REVEAL, /className="reveal-sparks"/);
   assert.match(CSS, /\.reveal-spark\s*\{[\s\S]*?animation:\s*spark-fly/);
+  // Les cartes sortent en pile, seule celle du dessus se retourne.
+  assert.match(CSS, /\.rip-card\[data-slot="0"\]\s*\{[\s\S]*?pointer-events: auto/);
+  assert.match(CSS, /\.rip-card\[data-flipped="true"\] \.rip-card-inner/);
 });
 
 test("pack indisponible : désaturé, incliné, avec la progression du seuil", () => {

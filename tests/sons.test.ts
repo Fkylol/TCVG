@@ -64,13 +64,16 @@ test("sans navigateur (rendu serveur, test), aucun son ne lève", () => {
   assert.doesNotThrow(() => {
     sfx.tear();
     sfx.aura("L");
+    sfx.open("L");
     sfx.card("SR", { holo: true });
     sfx.recap();
+    sfx.rip(0.5);
+    sfx.stopRip();
     haptic("L");
   });
 });
 
-test("la révélation branche le son sur la déchirure, l'aura, chaque carte et le récap", () => {
+test("la révélation branche le son sur la déchirure, l'ouverture, chaque carte et le récap", () => {
   const source = fs.readFileSync(
     path.join(process.cwd(), "src/components/booster-reveal.tsx"),
     "utf8",
@@ -78,7 +81,9 @@ test("la révélation branche le son sur la déchirure, l'aura, chaque carte et 
 
   for (const call of [
     /sfx\.tear\(\)/,
-    /sfx\.aura\(best\)/,
+    /sfx\.rip\(speed\)/,
+    /sfx\.stopRip\(\)/,
+    /sfx\.open\(best\)/,
     /sfx\.card\(entry\.card\.rarity/,
     /sfx\.recap\(\)/,
     /haptic\(entry\.card\.rarity\)/,
@@ -96,7 +101,9 @@ test("son coupé : jouer ne lève pas et ne crée pas de contexte", () => {
   try {
     assert.doesNotThrow(() => {
       sfx.tear();
+      sfx.open("C");
       sfx.card("C");
+      sfx.rip(1);
       haptic("C");
     });
   } finally {

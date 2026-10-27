@@ -6,6 +6,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { getCard, getCardGradient, type Rarity } from "@/lib/cards";
 import { RARITY, RARITY_ORDER } from "@/lib/game";
 import { getPortraitFraming } from "@/lib/portraits";
+import { framingStyle } from "@/lib/framing";
 
 type CardRow = {
   id: string;
@@ -288,7 +289,7 @@ export function PackCharacters({
             }}
             placeholder="Rechercher un perso ou une franchise…"
             aria-label="Rechercher un personnage"
-            className="w-full rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/30 focus:border-acid/60 focus:outline-none"
+            className="w-full rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/30 focus:border-cyan/60 focus:outline-none"
           />
           <div className="flex gap-1" role="group" aria-label="Filtrer les personnages">
             <button
@@ -434,7 +435,7 @@ function PackCardTile({ card, packId }: { card: CardRow; packId: string }) {
             decoding="async"
             referrerPolicy="no-referrer"
             onError={() => setBroken(true)}
-            style={framing}
+            style={framingStyle(framing)}
             className={card.owned ? "" : "grayscale opacity-45"}
           />
         ) : card.owned ? (
@@ -468,7 +469,7 @@ function PackCardTile({ card, packId }: { card: CardRow; packId: string }) {
   return (
     <Link
       href={`/card/${card.id}?retour=persos&pack=${packId}`}
-      className="block rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-acid/70"
+      className="block rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan/70"
       title={`${card.name} — ${card.franchise}`}
     >
       {content}

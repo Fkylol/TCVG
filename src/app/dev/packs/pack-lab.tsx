@@ -23,7 +23,7 @@ export function PackLab() {
         <div className="flex gap-2" role="group" aria-label="Fond de la planche">
           <button
             type="button"
-            className={`btn btn-sm ${light ? "btn-outline" : "btn-acid"}`}
+            className={`btn btn-sm ${light ? "btn-outline" : "btn-cyan"}`}
             aria-pressed={!light}
             onClick={() => setLight(false)}
           >
@@ -31,7 +31,7 @@ export function PackLab() {
           </button>
           <button
             type="button"
-            className={`btn btn-sm ${light ? "btn-acid" : "btn-outline"}`}
+            className={`btn btn-sm ${light ? "btn-cyan" : "btn-outline"}`}
             aria-pressed={light}
             onClick={() => setLight(true)}
           >

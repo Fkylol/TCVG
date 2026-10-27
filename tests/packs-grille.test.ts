@@ -65,20 +65,39 @@ test("inclinaison : tous les packs penchent du même côté", () => {
   assert.match(CSS, /transition:\s*transform 0\.4s cubic-bezier\(0\.2, 0\.8, 0\.2, 1\)/);
 });
 
-test("grille : tous les packs, un seul sélectionné, Mix par défaut", () => {
-  // La grille boucle sur les dix packs, sans filtre de roulement.
+test("vitrine : tous les packs dans l'étagère, un seul sélectionné, Mix par défaut", () => {
+  // L'étagère boucle sur les dix packs, sans filtre de roulement.
   assert.match(PICKER, /\{packs\.map\(\(pack\) =>/);
   assert.match(PICKER, /aria-pressed=\{isSelected\}/);
   assert.match(PICKER, /pack\.id === "mix"/);
 
-  // Largeurs et colonnes : 2 sur mobile, 3 à côté du panneau, 4 en très grand.
-  assert.match(PICKER, /lg:grid-cols-3/);
-  assert.match(PICKER, /2xl:grid-cols-4/);
-  assert.match(PICKER, /max-w-\[190px\]/);
+  // Une scène, pas une grille : un poster en grand, une flèche de chaque côté,
+  // et l'étagère en bas pour circuler entre les douze packs.
+  assert.match(PICKER, /aria-label="Booster précédent"/);
+  assert.match(PICKER, /aria-label="Booster suivant"/);
+  assert.match(PICKER, /className="v-shelf"/);
+  assert.match(PICKER, /className="v-shelf-tile"/);
+  assert.doesNotMatch(PICKER, /grid-cols/);
+  assert.match(CSS, /\.v-arrow\s*\{/);
+  assert.match(CSS, /\.v-shelf\s*\{[\s\S]*?overflow-x:\s*auto/);
 
-  // Compteur de disponibilité et tiroir mobile.
-  assert.match(PICKER, /Packs disponibles/);
-  assert.match(PICKER, /setSheetOpen\(true\)/);
+  // Le halo suit le pack choisi : un calque par pack, un seul allumé, et le
+  // changement se fond.
+  assert.match(PICKER, /className="v-halo"/);
+  assert.match(PICKER, /data-on=\{pack\.id === selectedId \? "true" : undefined\}/);
+  assert.match(CSS, /\.v-halo\s*\{[\s\S]*?transition:\s*opacity/);
+  assert.match(CSS, /\.v-halo\[data-on="true"\]\s*\{[\s\S]*?opacity:\s*1/);
+
+  // Les flèches du clavier circulent aussi, sans voler les touches d'un champ.
+  assert.match(PICKER, /event\.key === "ArrowLeft"/);
+  assert.match(PICKER, /event\.key === "ArrowRight"/);
+  assert.match(PICKER, /\^\(INPUT\|TEXTAREA\|SELECT\)\$/);
+
+  // Deux chiffres seulement : le stock et l'album. Un compteur de packs
+  // ouvrables se lisait comme un second stock, à côté du vrai.
+  assert.match(PICKER, />Stock</);
+  assert.match(PICKER, />Album</);
+  assert.doesNotMatch(PICKER, /Packs disponibles/);
 
   // Le poster n'est pas un bouton : la tuile entière reste le contrôle.
   assert.match(PICKER, /<BoosterPack\s/);

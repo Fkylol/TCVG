@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { openPacks } from "@/app/actions";
 import { BoosterPack } from "@/components/booster-pack";
@@ -15,6 +15,7 @@ import {
   formatCountdown,
   projectedStock,
 } from "@/lib/game";
+import { isMotionForced } from "@/lib/motion";
 import { GUARANTEE_ENABLED, PACKS, type Pack } from "@/lib/packs";
 import { setPendingReveal, usePendingReveal } from "@/lib/reveal-queue";
 
@@ -28,10 +29,10 @@ export type PackView = Pack & {
   };
 };
 
-/** Raretés affichées dans les barres de chance (le Commun n'a pas d'intérêt). */
+/** Raretés affichées dans les pastilles de chance (le Commun n'a pas d'intérêt). */
 const CHANCE_RARITIES = ["UC", "R", "SR", "UR", "L"] as const;
 
-/** Lots proposés au-dessus du bouton d'ouverture. */
+/** Lots proposés à côté du bouton d'ouverture. */
 const BATCHES = [1, 5, 10] as const;
 
 /**
@@ -45,8 +46,35 @@ function formatChance(value: number): string {
   return `${text.replace(/\.0+$/, "").replace(".", ",")} %`;
 }
 
+/** Halo de la scène : la couleur d'emblème du pack, posée en alpha. */
+function haloFor(pack: Pack): string {
+  return `${pack.colors.gl}59`;
+}
+
+/** Flèche dessinée, pour circuler entre les packs. */
+function Chevron({ to }: { to: "left" | "right" }) {
+  return (
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+      focusable="false"
+    >
+      <path d={to === "left" ? "M15 5l-7 7 7 7" : "M9 5l7 7-7 7"} />
+    </svg>
+  );
+}
+
 /**
- * Page Boosters : les dix packs côte à côte, un seul sélectionné à la fois.
+ * Page Boosters, en vitrine : le pack choisi en grand au centre, une flèche de
+ * chaque côté, ses chances en pastilles, le lot et l'ouverture, puis l'étagère
+ * des douze packs pour circuler.
  *
  * Tous les packs sont gratuits et disponibles en permanence ; seul le stock
  * commun (1 toutes les 10 min, plafond 10) limite le joueur, et un pack dont le
@@ -89,7 +117,6 @@ export function BoosterPicker({
   const [bonus, setBonus] = useState(initialBonus);
   const [anchor, setAnchor] = useState(initialAnchor);
   const [now, setNow] = useState(serverNow);
-  const [sheetOpen, setSheetOpen] = useState(false);
   const [charactersOpen, setCharactersOpen] = useState(
     Boolean(openCharacters && initialPackId && packs.some((pack) => pack.id === initialPackId)),
   );
@@ -101,6 +128,8 @@ export function BoosterPicker({
   // Verrou synchrone : deux clics rapides ne doivent pas tirer deux boosters
   // (l'état `opening` n'est pas encore à jour au deuxième clic).
   const busy = useRef(false);
+  // Scène remontée à la main quand un pack est choisi dans l'étagère (mobile).
+  const stage = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const timer = setInterval(() => setNow(Date.now()), 1000);
@@ -111,16 +140,54 @@ export function BoosterPicker({
   const { stock: stockAvailable, nextAt } = projectedStock(stock, anchor, now);
   const available = stockAvailable + bonus;
   const nextIn = nextAt === null ? null : Math.max(0, nextAt - now);
-  const readyCount = packs.filter((pack) => pack.stats.available).length;
   // Le lot est plafonné par le total disponible (stock + bonus).
   const keep = Math.min(batch, available);
   const canOpen = Boolean(selected?.stats.available) && available >= 1 && !opening;
 
+  /** Pack suivant ou précédent, en boucle sur les douze. */
+  const move = useCallback(
+    (delta: number) => {
+      setSelectedId((current) => {
+        const index = packs.findIndex((pack) => pack.id === current);
+        const next = packs[(index + delta + packs.length) % packs.length];
+        return next ? next.id : current;
+      });
+      setError(null);
+    },
+    [packs],
+  );
+
+  // Flèches du clavier, comme dans la vitrine : jamais depuis un champ de
+  // saisie, ni pendant la révélation. Sans `preventDefault`, la page défilerait
+  // au lieu de changer de pack.
+  useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.altKey) return;
+      const target = event.target as HTMLElement | null;
+      if (target && /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName)) return;
+      if (charactersOpen || opening) return;
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        move(-1);
+      } else if (event.key === "ArrowRight") {
+        event.preventDefault();
+        move(1);
+      }
+    }
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [charactersOpen, move, opening]);
+
+  /** Choix d'un pack dans l'étagère : la scène se remonte pour le montrer. */
   function select(pack: PackView) {
     setSelectedId(pack.id);
     setError(null);
     if (typeof window !== "undefined" && window.matchMedia("(max-width: 1023px)").matches) {
-      setSheetOpen(true);
+      stage.current?.scrollIntoView({
+        block: "center",
+        behavior: isMotionForced() ? "smooth" : "auto",
+      });
     }
   }
 
@@ -140,7 +207,6 @@ export function BoosterPicker({
     busy.current = true;
     setOpening(true);
     setError(null);
-    setSheetOpen(false);
 
     // Aucune attente artificielle : la révélation s'ouvre dès que le serveur a
     // écrit le tirage. Il n'y a pas non plus de `router.refresh()` ici — il
@@ -182,199 +248,174 @@ export function BoosterPicker({
     setOpening(false);
   }
 
-  const panel = selected ? (
-    <PackPanel
-      pack={selected}
-      available={available}
-      bonus={bonus}
-      keep={keep}
-      batch={batch}
-      onBatch={setBatch}
-      nextIn={nextIn}
-      canOpen={canOpen}
-      opening={opening}
-      onOpen={() => void open()}
-      onShowCharacters={() => setCharactersOpen(true)}
-    />
-  ) : null;
-
   return (
     <div>
-      <div className="mb-6">
+      {/* ————— En-tête : le titre au centre, les deux chiffres du joueur ————— */}
+      <header className="text-center">
         <span className="eyebrow">Boosters</span>
-        <div className="mt-2 flex flex-wrap items-end justify-between gap-x-10 gap-y-3">
-          <div>
-            <h1 className="display text-4xl">Choisis ton booster</h1>
-            <span className="title-rule" aria-hidden />
-          </div>
-          <p className="max-w-sm text-sm leading-relaxed text-white/45">
-            {CARDS_PER_BOOSTER} cartes par pack, un booster toutes les 10 minutes, jusqu&apos;à{" "}
-            {BOOSTER_STOCK_MAX} en stock. Tous les packs sont disponibles.
-          </p>
-        </div>
-      </div>
+        <h1 className="display mt-3 text-4xl sm:text-5xl">Choisis ton booster</h1>
+        <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-white/50">
+          {CARDS_PER_BOOSTER} cartes par pack, un booster toutes les{" "}
+          {Math.round(BOOSTER_COOLDOWN_MS / 60000)} minutes, jusqu&apos;à {BOOSTER_STOCK_MAX} en
+          stock. Tous les packs sont disponibles.
+        </p>
 
-      {/* État en trois chiffres : le stock d'abord, puis l'album et les packs
-          ouvrables. Le détail passe au second plan, sous chaque valeur. */}
-      <dl className="mb-6 grid divide-y divide-white/10 border border-white/10 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
-        <div className="px-4 py-3">
-          <dt className="text-[10px] uppercase tracking-[0.18em] text-white/40">Stock</dt>
-          <dd className="mt-1 flex items-baseline gap-1.5">
-            <span
-              className={`font-mono text-2xl font-semibold ${
-                available > 0 ? "text-acid" : "text-white/40"
-              }`}
-            >
-              {stockAvailable}
+        {/* Deux chiffres seulement : le stock et l'album. Un compteur de packs
+            ouvrables se lisait comme un second stock, à côté du vrai. */}
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-2.5 font-mono text-xs">
+          <span className="chip px-3.5 py-1.5">
+            <span className="uppercase tracking-[0.14em] text-white/40">Stock</span>
+            <span className={available > 0 ? "text-cyan" : "text-white/40"}>
+              {stockAvailable} / {BOOSTER_STOCK_MAX}
             </span>
-            <span className="font-mono text-sm text-white/35">/ {BOOSTER_STOCK_MAX}</span>
             {bonus > 0 && (
               <span
+                className="text-cyan"
                 title="Boosters bonus du parrainage : hors plafond, sans expiration"
-                className="chip px-1.5 py-0.5 text-[10px] text-acid"
               >
                 +{bonus} bonus
               </span>
             )}
-            <span className="ml-auto text-right text-[11px] text-white/40">
-              {stockAvailable >= BOOSTER_STOCK_MAX
-                ? "Plein"
-                : nextIn !== null
-                  ? `+1 dans ${formatCountdown(nextIn)}`
-                  : `+1 toutes les ${Math.round(BOOSTER_COOLDOWN_MS / 60000)} min`}
+          </span>
+          <span className="chip px-3.5 py-1.5">
+            <span className="uppercase tracking-[0.14em] text-white/40">Album</span>
+            <span>
+              {uniqueOwned} / {totalCards}
             </span>
-          </dd>
+          </span>
+          <span className="chip px-3.5 py-1.5 text-white/45">
+            {stockAvailable >= BOOSTER_STOCK_MAX
+              ? "Plein"
+              : nextIn !== null
+                ? `+1 dans ${formatCountdown(nextIn)}`
+                : `+1 toutes les ${Math.round(BOOSTER_COOLDOWN_MS / 60000)} min`}
+          </span>
+          {GUARANTEE_ENABLED && <span className="chip px-3.5 py-1.5 text-cyan">Garantie R+</span>}
+        </div>
+      </header>
+
+      {/* ————— La scène : le pack choisi en grand, une flèche de chaque côté ————— */}
+      <div ref={stage} className="relative mt-10">
+        {/* Halo du pack choisi : un calque par pack, un seul allumé — la
+            sélection se fond au lieu de sauter. */}
+        <div className="v-scene" aria-hidden>
+          {packs.map((pack) => (
+            <span
+              key={pack.id}
+              className="v-halo"
+              data-on={pack.id === selectedId ? "true" : undefined}
+              style={{
+                backgroundImage: `radial-gradient(34% 44% at 50% 44%, ${haloFor(pack)} 0%, transparent 72%)`,
+              }}
+            />
+          ))}
         </div>
 
-        <div className="px-4 py-3">
-          <dt className="text-[10px] uppercase tracking-[0.18em] text-white/40">Album</dt>
-          <dd className="mt-1">
-            <span className="flex items-baseline gap-1.5">
-              <span className="font-mono text-2xl font-semibold">{uniqueOwned}</span>
-              <span className="font-mono text-sm text-white/35">/ {totalCards}</span>
-            </span>
-            <span className="mt-1.5 block h-0.5 bg-white/10">
-              <span
-                className="block h-full bg-acid"
-                style={{ width: `${Math.min(100, Math.round((uniqueOwned / totalCards) * 100))}%` }}
-              />
-            </span>
-          </dd>
-        </div>
-
-        <div className="px-4 py-3">
-          <dt className="text-[10px] uppercase tracking-[0.18em] text-white/40">
-            Packs disponibles
-          </dt>
-          <dd className="mt-1">
-            <span className="flex items-baseline gap-1.5">
-              <span className="font-mono text-2xl font-semibold">{readyCount}</span>
-              <span className="font-mono text-sm text-white/35">/ {packs.length}</span>
-            </span>
-            <span className="mt-1.5 block h-0.5 bg-white/10">
-              <span
-                className="block h-full bg-acid"
-                style={{
-                  width: `${packs.length ? Math.round((readyCount / packs.length) * 100) : 0}%`,
-                }}
-              />
-            </span>
-          </dd>
-        </div>
-      </dl>
-
-      <p className="sr-only" aria-live="polite">
-        {selected ? `Pack sélectionné : ${selected.name}` : ""}
-      </p>
-
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
-        <div>
-          {/* `data-hw-torch` : zone que l'overlay Halloween assombrit. */}
-          <ul
-            data-hw-torch
-            className="grid grid-cols-2 gap-x-4 gap-y-7 sm:gap-x-5 lg:grid-cols-3 2xl:grid-cols-4"
-            aria-label="Les douze boosters"
+        {/* `data-hw-torch` : zone que l'overlay Halloween assombrit. */}
+        <div data-hw-torch className="relative z-10 flex items-center justify-center gap-3 sm:gap-8">
+          <button
+            type="button"
+            onClick={() => move(-1)}
+            className="v-arrow"
+            aria-label="Booster précédent"
           >
-            {packs.map((pack) => {
-              const isSelected = pack.id === selected?.id;
-              const ready = pack.stats.available;
+            <Chevron to="left" />
+          </button>
 
-              return (
-                <li key={pack.id} className="mx-auto w-full max-w-[190px]">
-                  <button
-                    type="button"
-                    onClick={() => select(pack)}
-                    aria-pressed={isSelected}
-                    aria-label={
-                      ready
-                        ? `Booster ${pack.name}, ${CARDS_PER_BOOSTER} cartes, gratuit`
-                        : `Booster ${pack.name}, bientôt disponible : ${pack.stats.poolSize} sur ${pack.stats.minPoolSize} persos`
-                    }
-                    className="block w-full rounded-2xl text-center outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/70"
-                  >
-                    <BoosterPack
-                      pack={pack}
-                      locked={!ready}
-                      selected={isSelected}
-                      showPrice={false}
-                    />
-                    <span
-                      className={`mt-3 block font-mono text-[10px] uppercase tracking-[0.12em] ${
-                        !ready
-                          ? "text-white/35"
-                          : isSelected
-                            ? "text-acid/80"
-                            : "text-white/45"
-                      }`}
-                    >
-                      {ready
-                        ? "Gratuit"
-                        : `Bientôt · ${pack.stats.poolSize} / ${pack.stats.minPoolSize} persos`}
-                    </span>
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
+          <div className="pack-float w-[210px] sm:w-[260px]">
+            {selected && (
+              <BoosterPack
+                pack={selected}
+                locked={!selected.stats.available}
+                selected
+                showPrice={false}
+              />
+            )}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => move(1)}
+            className="v-arrow"
+            aria-label="Booster suivant"
+          >
+            <Chevron to="right" />
+          </button>
         </div>
 
-        <aside className="hidden lg:block">
-          <div className="sticky top-20">{panel}</div>
-        </aside>
+        <p className="sr-only" aria-live="polite">
+          {selected ? `Pack sélectionné : ${selected.name}` : ""}
+        </p>
+
+        {selected && (
+          <PackPanel
+            pack={selected}
+            available={available}
+            keep={keep}
+            batch={batch}
+            onBatch={setBatch}
+            canOpen={canOpen}
+            opening={opening}
+            onOpen={() => void open()}
+            onShowCharacters={() => setCharactersOpen(true)}
+          />
+        )}
       </div>
 
       {error && (
         <p
           role="alert"
-          className="mt-4 border-l-2 border-rose-400/60 bg-rose-500/10 px-3 py-2 text-sm text-rose-200"
+          className="mx-auto mt-5 max-w-md border-l-2 border-rose-400/60 bg-rose-500/10 px-3 py-2 text-center text-sm text-rose-200"
         >
           {error}
         </p>
       )}
 
-      {/* Mobile : fiche du pack sélectionné, ouverte au tap. */}
-      {sheetOpen && selected && (
-        <div className="fixed inset-0 z-[60] lg:hidden">
-          <button
-            type="button"
-            className="absolute inset-0 bg-black/60"
-            aria-label="Fermer le détail du booster"
-            onClick={() => setSheetOpen(false)}
-          />
-          <div className="absolute inset-x-0 bottom-0 max-h-[85vh] overflow-y-auto rounded-t border-t border-white/10 bg-ink-soft p-4">
-            <div className="mb-2 flex justify-end">
-              <button
-                type="button"
-                className="btn btn-outline btn-sm"
-                onClick={() => setSheetOpen(false)}
-              >
-                Fermer
-              </button>
-            </div>
-            {panel}
-          </div>
+      {/* ————— L'étagère : les dix packs sur une bande qui défile ————— */}
+      <section className="mt-12">
+        <div className="flex items-center gap-3.5 font-mono text-[11px] uppercase tracking-[0.24em] text-white/45">
+          <span>Tous les boosters</span>
+          <span className="h-px flex-1 bg-white/10" aria-hidden />
         </div>
-      )}
+
+        <ul className="v-shelf" aria-label="Les dix boosters">
+          {packs.map((pack) => {
+            const isSelected = pack.id === selected?.id;
+            const ready = pack.stats.available;
+
+            return (
+              <li key={pack.id} className="flex-none">
+                <button
+                  type="button"
+                  onClick={() => select(pack)}
+                  aria-pressed={isSelected}
+                  aria-label={
+                    ready
+                      ? `Booster ${pack.name}, ${CARDS_PER_BOOSTER} cartes, gratuit`
+                      : `Booster ${pack.name}, bientôt disponible : ${pack.stats.poolSize} sur ${pack.stats.minPoolSize} persos`
+                  }
+                  className="v-shelf-tile"
+                >
+                  <BoosterPack
+                    pack={pack}
+                    locked={!ready}
+                    selected={isSelected}
+                    showPrice={false}
+                    flat
+                  />
+                  <span
+                    className={`mt-2.5 block text-center font-mono text-[10px] uppercase tracking-[0.12em] ${
+                      !ready ? "text-white/35" : isSelected ? "text-cyan/80" : "text-white/45"
+                    }`}
+                  >
+                    {!ready ? "Bientôt" : isSelected ? "Choisi" : "Gratuit"}
+                  </span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      </section>
 
       {charactersOpen && selected && (
         <PackCharacters
@@ -403,15 +444,16 @@ export function BoosterPicker({
   );
 }
 
-/** Panneau de détails, partagé entre la colonne desktop et la feuille mobile. */
+/**
+ * Fiche du pack choisi, sous la scène : son numéro, ses chances de rareté, le
+ * lot d'ouverture et le bouton. Tout est centré, comme la vitrine.
+ */
 function PackPanel({
   pack,
   available,
-  bonus,
   keep,
   batch,
   onBatch,
-  nextIn,
   canOpen,
   opening,
   onOpen,
@@ -419,152 +461,90 @@ function PackPanel({
 }: {
   pack: PackView;
   available: number;
-  /** Part bonus dans `available`. */
-  bonus: number;
   /** Boosters réellement ouverts par le lot sélectionné (plafonné au stock). */
   keep: number;
   batch: (typeof BATCHES)[number];
   onBatch: (value: (typeof BATCHES)[number]) => void;
-  nextIn: number | null;
   canOpen: boolean;
   opening: boolean;
   onOpen: () => void;
   onShowCharacters: () => void;
 }) {
   const ready = pack.stats.available;
+  const number = String(PACKS.findIndex((entry) => entry.id === pack.id) + 1).padStart(2, "0");
 
   return (
-    <div className="panel overflow-hidden">
-      <div className="px-5 pt-5 pb-4">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/40">
-              {ready ? "Disponible" : "Bientôt"}
-            </p>
-            <h2 className="display mt-1 truncate text-xl">{pack.name}</h2>
-            <p className="truncate text-xs text-white/45">{pack.subtitle}</p>
-          </div>
-          <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-white/30">
-            N°{String(PACKS.findIndex((entry) => entry.id === pack.id) + 1).padStart(2, "0")}
-          </span>
-        </div>
-      </div>
+    <div className="relative z-10 mt-9 text-center">
+      <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-white/45">
+        N°{number} · {ready ? "Disponible" : "Bientôt"} · Gratuit
+      </p>
 
-      <div className="grid grid-cols-2 border-y border-white/10">
-        <div className="px-5 py-3">
-          <p className="font-mono text-lg font-semibold">{CARDS_PER_BOOSTER}</p>
-          <p className="mt-0.5 text-[11px] leading-tight text-white/45">cartes par booster</p>
-        </div>
-        <div className="border-l border-white/10 px-5 py-3">
-          {GUARANTEE_ENABLED ? (
-            <>
-              <p className="font-mono text-lg font-semibold">R+</p>
-              <p className="mt-0.5 text-[11px] leading-tight text-white/45">Rare ou mieux, garantie</p>
-            </>
-          ) : (
-            <>
-              <p className="font-mono text-lg font-semibold">{pack.stats.poolSize}</p>
-              <p className="mt-0.5 text-[11px] leading-tight text-white/45">persos dans le pack</p>
-            </>
-          )}
-        </div>
-      </div>
+      <ul className="mt-5 flex flex-wrap justify-center gap-2.5">
+        {CHANCE_RARITIES.map((key) => {
+          const info = RARITY[key];
+          const chance = pack.stats.chances[key];
+          const percent = typeof chance === "number" ? chance * 100 : null;
+          const label =
+            percent === null ? "aucune chance" : `${formatChance(percent / 100)} par booster`;
 
-      <div className="px-5 py-4">
-        <button
-          type="button"
-          onClick={onShowCharacters}
-          className="btn btn-outline btn-sm w-full"
-          disabled={pack.stats.poolSize === 0}
-        >
-          Voir les {pack.stats.poolSize} persos
-        </button>
-      </div>
-
-      <div className="border-t border-white/10 px-5 py-4">
-        <div className="flex items-baseline justify-between gap-3">
-          <p className="text-[10px] uppercase tracking-[0.18em] text-white/40">Chance par booster</p>
-          <p className="font-mono text-[10px] text-white/25">≥ 1 carte</p>
-        </div>
-        <ul className="mt-3 space-y-2.5">
-          {CHANCE_RARITIES.map((key) => {
-            const info = RARITY[key];
-            const chance = pack.stats.chances[key];
-            const percent = typeof chance === "number" ? chance * 100 : null;
-
-            return (
-              <li key={key}>
-                <div className="flex items-center justify-between text-xs">
-                  <span className={`flex items-center gap-1.5 ${info.text}`}>
-                    <span className={`chip px-1 py-0.5 text-[9px] font-bold ${info.badge}`}>
-                      {info.short}
-                    </span>
-                    {info.label}
-                  </span>
-                  <span className="font-mono text-white/60">
-                    {percent === null ? "—" : formatChance(percent / 100)}
-                  </span>
-                </div>
-                <div
-                  className="mt-1 h-1 overflow-hidden bg-white/10"
-                  role="img"
-                  aria-label={`${info.label} : ${
-                    percent === null ? "aucune chance" : `${formatChance(percent / 100)} par booster`
-                  }`}
-                >
-                  <div
-                    className={`h-full ${info.bar}`}
-                    style={{ width: `${Math.min(100, percent ?? 0)}%` }}
-                  />
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-        <p className="mt-3 text-[10px] leading-relaxed text-white/30">
-          Chance d&apos;obtenir au moins une carte de la rareté dans le booster, calculée sur le
-          tirage réel du pack.
-        </p>
-      </div>
-
-      <div className="border-t border-white/10 px-5 py-4">
-        {/* Lot d'ouverture : pilules ×1, ×5, ×10 centrées au-dessus du bouton.
-            Au-delà du stock, le lot est ramené au nombre de boosters présents. */}
-        <div className="mb-3 flex justify-center">
-          <div
-            role="group"
-            aria-label="Nombre de boosters à ouvrir"
-            className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/[0.03] p-1"
-          >
-            {BATCHES.map((value) => (
-              <button
-                key={value}
-                type="button"
-                onClick={() => onBatch(value)}
-                disabled={!ready || opening}
-                aria-pressed={batch === value}
-                aria-label={
-                  value === 1
-                    ? "Ouvrir 1 booster"
-                    : `Ouvrir ${value} boosters${available < value ? ` (${available} en stock)` : ""}`
-                }
-                className={`min-w-11 rounded-full px-3 py-1.5 font-mono text-xs transition disabled:cursor-not-allowed disabled:opacity-40 ${
-                  batch === value
-                    ? "bg-acid font-semibold text-ink"
-                    : "text-white/55 hover:bg-white/5 hover:text-white"
-                }`}
+          return (
+            <li key={key}>
+              <span
+                className="chip gap-2 px-3.5 py-1.5 text-xs"
+                title={`${info.label} : ${label}`}
               >
-                ×{value}
-              </button>
-            ))}
-          </div>
+                <span className={`h-2.5 w-2.5 rounded-full ${info.bar}`} aria-hidden />
+                <span className="text-white/70">{info.label}</span>
+                <span className="text-[11px] text-white/45">
+                  {percent === null ? "—" : formatChance(percent / 100)}
+                </span>
+              </span>
+            </li>
+          );
+        })}
+      </ul>
+
+      <p className="mx-auto mt-3 max-w-md text-[11px] leading-relaxed text-white/35">
+        Chance d&apos;obtenir au moins une carte de la rareté dans le booster, calculée sur le
+        tirage réel du pack.
+      </p>
+
+      <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
+        {/* Lot d'ouverture : pilules ×1, ×5, ×10. Au-delà du stock, le lot est
+            ramené au nombre de boosters présents. */}
+        <div
+          role="group"
+          aria-label="Nombre de boosters à ouvrir"
+          className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/[0.03] p-1"
+        >
+          {BATCHES.map((value) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => onBatch(value)}
+              disabled={!ready || opening}
+              aria-pressed={batch === value}
+              aria-label={
+                value === 1
+                  ? "Ouvrir 1 booster"
+                  : `Ouvrir ${value} boosters${available < value ? ` (${available} en stock)` : ""}`
+              }
+              className={`min-w-11 rounded-full px-3.5 py-2 font-mono text-xs transition disabled:cursor-not-allowed disabled:opacity-40 ${
+                batch === value
+                  ? "bg-cyan font-semibold text-ink"
+                  : "text-white/55 hover:bg-white/5 hover:text-white"
+              }`}
+            >
+              ×{value}
+            </button>
+          ))}
         </div>
 
         <button
           type="button"
           onClick={onOpen}
           disabled={!canOpen}
-          className="btn btn-primary w-full"
+          className="btn btn-primary btn-lg px-7"
           aria-describedby="pack-open-note"
         >
           {opening ? (
@@ -583,19 +563,25 @@ function PackPanel({
             "Bientôt disponible"
           )}
         </button>
-
-        <p id="pack-open-note" className="mt-2 text-center text-[11px] text-white/40">
-          {!ready
-            ? `${pack.stats.poolSize} / ${pack.stats.minPoolSize} persos — le pack s'ouvrira tout seul au seuil atteint.`
-            : available < 1
-              ? nextIn !== null
-                ? `Prochain booster dans ${formatCountdown(nextIn)}`
-                : `Un booster toutes les ${Math.round(BOOSTER_COOLDOWN_MS / 60000)} minutes.`
-              : `Stock commun : ${available - bonus} / ${BOOSTER_STOCK_MAX}${
-                  bonus > 0 ? ` · +${bonus} bonus` : ""
-                } · un toutes les ${Math.round(BOOSTER_COOLDOWN_MS / 60000)} minutes.`}
-        </p>
       </div>
+
+      <p
+        id="pack-open-note"
+        className="mx-auto mt-3 max-w-md text-[11px] leading-relaxed text-white/40"
+      >
+        {!ready
+          ? `${pack.stats.poolSize} / ${pack.stats.minPoolSize} persos — le pack s'ouvrira tout seul au seuil atteint.`
+          : `Un booster toutes les ${Math.round(BOOSTER_COOLDOWN_MS / 60000)} minutes : le stock se remplit tout seul.`}
+      </p>
+
+      <button
+        type="button"
+        onClick={onShowCharacters}
+        className="btn btn-outline btn-sm mt-4"
+        disabled={pack.stats.poolSize === 0}
+      >
+        Voir les {pack.stats.poolSize} persos
+      </button>
     </div>
   );
 }

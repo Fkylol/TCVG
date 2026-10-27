@@ -92,9 +92,13 @@ function boot(): Engine | null {
   }
   try {
     const ctx = new Ctor();
+    // Compresseur sur la sortie : la déchirure au doigt superpose des dizaines
+    // de souffles, et sans lui l'ouverture sature sur haut-parleur de téléphone.
+    const compressor = ctx.createDynamicsCompressor();
+    compressor.connect(ctx.destination);
     const master = ctx.createGain();
     master.gain.value = MASTER_GAIN;
-    master.connect(ctx.destination);
+    master.connect(compressor);
     engine = { ctx, master, noise: makeNoise(ctx) };
     // Le contexte peut naître suspendu même après un geste (Safari).
     if (ctx.state === "suspended") void ctx.resume().catch(() => {});
@@ -192,6 +196,9 @@ export function readSoundOn(): boolean {
 /** Active ou coupe le son, et mémorise le choix dans le navigateur. */
 export function setSoundOn(on: boolean) {
   soundOnCache = on;
+  // Couper le son pendant une déchirure doit l'éteindre tout de suite : la
+  // boucle de bruit tournerait sinon jusqu'au prochain geste.
+  if (!on) stopRip();
   if (typeof window !== "undefined") {
     try {
       window.localStorage.setItem(STORAGE_KEY, on ? "on" : "off");
@@ -212,6 +219,76 @@ export function useSoundOn(): boolean {
     readSoundOn,
     () => true,
   );
+}
+
+/* ————— La déchirure au doigt ————— */
+
+type Rip = {
+  source: AudioBufferSourceNode;
+  filter: BiquadFilterNode;
+  gain: GainNode;
+  timer: number;
+};
+
+let ripLoop: Rip | null = null;
+
+/**
+ * Craquement continu de la soudure, piloté par la vitesse du doigt.
+ *
+ * Le bruit blanc tourne en boucle dans un filtre passe-bande dont la fréquence
+ * saute à chaque déplacement : c'est ce grain irrégulier qui fait « papier »
+ * plutôt que « souffle ». `intensity` (0–1) suit le geste ; le son s'éteint
+ * seul 90 ms après le dernier appel, donc un doigt immobile ne bruite pas.
+ */
+export function rip(intensity: number) {
+  if (!readSoundOn()) return;
+  const ready = boot();
+  if (!ready || typeof window === "undefined") return;
+
+  if (!ripLoop) {
+    const source = ready.ctx.createBufferSource();
+    source.buffer = ready.noise;
+    source.loop = true;
+    const filter = ready.ctx.createBiquadFilter();
+    filter.type = "bandpass";
+    filter.Q.value = 0.9;
+    filter.frequency.value = 3000;
+    const gain = ready.ctx.createGain();
+    gain.gain.value = 0;
+    source.connect(filter);
+    filter.connect(gain);
+    gain.connect(ready.master);
+    source.start();
+    ripLoop = { source, filter, gain, timer: 0 };
+  }
+
+  const now = ready.ctx.currentTime;
+  // Le gain suit le geste, avec une légère variance : deux passages du doigt
+  // ne sonnent jamais exactement pareil.
+  ripLoop.gain.gain.setTargetAtTime(
+    Math.min(0.5, Math.max(0, intensity) * 30) * (0.6 + Math.random() * 0.8),
+    now,
+    0.015,
+  );
+  ripLoop.filter.frequency.setValueAtTime(2000 + Math.random() * 4500, now);
+  window.clearTimeout(ripLoop.timer);
+  ripLoop.timer = window.setTimeout(stopRip, 90);
+}
+
+/** Coupe la déchirure en cours (geste relâché, son coupé, pack ouvert). */
+export function stopRip() {
+  if (!ripLoop) return;
+  const current = ripLoop;
+  ripLoop = null;
+  if (typeof window !== "undefined") window.clearTimeout(current.timer);
+  if (!engine) return;
+  const now = engine.ctx.currentTime;
+  current.gain.gain.setTargetAtTime(0, now, 0.03);
+  try {
+    current.source.stop(now + 0.2);
+  } catch {
+    // Source déjà arrêtée : sans conséquence.
+  }
 }
 
 /* ————— Les sons de l'ouverture ————— */
@@ -248,7 +325,55 @@ function aura(rarity: Rarity) {
   }
 }
 
-/** Une carte se pose : impact léger, puis un arpège proportionnel à la rareté. */
+/**
+ * Le pack cède : souffle qui monte, impact grave, pluie d'éclats.
+ *
+ * C'est le son le plus fort de l'ouverture, et le seul à durer : la traîne
+ * couvre l'arrivée des cartes, pour que le silence ne retombe pas entre la
+ * déchirure et le premier retournement.
+ */
+function open(rarity: Rarity) {
+  if (!readSoundOn()) return;
+  stopRip();
+  const ready = boot();
+  if (!ready) return;
+  const hot = rarity === "L" || rarity === "UR";
+
+  air(ready, { dur: 0.45, gain: 0.34, from: 500, to: 5200, q: 0.8 });
+  tone(ready, { freq: 150, dur: 0.26, gain: 0.34, type: "sine", glide: 40 });
+  tone(ready, { at: 0.02, freq: 74, dur: 0.5, gain: 0.18, type: "triangle" });
+
+  // Éclats : des notes très aiguës, désaccordées, qui tombent en pluie.
+  const sparkles = hot ? 12 : 6;
+  for (let index = 0; index < sparkles; index += 1) {
+    tone(ready, {
+      at: 0.05 + Math.random() * 0.5,
+      freq: 2200 + Math.random() * 3000,
+      dur: 0.25,
+      gain: 0.045,
+      type: "sine",
+    });
+  }
+
+  // Craquements du plastique qui se détend.
+  for (let index = 0; index < 5; index += 1) {
+    air(ready, {
+      at: 0.3 + index * 0.09,
+      dur: 0.14,
+      gain: 0.12,
+      from: 800,
+      to: 2600,
+      q: 1.2,
+    });
+  }
+
+  air(ready, { at: 1.35, dur: 0.5, gain: 0.14, from: 1800, to: 300, q: 0.7 });
+}
+
+/**
+ * Retournement d'une carte : froissement bref puis l'arpège de sa rareté.
+ * `holo` ajoute une note cristalline au-dessus de l'accord.
+ */
 function card(rarity: Rarity, options: { holo?: boolean } = {}) {
   if (!readSoundOn()) return;
   const ready = boot();
@@ -256,6 +381,10 @@ function card(rarity: Rarity, options: { holo?: boolean } = {}) {
   const preset = raritySound(rarity);
   const holo = options.holo === true;
 
+  air(ready, { dur: 0.16, gain: 0.16, from: 900, to: 3800, q: 1.4 });
+  tone(ready, { at: 0.04, freq: 700, dur: 0.05, gain: 0.1, type: "square" });
+
+  // Éclat de corde : le carton claque avant que les notes ne montent.
   air(ready, { dur: 0.09, gain: 0.1 + preset.air, from: 2400, to: 5400, q: 1.1 });
 
   preset.degrees.forEach((degree, position) => {
@@ -303,4 +432,4 @@ export function haptic(rarity: Rarity) {
   }
 }
 
-export const sfx = { tear, aura, card, recap };
+export const sfx = { tear, aura, open, card, recap, rip, stopRip };

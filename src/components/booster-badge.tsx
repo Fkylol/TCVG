@@ -59,8 +59,8 @@ export function BoosterBadge({
       } sur ${BOOSTER_STOCK_MAX}${
         bonus > 0 ? `, plus ${bonus} booster${bonus > 1 ? "s" : ""} bonus` : ""
       }`}
-      className={`chip gap-1 py-1 transition hover:text-acid sm:px-2.5 ${
-        full ? "text-acid" : "text-white/70"
+      className={`chip gap-1 py-1 transition hover:text-cyan sm:px-2.5 ${
+        full ? "text-cyan" : "text-white/70"
       }`}
     >
       <svg
@@ -82,7 +82,7 @@ export function BoosterBadge({
         {available}
         <span className="text-white/35">/{BOOSTER_STOCK_MAX}</span>
         {bonus > 0 && (
-          <span className="text-acid">
+          <span className="text-cyan">
             {" · "}+{bonus} bonus
           </span>
         )}
