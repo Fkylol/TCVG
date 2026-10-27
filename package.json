@@ -14,7 +14,7 @@
     "db:migrate": "node --env-file=.env --import tsx scripts/db-migrate.ts",
     "cf:build": "opennextjs-cloudflare build",
     "cf:preview": "opennextjs-cloudflare preview",
-    "cf:deploy": "opennextjs-cloudflare deploy",
+    "cf:deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
     "db:cards": "node --env-file=.env --import tsx scripts/db-cards.ts",
     "db:genres": "node --env-file=.env --import tsx scripts/cards-genres.ts",
     "db:verify": "node --env-file=.env --import tsx scripts/db-verify.ts",
