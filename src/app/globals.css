@@ -744,6 +744,22 @@ button:focus-visible .pack-poster[data-flat="true"] {
   --rarity-M-on: #170215;
 }
 
+/* Valeurs de repos de l'inclinaison, écrites ici et pas sur `.card-face` :
+   une variable déclarée sur la carte elle-même masque celle héritée de son
+   parent. Or, dans la visionneuse, c'est `.card-flip-tilt` — au-dessus de la
+   carte — qui reçoit le survol et pose `--rx`, `--ry`, `--tx`, `--ty` et
+   `--intensity`. Déclarés sur la carte, ces zéros écrasaient les valeurs du
+   conteneur : le foil restait figé, imprimé sur le carton. Depuis `:root`,
+   ils ne servent que de défaut à qui n'en reçoit aucun. */
+:root {
+  --rx: 0deg;
+  --ry: 0deg;
+  --tx: 0;
+  --ty: 0;
+  --intensity: 0;
+  --tilt-scale: 1;
+}
+
 .card-face {
   /* Couleur de rareté, surchargée par `[data-rarity]`. */
   --rarity: var(--rarity-C);
@@ -754,14 +770,9 @@ button:focus-visible .pack-poster[data-flat="true"] {
   /* Halo : intensité croissante du Commun au Mythique. */
   --glow: 0 10px 24px -22px rgba(0, 0, 0, 0.95);
   --border-width: 2px;
-  /* Variables écrites par `useCardTilt` : inclinaison, position du pointeur,
-     intensité du survol et écart au centre pour la parallaxe. */
-  --rx: 0deg;
-  --ry: 0deg;
-  --tx: 0;
-  --ty: 0;
-  --intensity: 0;
-  --tilt-scale: 1;
+  /* L'inclinaison, la position du pointeur, l'intensité du survol et l'écart
+     au centre viennent de `:root`, puis du parent inclinable quand il y en a
+     un (voir plus haut) — elles ne sont jamais déclarées ici. */
   /* Dimensions internes, redéfinies par taille. */
   --pad: 8px;
   --art-radius: 9px;

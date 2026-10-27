@@ -333,6 +333,30 @@ test("visionneuse : l'inclinaison vit à l'extérieur du retournement", () => {
   assert.match(CSS, /\.card-flip-back \{[\s\S]*?transform: rotateY\(180deg\);/);
 });
 
+test("visionneuse : les variables d'inclinaison traversent la carte", () => {
+  // `useCardTilt` écrit `--rx`/`--ry`/`--tx`/`--ty`/`--intensity` sur
+  // `.card-flip-tilt`, au-dessus de la carte : le foil et le reflet les lisent
+  // par héritage. Une déclaration sur `.card-face` elle-même les masquerait,
+  // et la pellicule resterait figée, imprimée sur le carton.
+  const face = CSS.slice(CSS.indexOf("\n.card-face {"), CSS.indexOf('.card-face[data-size="sm"]'));
+  for (const name of ["--rx", "--ry", "--tx", "--ty", "--intensity"]) {
+    assert.doesNotMatch(
+      face,
+      new RegExp(`${name}:`),
+      `${name} ne doit pas être déclaré sur .card-face`,
+    );
+  }
+
+  // Les valeurs de repos vivent à la racine : elles ne font que fournir un
+  // défaut à qui n'en reçoit aucun.
+  const rootStart = CSS.indexOf(":root {\n  --rx");
+  assert.ok(rootStart > 0, "les valeurs de repos de l'inclinaison sont introuvables");
+  const root = CSS.slice(rootStart, CSS.indexOf("\n}", rootStart));
+  for (const name of ["--rx", "--ry", "--tx", "--ty", "--intensity", "--tilt-scale"]) {
+    assert.match(root, new RegExp(`${name}:`), `${name} manque aux valeurs de repos`);
+  }
+});
+
 test("visionneuse : fond opaque et effets coupés pendant le retournement", () => {
   // Un `backdrop-filter` plein écran derrière la grille recomposait toute la
   // page à chaque image de la rotation.
