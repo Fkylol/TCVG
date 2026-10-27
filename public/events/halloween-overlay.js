@@ -42,8 +42,17 @@
   );
 
   var STORAGE_KEY = 'halloween-overlay-off';
+  // Le mode « animations toujours » (data-motion="full", par défaut) passe
+  // outre la demande d'économie d'énergie du téléphone.
   var reduceMotion = window.matchMedia &&
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches &&
+    document.documentElement.getAttribute('data-motion') === 'auto';
+  // Écrans étroits : l'ambiance est allégée (moins de chauves-souris et de
+  // bonbons, brume plus basse, toiles dans les coins). Lu au chargement, un
+  // redimensionnement ne redistribue pas les éléments déjà créés.
+  var narrow = window.matchMedia
+    ? window.matchMedia('(max-width: 640px)').matches
+    : window.innerWidth <= 640;
 
   // --- Période d'activation : 15 octobre -> 2 novembre -----------------
   function inSeason() {
@@ -166,8 +175,8 @@
   // --- CSS --------------------------------------------------------------
   var css = [
     // `clamp` : sur un téléphone, 10vw ne faisait que ~37 px et les toiles
-    // disparaissaient ; elles gardent au moins 104 px quelle que soit la largeur.
-    '#hw-layer{--ww:clamp(104px,16vw,150px);position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:' + opts.zIndex + '}',
+    // disparaissaient ; elles gardent au moins 96 px quelle que soit la largeur.
+    '#hw-layer{--ww:clamp(96px,18vw,150px);position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:' + opts.zIndex + '}',
     '#hw-layer *{pointer-events:none;box-sizing:border-box}',
     '#hw-layer.hw-off{display:none}',
 
@@ -193,7 +202,7 @@
     '.hw-web.right{right:0;transform:scaleX(-1)}',
 
     // araignées + fil
-    '.hw-thread{position:absolute;top:0;width:1.5px;transform-origin:top;background:linear-gradient(rgba(255,255,255,.75),rgba(255,255,255,.25));' +
+    '.hw-thread{position:absolute;top:0;width:1.5px;height:var(--h,20vh);transform-origin:top;background:linear-gradient(rgba(255,255,255,.75),rgba(255,255,255,.25));' +
       'animation:hw-drop var(--d,7s) ease-in-out infinite alternate}',
     '.hw-thread .sp{position:absolute;left:50%;bottom:-16px;width:22px;height:22px;margin-left:-11px;color:var(--c,#ff8a1f);' +
       'filter:drop-shadow(0 0 6px var(--c,#ff8a1f))}',
@@ -255,7 +264,20 @@
       'font:600 14px/1.3 system-ui,sans-serif;box-shadow:0 0 22px rgba(255,120,0,.35);transition:opacity .25s,transform .25s}',
     '#hw-toast.show{opacity:1;transform:translate(-50%,0)}',
 
-    '@media (prefers-reduced-motion:reduce){.hw-fog,.hw-thread,.hw-bat svg,.hw-pumpkin,#hw-layer .hw-witch.hw-ready{animation:none!important}}'
+    // Téléphones : ambiance allégée. La vignette ne voile plus le texte, la
+    // brume descend moins haut et coûte moins cher au GPU, les araignées
+    // restent dans les coins, et le bouton 🎃 remonte au-dessus du bouton Agora
+    // au lieu de flotter au milieu du contenu.
+    '@media (max-width:640px){' +
+      '.hw-vignette{background:' +
+        'radial-gradient(ellipse at 50% 40%,transparent 62%,rgba(60,10,90,.22) 100%),' +
+        'radial-gradient(ellipse at 0% 100%,rgba(255,120,0,.14),transparent 42%),' +
+        'radial-gradient(ellipse at 100% 100%,rgba(130,60,255,.16),transparent 42%)}' +
+      '.hw-fog{height:20vh;opacity:.4;filter:blur(8px)}' +
+      '.hw-thread{height:min(var(--h,20vh),13vh)}' +
+      '#hw-toggle{left:auto;right:14px;bottom:calc(72px + env(safe-area-inset-bottom,0px));width:36px;height:36px;font-size:18px}' +
+    '}',
+    '@media (prefers-reduced-motion:reduce){html:not([data-motion="full"]) .hw-fog,html:not([data-motion="full"]) .hw-thread,html:not([data-motion="full"]) .hw-bat svg,html:not([data-motion="full"]) .hw-pumpkin,html:not([data-motion="full"]) #hw-layer .hw-witch.hw-ready{animation:none!important}}'
   ].join('\n');
 
   // --- Construction du DOM ----------------------------------------------
@@ -296,15 +318,17 @@
       layer.appendChild(el('div', 'hw-web left', SVG.web));
       layer.appendChild(el('div', 'hw-web right', SVG.web));
       [
-        { left: 'calc(var(--ww) * .22)',  top: 'calc(var(--ww) * .78)',  h: '20vh', c: '#ff8a1f', d: '7s' },
-        { left: 'calc(var(--ww) + 3vw)',  top: '0',                      h: '13vh', c: '#9b6bff', d: '9s' },
-        { right: 'calc(var(--ww) * .22)', top: 'calc(var(--ww) * .78)',  h: '22vh', c: '#9b6bff', d: '8s' },
-        { right: 'calc(var(--ww) + 3vw)', top: '0',                      h: '11vh', c: '#ff8a1f', d: '10s' }
+        // Toutes les araignées restent dans la bande des toiles : posées plus
+        // loin, elles pendaient au milieu du haut de page sur téléphone.
+        { left: 'calc(var(--ww) * .28)',  top: 'calc(var(--ww) * .78)',  h: '20vh', c: '#ff8a1f', d: '7s' },
+        { left: 'calc(var(--ww) * .68)',  top: '0',                      h: '13vh', c: '#9b6bff', d: '9s' },
+        { right: 'calc(var(--ww) * .28)', top: 'calc(var(--ww) * .78)',  h: '22vh', c: '#9b6bff', d: '8s' },
+        { right: 'calc(var(--ww) * .68)', top: '0',                      h: '11vh', c: '#ff8a1f', d: '10s' }
       ].forEach(function (s) {
         var t = el('div', 'hw-thread', '<div class="sp">' + SVG.spider + '</div>');
         if (s.left) t.style.left = s.left;
         if (s.right) t.style.right = s.right;
-        t.style.height = s.h;
+        t.style.setProperty('--h', s.h);
         if (s.top) t.style.top = s.top;
         t.style.setProperty('--c', s.c);
         t.style.setProperty('--d', s.d);
@@ -340,7 +364,7 @@
       flyers.push(witchFlyer);
     }
     if (opts.bats) {
-      for (var i = 0; i < 4; i++) {
+      for (var i = 0; i < (narrow ? 2 : 4); i++) {
         var b = el('div', 'hw-bat', SVG.bat);
         b.style.width = Math.round(rnd(26, 46)) + 'px';
         b.style.visibility = 'hidden';
@@ -614,7 +638,7 @@
       flyers.forEach(resetFlyer);
       last = performance.now();
       rafId = requestAnimationFrame(loop);
-      if (opts.candies) candyTimer = setInterval(spawnCandy, 1100);
+      if (opts.candies) candyTimer = setInterval(spawnCandy, narrow ? 2300 : 1100);
       if (darkNode) scheduleFlicker();
     } else if (witchNode) {
       // animations réduites : la sorcière reste fixe (mais cliquable) dans un coin

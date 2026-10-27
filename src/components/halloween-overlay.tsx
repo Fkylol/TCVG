@@ -15,6 +15,8 @@ type OverlayOptions = {
   torchTarget?: string;
   torchRadius?: number;
   torchDarkness?: number;
+  /** Marge assombrie autour de la zone (px), voir `torchPadding` du script. */
+  torchPadding?: number;
   torchFlicker?: boolean;
   [key: string]: unknown;
 };
@@ -65,6 +67,12 @@ export function HalloweenOverlay({
       torchTarget: "[data-hw-torch]",
       torchRadius: 190,
       torchDarkness: 0.9,
+      // 20 px et non 12 : le pack sélectionné (et celui survolé) se soulève de
+      // 8 px et grossit de 4 %, soit ~14 px au-dessus de la grille. Le cadre de
+      // la zone assombrie ne inclut pas les transformations des enfants, donc
+      // avec 12 px le haut du poster restait éclairé. On reste sous les 24 px
+      // de marge qui séparent la grille du bandeau d'en haut.
+      torchPadding: 20,
       torchFlicker: true,
       zIndex,
     };
