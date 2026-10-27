@@ -41,7 +41,7 @@ export default function PrivacyPage() {
           href={DISCORD_MFA_HELP}
           target="_blank"
           rel="noreferrer"
-          className="text-acid underline-offset-4 hover:underline"
+          className="text-cyan underline-offset-4 hover:underline"
         >
           le site de Discord
         </Link>
@@ -65,7 +65,7 @@ export default function PrivacyPage() {
 
       <Section title="Tes droits">
         Tu peux demander la suppression de ton compte et des données associées via la page{" "}
-        <Link href="/avis-et-bugs" className="text-acid underline-offset-4 hover:underline">
+        <Link href="/avis-et-bugs" className="text-cyan underline-offset-4 hover:underline">
           Avis et bugs
         </Link>
         . La suppression du compte efface le profil, la collection, les parrainages et les

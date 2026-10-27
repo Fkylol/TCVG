@@ -19,7 +19,7 @@ export function DailyBonusNote({ bonus }: { bonus: DailyBonus | null }) {
   return (
     <div
       role="status"
-      className="mb-6 flex items-center gap-2.5 border-l-2 border-acid/70 bg-acid/10 px-3 py-2 text-acid"
+      className="mb-6 flex items-center gap-2.5 border-l-2 border-cyan/70 bg-cyan/10 px-3 py-2 text-cyan"
     >
       <span aria-hidden className="text-[10px]">
         ◆
@@ -34,7 +34,7 @@ export function DailyBonusNote({ bonus }: { bonus: DailyBonus | null }) {
         onClick={() => setDismissed(true)}
         aria-label="Masquer le message du bonus quotidien"
         title="Masquer"
-        className="ml-auto grid h-6 w-6 shrink-0 place-items-center rounded-full text-acid/60 transition hover:bg-acid/15 hover:text-acid"
+        className="ml-auto grid h-6 w-6 shrink-0 place-items-center rounded-full text-cyan/60 transition hover:bg-cyan/15 hover:text-cyan"
       >
         <svg
           aria-hidden

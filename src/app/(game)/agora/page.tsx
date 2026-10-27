@@ -25,7 +25,7 @@ export default function AgoraPage() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <Link href="/agora/offres" className="btn btn-acid btn-sm">
+          <Link href="/agora/offres" className="btn btn-cyan btn-sm">
             Mes échanges
           </Link>
           <Link href="/regles-chat" className="btn btn-outline btn-sm">

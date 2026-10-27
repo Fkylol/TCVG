@@ -53,7 +53,7 @@ export function ReferralLink({ code, url }: { code: string; url: string }) {
         <span>
           Code : <span className="font-mono text-white/60">{code}</span>
         </span>
-        <span aria-live="polite" className="text-acid">
+        <span aria-live="polite" className="text-cyan">
           {message}
         </span>
       </div>

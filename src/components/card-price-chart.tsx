@@ -134,7 +134,7 @@ export function CardPriceChart({
               type="button"
               onClick={() => setRange(value)}
               aria-pressed={range === value}
-              className={`tab px-3 py-1.5 ${range === value ? "bg-acid text-ink" : ""}`}
+              className={`tab px-3 py-1.5 ${range === value ? "bg-cyan text-ink" : ""}`}
             >
               {value} j
             </button>
@@ -156,8 +156,8 @@ export function CardPriceChart({
           >
             <defs>
               <linearGradient id="price-area" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#b6ff2e" stopOpacity="0.22" />
-                <stop offset="100%" stopColor="#b6ff2e" stopOpacity="0" />
+                <stop offset="0%" stopColor="#36e2ff" stopOpacity="0.22" />
+                <stop offset="100%" stopColor="#36e2ff" stopOpacity="0" />
               </linearGradient>
             </defs>
 
@@ -199,7 +199,7 @@ export function CardPriceChart({
               strokeDasharray="6 6"
             />
 
-            <path d={path} fill="none" stroke="#b6ff2e" strokeWidth="2" strokeLinejoin="round" />
+            <path d={path} fill="none" stroke="#36e2ff" strokeWidth="2" strokeLinejoin="round" />
 
             {visible.map((point) => (
               <circle
@@ -208,7 +208,7 @@ export function CardPriceChart({
                 cy={y(point.median)}
                 r={compact ? 2.2 : 2.6}
                 fill="#08090a"
-                stroke="#b6ff2e"
+                stroke="#36e2ff"
                 strokeWidth="1.6"
               />
             ))}
@@ -268,7 +268,7 @@ export function CardPriceChart({
 
           <div className="mt-2 flex flex-wrap items-center gap-x-5 gap-y-1 text-[11px] text-white/40">
             <span className="flex items-center gap-1.5">
-              <span aria-hidden className="h-px w-5 bg-acid" />
+              <span aria-hidden className="h-px w-5 bg-cyan" />
               Prix médian du jour
             </span>
             <span className="flex items-center gap-1.5">
@@ -277,7 +277,7 @@ export function CardPriceChart({
               <span className="font-mono text-white/60">◆ {median}</span>
             </span>
             <span className="flex items-center gap-1.5">
-              <span aria-hidden className="h-2 w-2 bg-acid/35" />
+              <span aria-hidden className="h-2 w-2 bg-cyan/35" />
               Volume de ventes
             </span>
           </div>

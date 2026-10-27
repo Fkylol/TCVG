@@ -144,7 +144,7 @@ export function ModerationQueue({
 
                 <button
                   type="button"
-                  className="btn btn-sm btn-acid"
+                  className="btn btn-sm btn-cyan"
                   disabled={pending}
                   onClick={() => run(() => resolveChatReport(report.id, "handled"))}
                 >

@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { CATALOG_SIZE } from "@/lib/cards";
+import { catalogSize } from "@/lib/cards";
 import type { Rarity } from "@/lib/cards";
 import { RARITY_META } from "@/lib/rarity";
 import {
@@ -114,7 +114,7 @@ export default async function RarityPage() {
               <tr>
                 <td className="px-3 py-2 text-white/50">Total actif</td>
                 <td className="px-3 py-2" />
-                <td className="px-3 py-2 text-right font-mono text-white/80">{total || CATALOG_SIZE}</td>
+                <td className="px-3 py-2 text-right font-mono text-white/80">{total || catalogSize()}</td>
               </tr>
             </tfoot>
           </table>
@@ -153,7 +153,7 @@ export default async function RarityPage() {
       <p className="mt-9 text-[11px] text-white/30">
         Les raretés ne se recalculent jamais toutes seules : chaque mise à jour est un calcul
         manuel, vérifié avant application. Voir aussi{" "}
-        <Link href="/regles" className="text-white/50 underline-offset-4 hover:text-acid hover:underline">
+        <Link href="/regles" className="text-white/50 underline-offset-4 hover:text-cyan hover:underline">
           les règles du jeu
         </Link>
         .
@@ -178,7 +178,7 @@ function Ext({ href, children }: { href: string; children: React.ReactNode }) {
       href={href}
       target="_blank"
       rel="noreferrer noopener"
-      className="text-acid underline-offset-4 hover:underline"
+      className="text-cyan underline-offset-4 hover:underline"
     >
       {children}
     </a>

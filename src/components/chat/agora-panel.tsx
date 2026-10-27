@@ -374,9 +374,9 @@ export function AgoraPanel({
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <h2 className="display truncate text-sm tracking-[0.08em]">{APP_CHAT_NAME}</h2>
-            <span className="flex shrink-0 items-center gap-1 rounded-full bg-acid/10 px-1.5 py-0.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-acid" aria-hidden />
-              <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-acid">
+            <span className="flex shrink-0 items-center gap-1 rounded-full bg-cyan/10 px-1.5 py-0.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-cyan" aria-hidden />
+              <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-cyan">
                 En direct
               </span>
             </span>
@@ -392,7 +392,7 @@ export function AgoraPanel({
 
         <Link
           href="/agora/offres"
-          className="chip shrink-0 text-white/55 hover:text-acid"
+          className="chip shrink-0 text-white/55 hover:text-cyan"
           title="Propositions d'échange reçues et envoyées"
         >
           Échanges
@@ -413,7 +413,7 @@ export function AgoraPanel({
           onClick={() => setRoomsOpen((open) => !open)}
           aria-expanded={roomsOpen}
           aria-label="Choisir un salon"
-          className="grid h-7 w-7 shrink-0 place-items-center rounded-sm text-white/45 hover:bg-white/5 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-acid"
+          className="grid h-7 w-7 shrink-0 place-items-center rounded-sm text-white/45 hover:bg-white/5 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan"
         >
           ☰
         </button>
@@ -423,7 +423,7 @@ export function AgoraPanel({
             type="button"
             onClick={() => setFullscreen(true)}
             aria-label="Ouvrir le chat en grand"
-            className="grid h-7 w-7 shrink-0 place-items-center rounded-sm text-white/45 hover:bg-white/5 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-acid"
+            className="grid h-7 w-7 shrink-0 place-items-center rounded-sm text-white/45 hover:bg-white/5 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan"
           >
             ⤢
           </button>
@@ -433,7 +433,7 @@ export function AgoraPanel({
             type="button"
             onClick={() => setFullscreen(false)}
             aria-label="Réduire le chat"
-            className="grid h-7 w-7 shrink-0 place-items-center rounded-sm text-white/45 hover:bg-white/5 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-acid"
+            className="grid h-7 w-7 shrink-0 place-items-center rounded-sm text-white/45 hover:bg-white/5 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan"
           >
             ✕
           </button>
@@ -451,7 +451,7 @@ export function AgoraPanel({
               aria-selected={item.key === language && !browseAll}
               onClick={() => selectLanguage(item.key)}
               className={`tab flex-1 justify-center px-1 text-[10px] ${
-                item.key === language && !browseAll ? "bg-acid/10 text-acid" : ""
+                item.key === language && !browseAll ? "bg-cyan/10 text-cyan" : ""
               }`}
             >
               {item.short}
@@ -471,7 +471,7 @@ export function AgoraPanel({
                   aria-current={active ? "true" : undefined}
                   className={`flex w-full items-center justify-between gap-2 rounded-sm px-2 py-1 text-left text-[11px] transition ${
                     active
-                      ? "bg-acid/10 text-acid"
+                      ? "bg-cyan/10 text-cyan"
                       : "text-white/55 hover:bg-white/5 hover:text-white"
                   }`}
                 >
@@ -495,7 +495,7 @@ export function AgoraPanel({
               onClick={openAll}
               aria-current={browseAll ? "true" : undefined}
               className={`flex w-full items-center justify-between gap-2 rounded-sm px-2 py-1 text-left text-[11px] transition ${
-                browseAll ? "bg-acid/10 text-acid" : "text-white/55 hover:bg-white/5 hover:text-white"
+                browseAll ? "bg-cyan/10 text-cyan" : "text-white/55 hover:bg-white/5 hover:text-white"
               }`}
             >
               <span>Tous les salons</span>
@@ -512,7 +512,7 @@ export function AgoraPanel({
                     setState((previous) => ({ ...previous, hideAnnouncements: hide }));
                     void setChatHideAnnouncements(hide);
                   }}
-                  className="h-3 w-3 accent-[var(--acid)]"
+                  className="h-3 w-3 accent-[var(--cyan)]"
                 />
                 Masquer les annonces
               </label>
@@ -528,7 +528,7 @@ export function AgoraPanel({
                       event.target.checked ? "on" : "off",
                     );
                   }}
-                  className="h-3 w-3 accent-[var(--acid)]"
+                  className="h-3 w-3 accent-[var(--cyan)]"
                 />
                 Annonce des nouveaux messages
               </label>
@@ -594,7 +594,7 @@ export function AgoraPanel({
               if (list) list.scrollTop = list.scrollHeight;
               setNewCount(0);
             }}
-            className="absolute inset-x-0 -top-9 mx-auto w-fit rounded-full bg-acid px-3 py-1 font-mono text-[10px] font-bold text-ink shadow-lg"
+            className="absolute inset-x-0 -top-9 mx-auto w-fit rounded-full bg-cyan px-3 py-1 font-mono text-[10px] font-bold text-ink shadow-lg"
           >
             {newCount} nouveau{newCount > 1 ? "x" : ""} message{newCount > 1 ? "s" : ""} ↓
           </button>
@@ -614,7 +614,7 @@ export function AgoraPanel({
           <button
             type="button"
             onClick={returnToRoom}
-            className="text-acid underline-offset-2 hover:underline"
+            className="text-cyan underline-offset-2 hover:underline"
           >
             rejoins un salon
           </button>{" "}

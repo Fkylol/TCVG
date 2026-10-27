@@ -6,6 +6,7 @@ import { recordActivityDay } from "@/lib/referral/service";
 import { RarityUpdateBanner } from "@/components/rarity-update-banner";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { canUseAtelier } from "@/lib/atelier-access";
 import { serverNowMs } from "@/lib/game";
 
 // Toutes les pages de jeu dépendent de la session : jamais de rendu statique.
@@ -38,6 +39,7 @@ export default async function GameLayout({ children }: { children: React.ReactNo
         serverNow={serverNowMs()}
         unread={unread}
         admin={admin}
+        atelier={canUseAtelier(profile.username)}
       />
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8">
         <DailyBonusNote bonus={bonus} />

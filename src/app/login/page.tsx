@@ -32,6 +32,16 @@ export default async function LoginPage({
             </p>
           )}
 
+          {erreur === "confirmation" && (
+            <p
+              role="alert"
+              className="mb-4 border-l-2 border-rose-400/60 bg-rose-500/10 px-3 py-2 text-sm text-rose-200"
+            >
+              La connexion n&apos;a pas abouti : le retour de Discord a expiré, ou la session
+              s&apos;est ouverte dans un autre onglet. Reclique sur le bouton ci-dessous.
+            </p>
+          )}
+
           <DiscordButton />
 
           <p className="mt-5 text-center text-xs leading-relaxed text-white/35">

@@ -8,7 +8,7 @@ import { getProfile } from "@/lib/data";
 import { REFERRAL_COOKIE } from "@/lib/referral/config";
 import { previewReferralCode } from "@/lib/referral/service";
 import { createClient } from "@/lib/supabase/server";
-import { CARDS, CATALOG_SIZE } from "@/lib/cards";
+import { CARDS, catalogSize } from "@/lib/cards";
 import {
   BOOSTER_COOLDOWN_MS,
   CARDS_PER_BOOSTER,
@@ -66,19 +66,21 @@ export default async function Home() {
         <section className="grid items-center gap-10 lg:grid-cols-[1.1fr_1fr]">
           <div>
             <span className="eyebrow">
-              Projet de fan · {CATALOG_SIZE} cartes
+              Projet de fan · {catalogSize()} cartes
             </span>
 
-            <h1 className="display mt-4 text-5xl sm:text-7xl">
+            {/* Titre à l'échelle de la vitrine (36 → 48 px) : Syne est large,
+                et à 72 px le titre se lisait comme étiré. */}
+            <h1 className="display mt-4 text-4xl sm:text-5xl">
               Le TCG des
-              <span className="text-acid"> héros de jeux vidéo</span>.
+              <span className="text-cyan"> héros de jeux vidéo</span>.
             </h1>
             <span className="title-rule" aria-hidden />
 
             <p className="mt-5 max-w-xl text-lg text-white/65">
               Ouvre des boosters toutes les {Math.round(BOOSTER_COOLDOWN_MS / 60000)} minutes,
               collectionne Kratos, Mario, Spyro et tout le reste, et complète un album de{" "}
-              {CATALOG_SIZE} personnages — du Commun au Mythique.
+              {catalogSize()} personnages — du Commun au Mythique.
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3">
@@ -187,7 +189,7 @@ export default async function Home() {
 function Step({ n, title, text }: { n: string; title: string; text: string }) {
   return (
     <div className="panel p-5">
-      <span className="grid h-8 w-8 place-items-center bg-acid/15 font-mono text-sm font-semibold text-acid">
+      <span className="grid h-8 w-8 place-items-center bg-cyan/15 font-mono text-sm font-semibold text-cyan">
         {n}
       </span>
       <h3 className="display mt-3 text-base">{title}</h3>

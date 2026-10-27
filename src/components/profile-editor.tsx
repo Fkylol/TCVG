@@ -8,6 +8,7 @@ import { FrameGallery } from "@/components/frame-gallery";
 import { getCardArt } from "@/lib/card-art";
 import type { FrameView } from "@/lib/frames";
 import { getPortraitFraming } from "@/lib/portraits";
+import { framingStyle } from "@/lib/framing";
 
 export type AvatarChoice = {
   id: string;
@@ -160,7 +161,7 @@ export function ProfileEditor({
                 onChange={() => setSelectedAvatar("")}
                 className="peer sr-only"
               />
-              <span className="cut grid aspect-square place-items-center border border-white/10 bg-white/[0.03] font-mono text-lg font-bold text-white/70 transition peer-checked:border-acid peer-checked:bg-acid/10">
+              <span className="cut grid aspect-square place-items-center border border-white/10 bg-white/[0.03] font-mono text-lg font-bold text-white/70 transition peer-checked:border-cyan peer-checked:bg-cyan/10">
                 {username.trim().charAt(0).toUpperCase()}
               </span>
               <span className="mt-1 block truncate text-center text-[11px] text-white/40">
@@ -178,7 +179,7 @@ export function ProfileEditor({
                   onChange={() => setSelectedAvatar(choice.id)}
                   className="peer sr-only"
                 />
-                <span className="cut relative block aspect-square overflow-hidden border border-white/10 bg-black/40 transition peer-checked:border-acid peer-checked:bg-acid/10">
+                <span className="cut relative block aspect-square overflow-hidden border border-white/10 bg-black/40 transition peer-checked:border-cyan peer-checked:bg-cyan/10">
                   {choice.url ? (
                     <Image
                       src={choice.url}
@@ -186,7 +187,7 @@ export function ProfileEditor({
                       fill
                       sizes="120px"
                       unoptimized
-                      style={getPortraitFraming(choice.id)}
+                      style={framingStyle(getPortraitFraming(choice.id))}
                     />
                   ) : (
                     <span className="grid h-full w-full place-items-center text-[10px] text-white/40">
@@ -228,12 +229,12 @@ export function ProfileEditor({
             </p>
           </div>
           <p className="chip py-1.5 text-[11px] text-white/55">
-            <span className="font-mono text-acid">{unlockedCount}</span> / {activeTotal} débloqués
+            <span className="font-mono text-cyan">{unlockedCount}</span> / {activeTotal} débloqués
           </p>
         </div>
 
         {next && (
-          <p className="mt-3 border-l-2 border-acid/50 bg-acid/[0.04] px-3 py-2 text-xs text-white/55">
+          <p className="mt-3 border-l-2 border-cyan/50 bg-cyan/[0.04] px-3 py-2 text-xs text-white/55">
             Prochain cadre : <span className="text-white/80">{next.name}</span>
             {" · "}
             {next.remaining || `progression ${next.percent} %`}
@@ -257,7 +258,7 @@ export function ProfileEditor({
         </p>
       )}
       {state.message && (
-        <p role="status" className="border-l-2 border-acid/70 bg-acid/10 px-3 py-2 text-sm text-acid">
+        <p role="status" className="border-l-2 border-cyan/70 bg-cyan/10 px-3 py-2 text-sm text-cyan">
           {state.message}
         </p>
       )}

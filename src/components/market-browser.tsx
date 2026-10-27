@@ -14,6 +14,9 @@ import { RARITY, RARITY_ORDER } from "@/lib/game";
 type Note = { tone: "ok" | "bad"; text: string } | null;
 type Sort = "recent" | "price-asc" | "price-desc";
 
+/** Copies déjà possédées pour une carte (les holos sont comptées à part). */
+type OwnedCopy = { quantity: number; holoQuantity: number };
+
 const STATUS_LABEL: Record<MarketListing["status"], string> = {
   active: "En vente",
   sold: "Vendu",
@@ -21,7 +24,7 @@ const STATUS_LABEL: Record<MarketListing["status"], string> = {
 };
 
 const STATUS_STYLE: Record<MarketListing["status"], string> = {
-  active: "bg-acid/15 text-acid",
+  active: "bg-cyan/15 text-cyan",
   sold: "bg-emerald-400/15 text-emerald-300",
   cancelled: "bg-white/10 text-white/45",
 };
@@ -60,6 +63,7 @@ export function MarketBrowser({
   userId,
   initialCard = null,
   orders,
+  owned,
 }: {
   listings: MarketListing[];
   genres: GenreOption[];
@@ -69,6 +73,8 @@ export function MarketBrowser({
   initialCard?: string | null;
   /** Ordres d'achat du joueur, actifs ou terminés. */
   orders: BuyOrder[];
+  /** Collection du joueur, indexée par carte : pastille « possédée ». */
+  owned: Record<string, OwnedCopy>;
 }) {
   const router = useRouter();
   const [tab, setTab] = useState<"market" | "mine" | "orders">("market");
@@ -257,27 +263,27 @@ export function MarketBrowser({
           <button
             type="button"
             onClick={() => setTab("market")}
-            className={`tab px-3 py-1.5 ${tab === "market" ? "bg-acid text-ink" : ""}`}
+            className={`tab px-3 py-1.5 ${tab === "market" ? "bg-cyan text-ink" : ""}`}
           >
             Annonces ({active.length})
           </button>
           <button
             type="button"
             onClick={() => setTab("mine")}
-            className={`tab px-3 py-1.5 ${tab === "mine" ? "bg-acid text-ink" : ""}`}
+            className={`tab px-3 py-1.5 ${tab === "mine" ? "bg-cyan text-ink" : ""}`}
           >
             Mes annonces ({myActive.length})
           </button>
           <button
             type="button"
             onClick={() => setTab("orders")}
-            className={`tab px-3 py-1.5 ${tab === "orders" ? "bg-acid text-ink" : ""}`}
+            className={`tab px-3 py-1.5 ${tab === "orders" ? "bg-cyan text-ink" : ""}`}
           >
             Mes ordres ({activeOrders.length})
           </button>
         </div>
 
-        <span className="chip ml-auto py-1.5 font-semibold text-acid">◆ {currentPixels}</span>
+        <span className="chip ml-auto py-1.5 font-semibold text-cyan">◆ {currentPixels}</span>
         {reservedPixels > 0 && (
           <span className="chip py-1.5 text-white/45">
             <span className="font-sans text-white/30">réservé</span> ◆ {reservedPixels}
@@ -307,7 +313,7 @@ export function MarketBrowser({
                 <button
                   type="button"
                   onClick={() => setCardFilter("all")}
-                  className="text-white/40 transition hover:text-acid"
+                  className="text-white/40 transition hover:text-cyan"
                   aria-label="Retirer le filtre de carte"
                 >
                   ✕
@@ -392,6 +398,21 @@ export function MarketBrowser({
                 const short = currentPixels < listing.price;
                 const working = busy === listing.id;
                 const mineListing = listing.mine || listing.sellerId === userId;
+                const ownedCopy = owned[card.id];
+
+                // Possession annoncée d'un coup d'œil. Une annonce holo ne se
+                // marque que si le joueur possède déjà une brillante : avoir la
+                // version normale ne dit rien de celle-ci.
+                const ownedLabel = !ownedCopy
+                  ? null
+                  : listing.holo
+                    ? ownedCopy.holoQuantity > 0
+                      ? `Holo possédée${ownedCopy.holoQuantity > 1 ? ` ×${ownedCopy.holoQuantity}` : ""}`
+                      : null
+                    : `Possédée${ownedCopy.quantity > 1 ? ` ×${ownedCopy.quantity}` : ""}`;
+                const ownedTitle = ownedCopy
+                  ? `Tu en as ${ownedCopy.quantity} exemplaire${ownedCopy.quantity > 1 ? "s" : ""}, dont ${ownedCopy.holoQuantity} holo${ownedCopy.holoQuantity > 1 ? "s" : ""}.`
+                  : undefined;
 
                 return (
                   <article
@@ -406,6 +427,18 @@ export function MarketBrowser({
                       {listing.holo && (
                         <span className="chip absolute -top-1.5 right-1 z-10 bg-amber-300 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-amber-950">
                           Holo
+                        </span>
+                      )}
+                      {ownedLabel && (
+                        <span
+                          title={ownedTitle}
+                          className={`chip absolute inset-x-1 bottom-1 z-10 justify-center px-1 py-0.5 text-[9px] font-bold uppercase tracking-wide ${
+                            listing.holo
+                              ? "bg-amber-300 text-amber-950"
+                              : "bg-cyan text-ink"
+                          }`}
+                        >
+                          {ownedLabel}
                         </span>
                       )}
                     </Link>
@@ -432,7 +465,7 @@ export function MarketBrowser({
                           Vendeur : <span className="text-white/60">{listing.sellerName}</span>
                         </p>
                       </div>
-                      <p className="mt-1 font-mono text-lg font-bold text-acid">◆ {listing.price}</p>
+                      <p className="mt-1 font-mono text-lg font-bold text-cyan">◆ {listing.price}</p>
 
                       {mineListing ? (
                         <button
@@ -464,7 +497,7 @@ export function MarketBrowser({
           {myActive.length === 0 && myFinished.length === 0 ? (
             <div className="border border-dashed border-white/15 px-6 py-14 text-center text-sm text-white/50">
               Tu n&apos;as aucune annonce.{" "}
-              <Link href="/collection" className="text-acid hover:underline">
+              <Link href="/collection" className="text-cyan hover:underline">
                 Choisis un doublon dans ta collection
               </Link>{" "}
               pour le mettre en vente depuis sa fiche.
@@ -503,7 +536,7 @@ export function MarketBrowser({
                             {info.short}
                           </span>
                           <h3 className="mt-1 truncate text-sm font-semibold text-white/90">{card.name}</h3>
-                          <p className="mt-0.5 font-mono text-base font-bold text-acid">◆ {listing.price}</p>
+                          <p className="mt-0.5 font-mono text-base font-bold text-cyan">◆ {listing.price}</p>
                           <p className="text-[11px] text-white/35">
                             Mise en vente le {formatDate(listing.createdAt)}
                           </p>
@@ -637,12 +670,12 @@ export function MarketBrowser({
                       <li key={order.id} className="flex flex-wrap items-center gap-3 px-4 py-3">
                         <Link
                           href={`/card/${card.id}`}
-                          className="min-w-0 flex-1 truncate text-sm text-white/80 hover:text-acid"
+                          className="min-w-0 flex-1 truncate text-sm text-white/80 hover:text-cyan"
                         >
                           {card.name}
                           {order.holo ? " · holo" : ""}
                         </Link>
-                        <span className="font-mono text-xs text-acid">◆ {order.maxPrice}</span>
+                        <span className="font-mono text-xs text-cyan">◆ {order.maxPrice}</span>
                         <span className="font-mono text-[11px] text-white/35">
                           réservé ◆ {order.reserved}
                         </span>

@@ -26,18 +26,18 @@ export function RarityUpdateBanner({ update }: { update: RarityUpdate | null }) 
   return (
     <div
       role="status"
-      className="mb-6 flex flex-wrap items-center gap-x-3 gap-y-1 border-l-2 border-acid/70 bg-acid/10 px-3 py-2 text-acid"
+      className="mb-6 flex flex-wrap items-center gap-x-3 gap-y-1 border-l-2 border-cyan/70 bg-cyan/10 px-3 py-2 text-cyan"
     >
       <p className="text-sm">
         <span className="font-semibold">Les raretés ont été mises à jour</span> d&apos;après la
         popularité des personnages, le {date}.
         {update.changed > 0 && (
-          <span className="text-acid/70"> {update.changed} cartes changent de palier.</span>
+          <span className="text-cyan/70"> {update.changed} cartes changent de palier.</span>
         )}
       </p>
       <Link
         href={update.href}
-        className="text-[11px] font-semibold uppercase tracking-[0.16em] text-acid/80 underline-offset-4 transition hover:text-acid hover:underline"
+        className="text-[11px] font-semibold uppercase tracking-[0.16em] text-cyan/80 underline-offset-4 transition hover:text-cyan hover:underline"
       >
         Comment c&apos;est calculé
       </Link>
@@ -46,7 +46,7 @@ export function RarityUpdateBanner({ update }: { update: RarityUpdate | null }) 
         onClick={() => setDismissed(true)}
         aria-label="Masquer l'annonce des raretés"
         title="Masquer"
-        className="ml-auto grid h-6 w-6 shrink-0 place-items-center rounded-full text-acid/60 transition hover:bg-acid/15 hover:text-acid"
+        className="ml-auto grid h-6 w-6 shrink-0 place-items-center rounded-full text-cyan/60 transition hover:bg-cyan/15 hover:text-cyan"
       >
         <svg
           aria-hidden

@@ -130,7 +130,7 @@ export default function ChatRulesPage() {
       <p className="text-xs text-white/35">
         En utilisant le chat, tu acceptes ces règles. Un manquement peut entraîner une réduction au
         silence temporaire ou définitive.{" "}
-        <Link href="/marche" className="text-acid underline-offset-2 hover:underline">
+        <Link href="/marche" className="text-cyan underline-offset-2 hover:underline">
           Retour au marché
         </Link>
         .

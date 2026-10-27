@@ -205,7 +205,7 @@ export function SellCardButton({
                     <button
                       type="button"
                       onClick={() => choose(false)}
-                      className={`tab flex-1 px-2 py-1.5 ${!isHolo ? "bg-acid text-ink" : ""}`}
+                      className={`tab flex-1 px-2 py-1.5 ${!isHolo ? "bg-cyan text-ink" : ""}`}
                     >
                       Normale
                     </button>
@@ -253,7 +253,7 @@ export function SellCardButton({
                   </div>
                   <div className="flex items-center justify-between py-1.5">
                     <dt className="text-white/60">Gain net</dt>
-                    <dd className="font-mono font-semibold text-acid">{payout} ◆</dd>
+                    <dd className="font-mono font-semibold text-cyan">{payout} ◆</dd>
                   </div>
                 </dl>
 

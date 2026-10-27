@@ -22,7 +22,7 @@ export default function SignupPage() {
 
           <p className="mt-5 text-center text-sm text-white/50">
             Déjà un compte ?{" "}
-            <Link href="/login" className="font-medium text-acid underline-offset-4 hover:underline">
+            <Link href="/login" className="font-medium text-cyan underline-offset-4 hover:underline">
               Se connecter
             </Link>
           </p>

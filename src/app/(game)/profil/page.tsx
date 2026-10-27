@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { MotionToggle } from "@/components/motion-toggle";
 import { ProfileEditor, type AvatarChoice } from "@/components/profile-editor";
 import { requireSession } from "@/lib/auth";
 import { CARDS, getCardNumber, getUniverseLabel, type Card } from "@/lib/cards";
@@ -61,8 +62,8 @@ export default async function ProfilePage({
       </p>
 
       {evaluation.newlyUnlocked.length > 0 && (
-        <div className="mt-4 border-l-2 border-acid bg-acid/[0.08] px-4 py-3 text-sm">
-          <span className="font-semibold text-acid">
+        <div className="mt-4 border-l-2 border-cyan bg-cyan/[0.08] px-4 py-3 text-sm">
+          <span className="font-semibold text-cyan">
             {evaluation.newlyUnlocked.length > 1
               ? "Nouveaux cadres débloqués"
               : "Nouveau cadre débloqué"}
@@ -72,14 +73,14 @@ export default async function ProfilePage({
             {evaluation.newlyUnlocked.map((frame) => frame.name).join(", ")}
           </span>
           {" "}
-          <Link href="#cadres" className="text-[12px] text-acid hover:underline">
+          <Link href="#cadres" className="text-[12px] text-cyan hover:underline">
             Choisir →
           </Link>
         </div>
       )}
 
       <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <ScoreTile label="Score de collection" value={score.quality} accent="text-acid" />
+        <ScoreTile label="Score de collection" value={score.quality} accent="text-cyan" />
         <ScoreTile label="Puissance" value={score.power} />
         <ScoreTile label="Aura" value={score.aura} />
         <ScoreTile label="Cartes uniques" value={score.unique} />
@@ -88,6 +89,42 @@ export default async function ProfilePage({
         Le score additionne la qualité (60 % puissance, 40 % aura) de chaque carte possédée, une
         seule fois par personnage.
       </p>
+
+      {/* Envies et parrainage ne sont plus dans l'en-tête : ils vivent ici. */}
+      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+        <Link
+          href="/envies"
+          className="panel flex items-center justify-between gap-3 p-3.5 transition hover:border-cyan/50"
+        >
+          <span>
+            <span className="block text-[10px] uppercase tracking-[0.16em] text-white/35">
+              Envies
+            </span>
+            <span className="mt-1 block text-sm text-white/80">
+              Les cartes qui te manquent, et les annonces à ton prix
+            </span>
+          </span>
+          <span aria-hidden className="text-cyan">
+            →
+          </span>
+        </Link>
+        <Link
+          href="/parrainage"
+          className="panel flex items-center justify-between gap-3 p-3.5 transition hover:border-cyan/50"
+        >
+          <span>
+            <span className="block text-[10px] uppercase tracking-[0.16em] text-white/35">
+              Parrainage
+            </span>
+            <span className="mt-1 block text-sm text-white/80">
+              Ton code, tes filleuls et les boosters gagnés
+            </span>
+          </span>
+          <span aria-hidden className="text-cyan">
+            →
+          </span>
+        </Link>
+      </div>
 
       <ProfileEditor
         username={profile.username}
@@ -100,6 +137,8 @@ export default async function ProfilePage({
         next={overview.next}
         initialFrame={initialFrame}
       />
+
+      <MotionToggle />
     </div>
   );
 }

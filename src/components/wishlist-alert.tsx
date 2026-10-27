@@ -74,7 +74,7 @@ export function WishlistAlert({
         ) : (
           <>
             Alerté sous{" "}
-            <span className="font-mono text-acid">◆ {saved}</span>{" "}
+            <span className="font-mono text-cyan">◆ {saved}</span>{" "}
             <button
               type="button"
               onClick={() => void save(null)}

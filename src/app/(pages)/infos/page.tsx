@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CATALOG_SIZE } from "@/lib/cards";
+import { catalogSize } from "@/lib/cards";
 
 export const metadata = { title: "Infos — TCVG" };
 
@@ -11,7 +11,7 @@ export default function InfoPage() {
       <span className="title-rule" aria-hidden />
       <p className="mt-3 text-sm leading-relaxed text-white/55">
         TCVG est un jeu de collection de cartes consacré aux personnages de jeux vidéo :{" "}
-        {CATALOG_SIZE} héros, méchants et créatures réunis dans un seul album, à obtenir uniquement
+        {catalogSize()} héros, méchants et créatures réunis dans un seul album, à obtenir uniquement
         en ouvrant des boosters gratuits.
       </p>
 
@@ -35,7 +35,7 @@ export default function InfoPage() {
         demande uniquement le scope « identify » (pseudo et identifiant), jamais l&apos;email, les
         serveurs, les messages ou les amis. Aucune donnée n&apos;est revendue ni transmise à des
         tiers, et il n&apos;y a pas de traceur publicitaire. Le détail figure sur la page{" "}
-        <Link href="/confidentialite" className="text-acid underline-offset-4 hover:underline">
+        <Link href="/confidentialite" className="text-cyan underline-offset-4 hover:underline">
           Confidentialité
         </Link>
         .
@@ -49,7 +49,7 @@ export default function InfoPage() {
       </Section>
 
       <Section title="Une erreur, une idée ?">
-        <Link href="/avis-et-bugs" className="text-acid underline-offset-4 hover:underline">
+        <Link href="/avis-et-bugs" className="text-cyan underline-offset-4 hover:underline">
           La page Avis et bugs
         </Link>{" "}
         sert exactement à ça. Décris ce qui s&apos;est passé et, si c&apos;est un bug, la page

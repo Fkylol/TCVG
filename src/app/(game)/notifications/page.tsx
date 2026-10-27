@@ -8,16 +8,16 @@ export const metadata = { title: "Notifications — TCVG" };
 
 const TONE: Record<Notification["kind"], string> = {
   listing_sold: "bg-emerald-400/15 text-emerald-300",
-  order_filled: "bg-acid/15 text-acid",
+  order_filled: "bg-cyan/15 text-cyan",
   listing_expired: "bg-white/10 text-white/55",
   wishlist_listing: "bg-white/10 text-white/70",
-  swap_offer: "bg-acid/15 text-acid",
+  swap_offer: "bg-cyan/15 text-cyan",
   swap_accepted: "bg-emerald-400/15 text-emerald-300",
   swap_declined: "bg-white/10 text-white/55",
   swap_expired: "bg-white/10 text-white/55",
   listing_cancelled: "bg-amber-400/15 text-amber-300",
   order_cancelled: "bg-amber-400/15 text-amber-300",
-  referral_milestone: "bg-acid/15 text-acid",
+  referral_milestone: "bg-cyan/15 text-cyan",
   referral_pending: "bg-amber-400/15 text-amber-200",
   referral_paid: "bg-emerald-400/15 text-emerald-300",
   referral_refused: "bg-rose-400/15 text-rose-200",
@@ -42,6 +42,15 @@ const LABEL: Record<Notification["kind"], string> = {
   frame_unlocked: "Cadre",
 };
 
+/** La monnaie du jeu s'appelle Pixels : un montant se lit toujours avec son nom. */
+function pixels(amount: number): string {
+  return `◆ ${amount.toLocaleString("fr-FR")} Pixel${Math.abs(amount) > 1 ? "s" : ""}`;
+}
+
+function credits(amount: number): string {
+  return `${pixels(amount)} crédité${Math.abs(amount) > 1 ? "s" : ""}`;
+}
+
 function sentence(notification: Notification): string {
   // Les événements de parrainage portent leur propre texte, écrit côté serveur.
   if (notification.message) return notification.message;
@@ -52,13 +61,13 @@ function sentence(notification: Notification): string {
 
   switch (notification.kind) {
     case "listing_sold":
-      return `${name} a trouvé preneur : ◆ ${notification.amount ?? 0} nets crédités.`;
+      return `${name} a trouvé preneur : ${credits(notification.amount ?? 0)}.`;
     case "order_filled":
-      return `Ton ordre d'achat sur ${name} a été servi pour ◆ ${notification.amount ?? 0}.`;
+      return `Ton ordre d'achat sur ${name} a été servi pour ${credits(notification.amount ?? 0)}.`;
     case "listing_expired":
       return `L'annonce de ${name} a expiré : la copie est revenue dans ta collection.`;
     case "wishlist_listing":
-      return `${name}, que tu suis dans tes envies, est en vente pour ◆ ${notification.amount ?? 0}.`;
+      return `${name}, que tu suis dans tes envies, est en vente pour ${pixels(notification.amount ?? 0)}.`;
     case "swap_offer":
       return `Nouvelle proposition d'échange autour de ${name}. Les cartes proposées sont réservées le temps de la réponse.`;
     case "swap_accepted":
@@ -70,7 +79,7 @@ function sentence(notification: Notification): string {
     case "listing_cancelled":
       return `Ton annonce de ${name} a été annulée : sa rareté a changé, le prix ne tenait plus dans la nouvelle fourchette. La carte est revenue dans ta collection.`;
     case "order_cancelled":
-      return `Ton ordre d'achat sur ${name} a été annulé : sa rareté a changé, ton prix ne tenait plus dans la nouvelle fourchette. ◆ ${notification.amount ?? 0} de réservation restitués.`;
+      return `Ton ordre d'achat sur ${name} a été annulé : sa rareté a changé, ton prix ne tenait plus dans la nouvelle fourchette. ${pixels(notification.amount ?? 0)} de réservation restitués.`;
     case "referral_milestone":
       return "Ton parrainage a atteint son seuil d'ouvertures.";
     case "referral_pending":
@@ -114,7 +123,7 @@ export default async function NotificationsPage() {
         <div className="flex flex-wrap items-center gap-2">
           <span className="chip py-2 text-white/60">
             <span className="font-sans text-white/40">Non lues</span>{" "}
-            <span className={unread > 0 ? "font-semibold text-acid" : "text-white/80"}>{unread}</span>
+            <span className={unread > 0 ? "font-semibold text-cyan" : "text-white/80"}>{unread}</span>
           </span>
           {unread > 0 && (
             <form action={markAllNotificationsRead}>
@@ -147,7 +156,7 @@ export default async function NotificationsPage() {
                 <span
                   aria-hidden
                   className={`h-1.5 w-1.5 shrink-0 rounded-full ${
-                    isUnread ? "bg-acid" : "bg-transparent"
+                    isUnread ? "bg-cyan" : "bg-transparent"
                   }`}
                 />
                 <span
@@ -163,7 +172,7 @@ export default async function NotificationsPage() {
                       {" "}
                       <Link
                         href={`/card/${card.id}`}
-                        className="text-[11px] text-white/35 transition hover:text-acid"
+                        className="text-[11px] text-white/35 transition hover:text-cyan"
                       >
                         Voir la fiche →
                       </Link>
@@ -172,7 +181,7 @@ export default async function NotificationsPage() {
                           {" "}
                           <Link
                             href="/agora/offres"
-                            className="text-[11px] text-acid/80 transition hover:text-acid"
+                            className="text-[11px] text-cyan/80 transition hover:text-cyan"
                           >
                             Voir mes échanges →
                           </Link>
@@ -185,7 +194,7 @@ export default async function NotificationsPage() {
                       {" "}
                       <Link
                         href={`/profil?cadre=${encodeURIComponent(notification.frameId)}#cadres`}
-                        className="text-[11px] font-semibold text-acid transition hover:underline"
+                        className="text-[11px] font-semibold text-cyan transition hover:underline"
                       >
                         Équiper →
                       </Link>

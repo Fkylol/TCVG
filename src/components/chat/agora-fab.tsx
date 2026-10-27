@@ -45,11 +45,11 @@ export function AgoraFab() {
     <Link
       href="/agora"
       aria-label={`${APP_CHAT_NAME}${unread > 0 ? `, ${unread} nouveau${unread > 1 ? "x" : ""} message${unread > 1 ? "s" : ""}` : ""}`}
-      className="fixed bottom-4 right-4 z-40 flex items-center gap-2 rounded-full bg-acid px-4 py-2.5 text-[12px] font-semibold text-ink shadow-[0_8px_30px_rgba(0,0,0,0.45)] sm:hidden"
+      className="fixed bottom-4 right-4 z-40 flex items-center gap-2 rounded-full bg-cyan px-4 py-2.5 text-[12px] font-semibold text-ink shadow-[0_8px_30px_rgba(0,0,0,0.45)] sm:hidden"
     >
       {APP_CHAT_NAME}
       {unread > 0 && (
-        <span className="grid h-4 min-w-4 place-items-center rounded-full bg-ink px-1 font-mono text-[9px] text-acid">
+        <span className="grid h-4 min-w-4 place-items-center rounded-full bg-ink px-1 font-mono text-[9px] text-cyan">
           {unread > 9 ? "9+" : unread}
         </span>
       )}

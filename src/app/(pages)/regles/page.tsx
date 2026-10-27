@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CARDS } from "@/lib/cards";
+import { catalogCards } from "@/lib/cards";
 import {
   BOOSTER_COOLDOWN_MS,
   BOOSTER_STOCK_MAX,
@@ -14,6 +14,9 @@ export const metadata = { title: "Règles — TCVG" };
 
 export default function RulesPage() {
   const cooldownMinutes = Math.round(BOOSTER_COOLDOWN_MS / 60000);
+  // Catalogue tel qu'il est jouable : les cartes supprimées en ligne sortent
+  // des totaux, sans attendre un déploiement.
+  const cards = catalogCards();
 
   return (
     <article>
@@ -26,7 +29,7 @@ export default function RulesPage() {
       </p>
 
       <Section title="Le but">
-        Réunir les {CARDS.length} personnages du catalogue dans une seule collection, du Commun au
+        Réunir les {cards.length} personnages du catalogue dans une seule collection, du Commun au
         Mythique. Chaque carte est unique dans l&apos;album : la première fois qu&apos;elle tombe,
         elle rejoint ta collection pour de bon.
       </Section>
@@ -53,7 +56,7 @@ export default function RulesPage() {
         <ul className="mt-4 grid gap-2 sm:grid-cols-2">
           {RARITY_ORDER.map((key) => {
             const info = RARITY[key];
-            const count = CARDS.filter((card) => card.rarity === key).length;
+            const count = cards.filter((card) => card.rarity === key).length;
             return (
               <li
                 key={key}
@@ -85,11 +88,11 @@ export default function RulesPage() {
         </p>
         <ul className="mt-3 list-inside list-disc space-y-1.5">
           <li>
-            <strong className="text-acid">Puissance</strong> — son poids au combat. C&apos;est la base
+            <strong className="text-cyan">Puissance</strong> — son poids au combat. C&apos;est la base
             du score de collection et du futur mode duel.
           </li>
           <li>
-            <strong className="text-acid">Aura</strong> — son prestige de collection. Elle pèse dans
+            <strong className="text-cyan">Aura</strong> — son prestige de collection. Elle pèse dans
             le score global et dans le déblocage des cadres de profil.
           </li>
         </ul>
@@ -160,7 +163,7 @@ export default function RulesPage() {
 
       <p className="mt-8 text-xs text-white/35">
         Une règle te paraît floue ou injuste ?{" "}
-        <Link href="/avis-et-bugs" className="text-acid underline-offset-4 hover:underline">
+        <Link href="/avis-et-bugs" className="text-cyan underline-offset-4 hover:underline">
           Signale-le
         </Link>
         .

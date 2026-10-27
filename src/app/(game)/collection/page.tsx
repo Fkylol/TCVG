@@ -1,8 +1,8 @@
 import { CollectionBrowser } from "@/components/collection-browser";
 import { requireSession } from "@/lib/auth";
 import { getCardOwners, getCollection, getRecycleValues } from "@/lib/data";
-import { CARDS, RARITY, RARITY_ORDER, collectionCompletion } from "@/lib/game";
-import { getCard } from "@/lib/cards";
+import { RARITY, RARITY_ORDER, collectionCompletion } from "@/lib/game";
+import { catalogCards, getCard } from "@/lib/cards";
 
 export const metadata = { title: "Collection — TCVG" };
 
@@ -15,11 +15,20 @@ export default async function CollectionPage() {
   ]);
 
   const copies = collection.reduce((sum, row) => sum + row.quantity, 0);
-  const completion = collectionCompletion(collection.length);
+  // Le catalogue tel qu'il est jouable : une carte supprimée depuis l'atelier
+  // en ligne sort des totaux immédiatement, sans déploiement.
+  const cards = catalogCards();
+  // Les cartes retirées (ou disparues) gardent leurs exemplaires mais ne
+  // comptent plus dans l'avancement de l'album.
+  const owned = collection.filter((row) => {
+    const card = getCard(row.cardId);
+    return card !== undefined && card.retired !== true;
+  });
+  const completion = collectionCompletion(owned.length);
   const byRarity = RARITY_ORDER.map((key) => ({
     key,
-    owned: collection.filter((row) => getCard(row.cardId)?.rarity === key).length,
-    total: CARDS.filter((card) => card.rarity === key).length,
+    owned: owned.filter((row) => getCard(row.cardId)?.rarity === key).length,
+    total: cards.filter((card) => card.rarity === key).length,
   }));
 
   return (
@@ -30,9 +39,9 @@ export default async function CollectionPage() {
           <h1 className="display mt-2 text-4xl">Collection</h1>
           <span className="title-rule" aria-hidden />
           <p className="mt-1 text-sm text-white/50">
-            {collection.length} personnage{collection.length > 1 ? "s" : ""} sur {CARDS.length} ·{" "}
-            {copies} carte{copies > 1 ? "s" : ""} · {copies - collection.length} doublon
-            {copies - collection.length > 1 ? "s" : ""}
+            {owned.length} personnage{owned.length > 1 ? "s" : ""} sur {cards.length} ·{" "}
+            {copies} carte{copies > 1 ? "s" : ""} · {copies - owned.length} doublon
+            {copies - owned.length > 1 ? "s" : ""}
           </p>
         </div>
 
@@ -42,7 +51,7 @@ export default async function CollectionPage() {
             <span className="font-mono">{completion} %</span>
           </div>
           <div className="mt-1.5 h-2 overflow-hidden bg-white/10">
-            <div className="h-full bg-acid transition-all" style={{ width: `${completion}%` }} />
+            <div className="h-full bg-cyan transition-all" style={{ width: `${completion}%` }} />
           </div>
         </div>
       </div>

@@ -11,7 +11,7 @@ import { RecycleButton } from "@/components/recycle-button";
 import { UniverseCards } from "@/components/universe-cards";
 import { requireSession } from "@/lib/auth";
 import { getCardLore } from "@/lib/card-lore";
-import { getCard, getCardNumber, getUniverseLabel } from "@/lib/cards";
+import { catalogCards, catalogSize, getCard, getCardNumber, getUniverseLabel } from "@/lib/cards";
 import {
   getCardBoosterChances,
   getCardGenres,
@@ -27,7 +27,7 @@ import {
   isCardActive,
   isCardWishlisted,
 } from "@/lib/data";
-import { CARDS, RARITY } from "@/lib/game";
+import { RARITY } from "@/lib/game";
 import { getCardArt } from "@/lib/card-art";
 import { attributionLabel, getPortrait, sourceLabel } from "@/lib/portraits";
 import { cardStats } from "@/lib/stats";
@@ -76,7 +76,9 @@ export default async function CardPage({
   const active = await isCardActive(supabase, card.id);
   if (active === false) notFound();
 
-  const sameUniverse = CARDS.filter((c) => c.universe === card.universe && c.id !== card.id);
+  const sameUniverse = catalogCards().filter(
+    (c) => c.universe === card.universe && c.id !== card.id,
+  );
 
   const [
     { data },
@@ -157,7 +159,7 @@ export default async function CardPage({
       {retour === "persos" && pack && (
         <Link
           href={`/boosters?pack=${encodeURIComponent(pack)}&persos=1`}
-          className="mb-4 inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.14em] text-white/40 transition hover:text-acid"
+          className="mb-4 inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.14em] text-white/40 transition hover:text-cyan"
         >
           <span aria-hidden>←</span> Retour aux persos du pack
         </Link>
@@ -170,13 +172,13 @@ export default async function CardPage({
         <Link href="/collection" className="transition hover:text-white/70">
           Wiki
         </Link>
-        <span aria-hidden className="text-acid/60">
+        <span aria-hidden className="text-cyan/60">
           /
         </span>
         <Link href="/collection" className="transition hover:text-white/70">
           {universe}
         </Link>
-        <span aria-hidden className="text-acid/60">
+        <span aria-hidden className="text-cyan/60">
           /
         </span>
         <span className="text-white/60">{card.name}</span>
@@ -185,7 +187,7 @@ export default async function CardPage({
       <header className="relative mt-5">
         <span
           aria-hidden
-          className="display pointer-events-none absolute -top-7 right-0 select-none whitespace-nowrap text-[clamp(3.5rem,14vw,8.5rem)] leading-none text-white/[0.035]"
+          className="display display-ghost pointer-events-none absolute -top-7 right-0 select-none whitespace-nowrap text-[clamp(3.5rem,14vw,8.5rem)] leading-none text-white/[0.035]"
         >
           {universe}
         </span>
@@ -197,7 +199,7 @@ export default async function CardPage({
           </span>
           <span
             className={`chip px-2.5 py-1 text-[11px] ${
-              owned ? "text-acid shadow-[inset_0_0_0_1px_var(--acid-line)]" : "text-white/45"
+              owned ? "text-cyan shadow-[inset_0_0_0_1px_var(--cyan-line)]" : "text-white/45"
             }`}
           >
             {owned ? `Possédée ×${quantity}` : "Non possédée"}
@@ -207,7 +209,7 @@ export default async function CardPage({
         <div className="relative mt-3 flex flex-wrap items-end gap-x-4 gap-y-1">
           <h1 className="display text-[clamp(2.6rem,9vw,5.2rem)] text-white">{card.name}</h1>
           <span className="mb-2 font-mono text-sm text-white/40">
-            #{number} <span className="text-white/20">/</span> {CARDS.length}
+            #{number} <span className="text-white/20">/</span> {catalogSize()}
           </span>
         </div>
 
@@ -301,20 +303,20 @@ export default async function CardPage({
                 </div>
 
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                  <StatBar label="POW" value={stats.power} tone="acid" />
+                  <StatBar label="POW" value={stats.power} tone="cyan" />
                   <StatBar label="AURA" value={stats.aura} tone="white" />
                 </div>
               </section>
 
               {lore?.power && (
                 <section className="panel panel-accent mt-4 p-5">
-                  <p className="text-[10px] uppercase tracking-[0.2em] text-acid/80">Pouvoir</p>
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-cyan/80">Pouvoir</p>
                   <p className="mt-1.5 text-base font-medium text-white/90">{lore.power}</p>
                 </section>
               )}
 
               {lore?.quote && (
-                <blockquote className="mt-6 border-l-2 border-acid/50 pl-5">
+                <blockquote className="mt-6 border-l-2 border-cyan/50 pl-5">
                   <p className="text-lg italic leading-relaxed text-white/75">« {lore.quote} »</p>
                 </blockquote>
               )}
@@ -368,7 +370,7 @@ export default async function CardPage({
                 <dl className="mt-3 grid gap-x-8 gap-y-1 text-sm sm:grid-cols-2">
                   <InfoRow label="Univers">{universe}</InfoRow>
                   <InfoRow label="Numéro">
-                    #{number} / {CARDS.length}
+                    #{number} / {catalogSize()}
                   </InfoRow>
                   <InfoRow label="Rareté">{rarity.label}</InfoRow>
                   <InfoRow label="Genres">
@@ -450,7 +452,7 @@ export default async function CardPage({
               <section className="panel panel-accent p-5 sm:p-6">
                 <div className="flex items-start gap-4">
                   <span
-                    className="grid h-11 w-11 shrink-0 place-items-center bg-acid/10 text-acid"
+                    className="grid h-11 w-11 shrink-0 place-items-center bg-cyan/10 text-cyan"
                     style={{ clipPath: "var(--bevel-sm)" }}
                   >
                     <svg
@@ -481,7 +483,7 @@ export default async function CardPage({
 
                     <p className="mt-3 text-[11px] leading-relaxed text-white/40">
                       Chance par booster{" "}
-                      <span className="font-mono text-acid">
+                      <span className="font-mono text-cyan">
                         {bestChance ? formatChance(bestChance.chance) : "—"}
                       </span>
                       {bestChance && (
@@ -577,7 +579,7 @@ export default async function CardPage({
               </span>
               <span className="text-xs text-white/50">{rarity.label}</span>
               <span
-                className={`ml-auto text-[11px] ${owned ? "text-acid" : "text-white/40"}`}
+                className={`ml-auto text-[11px] ${owned ? "text-cyan" : "text-white/40"}`}
               >
                 {owned ? `Possédée ×${quantity}` : "Non possédée"}
               </span>
@@ -649,10 +651,10 @@ export default async function CardPage({
               )}
               <InfoRow label="Univers">{universe}</InfoRow>
               <InfoRow label="Numéro">
-                #{number} / {CARDS.length}
+                #{number} / {catalogSize()}
               </InfoRow>
               <InfoRow label="POW">
-                <span className="text-acid">{stats.power}</span>
+                <span className="text-cyan">{stats.power}</span>
               </InfoRow>
               <InfoRow label="AURA">{stats.aura}</InfoRow>
               <InfoRow label="Rareté">{rarity.label}</InfoRow>
@@ -674,7 +676,7 @@ export default async function CardPage({
                     title={`${chance.cards} cartes par paquet`}
                   >
                     <span className="truncate text-white/55">{chance.name}</span>
-                    <span className="shrink-0 font-mono text-acid">
+                    <span className="shrink-0 font-mono text-cyan">
                       {formatChance(chance.chance)}
                     </span>
                   </li>
@@ -683,7 +685,7 @@ export default async function CardPage({
             )}
             <Link
               href="/boosters"
-              className="mt-3 inline-flex text-[11px] text-white/40 transition hover:text-acid"
+              className="mt-3 inline-flex text-[11px] text-white/40 transition hover:text-cyan"
             >
               Voir la boutique →
             </Link>
@@ -777,7 +779,7 @@ function StatBar({
 }: {
   label: string;
   value: number;
-  tone: "acid" | "white";
+  tone: "cyan" | "white";
 }) {
   return (
     <div className="bg-white/[0.03] p-3">
@@ -786,14 +788,14 @@ function StatBar({
           {label}
         </span>
         <span
-          className={`font-mono text-2xl font-semibold ${tone === "acid" ? "text-acid" : "text-white/85"}`}
+          className={`font-mono text-2xl font-semibold ${tone === "cyan" ? "text-cyan" : "text-white/85"}`}
         >
           {value}
         </span>
       </div>
       <div className="mt-2 h-1.5 overflow-hidden bg-white/10">
         <div
-          className={`h-full ${tone === "acid" ? "bg-acid" : "bg-white/60"}`}
+          className={`h-full ${tone === "cyan" ? "bg-cyan" : "bg-white/60"}`}
           style={{ width: `${value}%` }}
         />
       </div>
@@ -825,7 +827,7 @@ function SectionHeading({
 }) {
   return (
     <div>
-      <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-acid/70">
+      <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-cyan/70">
         {String(index).padStart(2, "0")} — {label}
       </p>
       <h2 className="display mt-1 text-[clamp(1.7rem,4vw,2.4rem)] text-white">

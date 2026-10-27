@@ -55,8 +55,8 @@ export function ChatComposer({
   if (!canWrite.ok) {
     return (
       <div className="border-t border-white/10 p-3">
-        <div className="rounded-sm border border-acid/25 bg-acid/[0.06] p-2.5">
-          <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-acid/80">
+        <div className="rounded-sm border border-cyan/25 bg-cyan/[0.06] p-2.5">
+          <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-cyan/80">
             Lecture seule pour l&apos;instant
           </p>
           {canWrite.muted ? (
@@ -118,7 +118,7 @@ export function ChatComposer({
             <button
               type="button"
               onClick={() => setAnnouncing("have")}
-              className="chip text-white/50 hover:text-acid"
+              className="chip text-white/50 hover:text-cyan"
             >
               + Annoncer une carte
             </button>
@@ -291,7 +291,7 @@ function AnnounceDialog({
                   aria-pressed={active}
                   className={`flex w-full items-center justify-between gap-2 rounded-sm border px-2 py-1.5 text-left text-[12px] transition ${
                     active
-                      ? "border-acid/60 bg-acid/10 text-white"
+                      ? "border-cyan/60 bg-cyan/10 text-white"
                       : "border-white/10 text-white/70 hover:border-white/25"
                   }`}
                 >

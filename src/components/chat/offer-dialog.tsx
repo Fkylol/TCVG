@@ -7,6 +7,7 @@ import { getCardArt } from "@/lib/card-art";
 import { getCard, getUniverseLabel } from "@/lib/cards";
 import { MAX_OFFER_MESSAGE } from "@/lib/chat/offers";
 import { rarityColorVar } from "@/lib/rarity";
+import { framingStyle } from "@/lib/framing";
 
 /**
  * Proposition d'échange : on choisit une de ses copies, on ajoute un mot, et
@@ -196,7 +197,7 @@ export function OfferDialog({
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Chercher dans tes cartes…"
-            className="w-full rounded-sm border border-white/10 bg-white/[0.03] px-3 py-2 text-sm outline-none focus-visible:border-acid/60"
+            className="w-full rounded-sm border border-white/10 bg-white/[0.03] px-3 py-2 text-sm outline-none focus-visible:border-cyan/60"
           />
         </label>
 
@@ -229,7 +230,7 @@ export function OfferDialog({
                     }}
                     className={`w-full rounded-sm border p-1 text-left transition ${
                       isSelected
-                        ? "border-acid/70 bg-acid/[0.08]"
+                        ? "border-cyan/70 bg-cyan/[0.08]"
                         : "border-white/10 bg-white/[0.02] hover:border-white/25"
                     }`}
                     style={{ borderColor: isSelected ? undefined : `var(${rarityColorVar(card.rarity)})` }}
@@ -243,7 +244,7 @@ export function OfferDialog({
                           height={128}
                           unoptimized={!art.local}
                           loading="lazy"
-                          style={art.framing}
+                          style={framingStyle(art.framing)}
                           className="h-full w-full object-cover"
                         />
                       ) : (
@@ -257,7 +258,7 @@ export function OfferDialog({
                         </span>
                       )}
                       {row.holoQuantity > 0 && (
-                        <span className="absolute left-1 top-1 rounded-sm bg-acid px-1 font-mono text-[8px] font-bold uppercase text-ink">
+                        <span className="absolute left-1 top-1 rounded-sm bg-cyan px-1 font-mono text-[8px] font-bold uppercase text-ink">
                           Holo
                         </span>
                       )}
@@ -276,7 +277,7 @@ export function OfferDialog({
               type="checkbox"
               checked={holo}
               onChange={(event) => setHolo(event.target.checked)}
-              className="accent-acid"
+              className="accent-cyan"
             />
             Proposer la copie holo (compte pour une copie brillante)
           </label>
@@ -292,7 +293,7 @@ export function OfferDialog({
             maxLength={MAX_OFFER_MESSAGE}
             rows={2}
             placeholder="« Ça te va ? »"
-            className="mt-1 w-full resize-none rounded-sm border border-white/10 bg-white/[0.03] px-3 py-2 text-sm outline-none focus-visible:border-acid/60"
+            className="mt-1 w-full resize-none rounded-sm border border-white/10 bg-white/[0.03] px-3 py-2 text-sm outline-none focus-visible:border-cyan/60"
           />
           <span className="mt-0.5 block text-right font-mono text-[10px] text-white/30">
             {remaining} / {MAX_OFFER_MESSAGE}

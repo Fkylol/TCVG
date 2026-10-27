@@ -27,6 +27,7 @@ import type { ChatMessage, ChatUserHistory } from "@/lib/chat/types";
 import { chatErrorText } from "@/lib/chat/text";
 import { rarityColorVar } from "@/lib/rarity";
 import { RARITY } from "@/lib/game";
+import { framingStyle } from "@/lib/framing";
 
 /**
  * Une ligne du fil : message système discret, texte, ou annonce avec sa carte.
@@ -99,7 +100,7 @@ export function ChatMessageRow({
             {isAnnouncement && (
               <span
                 className={`font-mono text-[10px] uppercase tracking-[0.12em] ${
-                  message.kind === "have" ? "text-acid/80" : "text-white/65"
+                  message.kind === "have" ? "text-cyan/80" : "text-white/65"
                 }`}
               >
                 {message.kind === "have" ? "J'échange" : "Je cherche"}
@@ -133,7 +134,7 @@ export function ChatMessageRow({
                     height={64}
                     unoptimized={!art.local}
                     loading="lazy"
-                    style={art.framing}
+                    style={framingStyle(art.framing)}
                     className="h-full w-full object-cover"
                   />
                 ) : (
@@ -149,7 +150,7 @@ export function ChatMessageRow({
                   {getUniverseLabel(card.universe)} · {RARITY[card.rarity].label}
                 </p>
                 <p
-                  className={`mt-0.5 text-[11px] ${message.owned > 0 ? "text-white/40" : "text-acid"}`}
+                  className={`mt-0.5 text-[11px] ${message.owned > 0 ? "text-white/40" : "text-cyan"}`}
                 >
                   {message.owned > 0 ? "Tu l'as déjà" : "Il te manque"}
                 </p>
@@ -188,7 +189,7 @@ export function ChatMessageRow({
             <p className="mt-1 text-[11px] text-white/40">Carte retirée du catalogue.</p>
           )}
 
-          {notice && <p className="mt-1 text-[11px] text-acid">{notice}</p>}
+          {notice && <p className="mt-1 text-[11px] text-cyan">{notice}</p>}
           {error && <p className="mt-1 text-[11px] text-rose-300">{error}</p>}
         </div>
 

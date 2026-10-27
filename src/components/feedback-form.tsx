@@ -96,7 +96,7 @@ function Choice({
         className="peer sr-only"
         required
       />
-      <span className="tab border border-white/15 px-4 py-1.5 text-sm text-white/60 peer-checked:border-acid/60 peer-checked:bg-acid/10 peer-checked:text-acid peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-acid">
+      <span className="tab border border-white/15 px-4 py-1.5 text-sm text-white/60 peer-checked:border-cyan/60 peer-checked:bg-cyan/10 peer-checked:text-cyan peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-cyan">
         {label}
       </span>
     </label>

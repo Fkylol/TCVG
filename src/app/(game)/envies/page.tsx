@@ -64,7 +64,7 @@ export default async function WishlistPage() {
               <div key={card.id} className="flex flex-col">
                 <Link
                   href={`/card/${card.id}`}
-                  className="group block rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-acid/70"
+                  className="group block rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan/70"
                 >
                   <CardFace
                     card={card}

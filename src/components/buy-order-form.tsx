@@ -160,7 +160,7 @@ export function BuyOrderForm({
                       setIsHolo(false);
                       setPrice(String(normal.reference));
                     }}
-                    className={`tab flex-1 px-2 py-1.5 ${!isHolo ? "bg-acid text-ink" : ""}`}
+                    className={`tab flex-1 px-2 py-1.5 ${!isHolo ? "bg-cyan text-ink" : ""}`}
                   >
                     Normale
                   </button>
@@ -229,7 +229,7 @@ export function BuyOrderForm({
           role="status"
           className={`border-l-2 px-3 py-2 text-[11px] leading-relaxed ${
             note.tone === "ok"
-              ? "border-acid/60 bg-acid/[0.06] text-white/70"
+              ? "border-cyan/60 bg-cyan/[0.06] text-white/70"
               : "border-white/25 bg-white/[0.04] text-white/60"
           }`}
         >

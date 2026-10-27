@@ -67,7 +67,7 @@ export function CardAnnounce({
         <div className="mt-3 space-y-2">
           <p
             role="status"
-            className="border-l-2 border-acid/60 bg-acid/[0.06] px-3 py-2 text-[11px] leading-relaxed text-white/70"
+            className="border-l-2 border-cyan/60 bg-cyan/[0.06] px-3 py-2 text-[11px] leading-relaxed text-white/70"
           >
             {published === "have"
               ? `${cardName} est proposée à l'échange.`

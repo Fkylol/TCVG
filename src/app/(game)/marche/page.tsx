@@ -3,6 +3,7 @@ import { MarketBrowser } from "@/components/market-browser";
 import { requireSession } from "@/lib/auth";
 import { getCard } from "@/lib/cards";
 import {
+  getCollection,
   getGenres,
   getMarketListings,
   getMarketOverview,
@@ -20,13 +21,24 @@ export default async function MarketPage({
   const { carte } = await searchParams;
   const { supabase, user } = await requireSession();
   const initialCard = carte && getCard(carte) ? carte : null;
-  const [profile, listings, genres, orders, overview] = await Promise.all([
+  const [profile, listings, genres, orders, overview, collection] = await Promise.all([
     getProfile(supabase, user),
     getMarketListings(supabase),
     getGenres(supabase),
     getMyBuyOrders(supabase),
     getMarketOverview(supabase),
+    getCollection(supabase, user.id),
   ]);
+
+  // Ce que le joueur possède déjà, pour le dire d'un coup d'œil sur chaque
+  // annonce : sans ça, il fallait ouvrir sa collection pour savoir si la carte
+  // manquait vraiment.
+  const owned = Object.fromEntries(
+    collection.map((row) => [
+      row.cardId,
+      { quantity: row.quantity, holoQuantity: row.holoQuantity },
+    ]),
+  );
 
   const active = listings.filter((listing) => listing.status === "active").length;
   const mine = listings.filter((listing) => listing.mine && listing.status === "active").length;
@@ -58,8 +70,8 @@ export default async function MarketPage({
             <span className="font-sans text-white/40">Tes ordres</span>{" "}
             <span className="text-white/80">{activeOrders}</span>
           </span>
-          <span className="chip py-2 text-acid">
-            <span className="font-sans text-acid/60">Solde</span>{" "}
+          <span className="chip py-2 text-cyan">
+            <span className="font-sans text-cyan/60">Solde</span>{" "}
             <span className="font-semibold">◆ {profile.pixels}</span>
           </span>
         </div>
@@ -105,6 +117,7 @@ export default async function MarketPage({
             userId={user.id}
             initialCard={initialCard}
             orders={orders}
+            owned={owned}
           />
         </div>
 

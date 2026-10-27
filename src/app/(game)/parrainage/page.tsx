@@ -17,7 +17,7 @@ export const metadata = { title: "Parrainage — TCVG" };
 
 const STATUS_TONE: Record<ReferralStatus, string> = {
   en_cours: "bg-white/10 text-white/60",
-  eligible: "bg-acid/15 text-acid",
+  eligible: "bg-cyan/15 text-cyan",
   en_attente: "bg-amber-400/15 text-amber-200",
   a_examiner: "bg-amber-400/15 text-amber-200",
   paye: "bg-emerald-400/15 text-emerald-300",
@@ -84,7 +84,7 @@ export default async function ReferralPage({
             { label: "En cours", value: `${overview.active} / ${overview.maxPending}` },
           ].map((item) => (
             <div key={item.label} className="border border-white/10 px-4 py-2">
-              <p className="font-mono text-lg font-semibold text-acid">{item.value}</p>
+              <p className="font-mono text-lg font-semibold text-cyan">{item.value}</p>
               <p className="text-[10px] uppercase tracking-[0.16em] text-white/40">{item.label}</p>
             </div>
           ))}
@@ -111,7 +111,7 @@ export default async function ReferralPage({
         </p>
       )}
       {mfa === "1" && (
-        <p className="mb-5 border-l-2 border-acid/60 bg-acid/10 px-3 py-2 text-sm text-acid">
+        <p className="mb-5 border-l-2 border-cyan/60 bg-cyan/10 px-3 py-2 text-sm text-cyan">
           Vérification Discord effectuée : ton état A2F vient d&apos;être relu.
         </p>
       )}
@@ -162,7 +162,7 @@ export default async function ReferralPage({
                       <div className="mt-2 flex items-center gap-3">
                         <div className="h-1.5 flex-1 overflow-hidden bg-white/10">
                           <div
-                            className="h-full bg-acid"
+                            className="h-full bg-cyan"
                             style={{ width: `${progress.percent}%` }}
                           />
                         </div>
@@ -223,12 +223,12 @@ export default async function ReferralPage({
             <section className="panel panel-accent p-5">
               <span className="eyebrow">Invitation reçue</span>
               <h2 className="display mt-1 text-lg">
-                Invité par <span className="text-acid">{invited.referrer}</span>
+                Invité par <span className="text-cyan">{invited.referrer}</span>
               </h2>
 
               <div className="mt-3 flex items-center gap-2">
                 <div className="h-1.5 flex-1 overflow-hidden bg-white/10">
-                  <div className="h-full bg-acid" style={{ width: `${invitedProgress.percent}%` }} />
+                  <div className="h-full bg-cyan" style={{ width: `${invitedProgress.percent}%` }} />
                 </div>
                 <span className="font-mono text-[11px] text-white/55">
                   {invitedProgress.openings} / {invitedProgress.required}
@@ -307,7 +307,7 @@ export default async function ReferralPage({
 
           <section className="panel p-5">
             <h2 className="display text-base">Boosters bonus</h2>
-            <p className="mt-2 font-mono text-3xl font-semibold text-acid">
+            <p className="mt-2 font-mono text-3xl font-semibold text-cyan">
               +{overview.bonusBoosters}
             </p>
             <p className="mt-1 text-xs leading-relaxed text-white/45">

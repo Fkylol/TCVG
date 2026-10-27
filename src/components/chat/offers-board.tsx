@@ -19,6 +19,7 @@ import {
 } from "@/lib/chat/offers";
 import { RARITY } from "@/lib/game";
 import { rarityColorVar } from "@/lib/rarity";
+import { framingStyle } from "@/lib/framing";
 
 /**
  * Tableau des échanges : les propositions reçues à gauche, celles envoyées à
@@ -97,7 +98,7 @@ export function OffersBoard({ initial }: { initial: ChatOfferBoard }) {
         </span>
       </p>
 
-      {notice && <p className="mt-3 border-l-2 border-acid/60 bg-acid/[0.07] px-3 py-2 text-sm text-acid">{notice}</p>}
+      {notice && <p className="mt-3 border-l-2 border-cyan/60 bg-cyan/[0.07] px-3 py-2 text-sm text-cyan">{notice}</p>}
       {error && (
         <p role="alert" className="mt-3 border-l-2 border-rose-400/60 bg-rose-500/10 px-3 py-2 text-sm text-rose-200">
           {error}
@@ -170,7 +171,7 @@ function Empty({ children }: { children: React.ReactNode }) {
 /** Statut coloré : vert pour un échange conclu, rouge pour un refus. */
 const STATUS_TONE: Record<ChatOffer["status"], string> = {
   pending: "bg-white/10 text-white/70",
-  accepted: "bg-acid/15 text-acid",
+  accepted: "bg-cyan/15 text-cyan",
   declined: "bg-rose-500/15 text-rose-200",
   countered: "bg-white/10 text-white/70",
   expired: "bg-white/10 text-white/45",
@@ -278,11 +279,11 @@ function OfferCard({
       )}
 
       {offer.status === "accepted" && (
-        <p className="mt-2 text-[11px] text-acid/80">
+        <p className="mt-2 text-[11px] text-cyan/80">
           {offer.direction === "in"
             ? `${offered?.name ?? "La carte"} a rejoint ta collection.`
             : `${requested?.name ?? "La carte"} a rejoint ta collection.`}{" "}
-          <Link href={`/card/${offer.direction === "in" ? offer.offeredCardId : offer.requestedCardId}`} className="text-white/40 hover:text-acid">
+          <Link href={`/card/${offer.direction === "in" ? offer.offeredCardId : offer.requestedCardId}`} className="text-white/40 hover:text-cyan">
             Voir la fiche →
           </Link>
         </p>
@@ -314,7 +315,7 @@ function MiniCard({ cardId, caption, holo = false }: { cardId: string; caption: 
             height={91}
             unoptimized={!art.local}
             loading="lazy"
-            style={art.framing}
+            style={framingStyle(art.framing)}
             className="h-full w-full object-cover"
           />
         ) : (
@@ -323,7 +324,7 @@ function MiniCard({ cardId, caption, holo = false }: { cardId: string; caption: 
           </span>
         )}
         {holo && (
-          <span className="absolute left-0.5 top-0.5 rounded-sm bg-acid px-1 font-mono text-[8px] font-bold uppercase text-ink">
+          <span className="absolute left-0.5 top-0.5 rounded-sm bg-cyan px-1 font-mono text-[8px] font-bold uppercase text-ink">
             Holo
           </span>
         )}

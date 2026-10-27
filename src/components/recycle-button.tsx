@@ -58,7 +58,7 @@ export function RecycleButton({
         onClick={run}
         disabled={busy}
         className={
-          className ?? "btn btn-sm btn-acid"
+          className ?? "btn btn-sm btn-cyan"
         }
       >
         {busy ? "Recyclage…" : label}

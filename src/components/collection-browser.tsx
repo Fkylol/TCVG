@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { recycleAllDuplicates } from "@/app/actions";
 import { CardFlip } from "@/components/card-flip";
+import { ReportCardButton } from "@/components/report-card-button";
 import { SellCardButton } from "@/components/sell-card-button";
 import {
   CARDS,
@@ -19,6 +20,7 @@ import { getCardArt } from "@/lib/card-art";
 import { cardStats } from "@/lib/stats";
 import { RARITY, RARITY_ORDER } from "@/lib/game";
 import type { CardVariant } from "@/lib/variants";
+import { framingStyle } from "@/lib/framing";
 
 export type CollectionEntry = {
   cardId: string;
@@ -244,14 +246,14 @@ export function CollectionBrowser({
           <button
             type="button"
             onClick={() => setView("albums")}
-            className={`tab px-3 py-1.5 ${view === "albums" ? "bg-acid text-ink" : ""}`}
+            className={`tab px-3 py-1.5 ${view === "albums" ? "bg-cyan text-ink" : ""}`}
           >
             Albums
           </button>
           <button
             type="button"
             onClick={() => setView("cards")}
-            className={`tab px-3 py-1.5 ${view === "cards" ? "bg-acid text-ink" : ""}`}
+            className={`tab px-3 py-1.5 ${view === "cards" ? "bg-cyan text-ink" : ""}`}
           >
             Cartes
           </button>
@@ -292,7 +294,7 @@ export function CollectionBrowser({
               type="button"
               onClick={recycleAll}
               disabled={bulkBusy}
-              className="btn btn-sm btn-acid"
+              className="btn btn-sm btn-cyan"
             >
               {bulkBusy
                 ? "Recyclage…"
@@ -339,7 +341,7 @@ export function CollectionBrowser({
                   </span>
                   <span className="mt-1.5 block h-1 overflow-hidden bg-white/10">
                     <span
-                      className="block h-full bg-acid transition-all"
+                      className="block h-full bg-cyan transition-all"
                       style={{ width: `${percent}%` }}
                     />
                   </span>
@@ -394,6 +396,12 @@ export function CollectionBrowser({
                     />
                   </div>
                 )}
+
+                {/* Un visuel cassé ou une fiche fausse se signale depuis la
+                    carte : le message part dans l'atelier pour vérification. */}
+                <div className="mt-0.5">
+                  <ReportCardButton card={card} />
+                </div>
               </div>
             );
           })}
@@ -426,7 +434,7 @@ function AlbumThumb({ album }: { album: Album }) {
           fill
           sizes="36px"
           unoptimized={!art.local}
-          style={art.framing}
+          style={framingStyle(art.framing)}
           onError={() => setFailed(true)}
         />
       ) : album.best ? (

@@ -85,7 +85,7 @@ export function ListingForm({
             5 % à la vente.
           </p>
         </div>
-        <Link href="/marche" className="shrink-0 text-[11px] text-acid hover:underline">
+        <Link href="/marche" className="shrink-0 text-[11px] text-cyan hover:underline">
           Marché →
         </Link>
       </div>
@@ -102,7 +102,7 @@ export function ListingForm({
               <button
                 type="button"
                 onClick={() => choose(false)}
-                className={`tab flex-1 px-2 py-1.5 ${!isHolo ? "bg-acid text-ink" : ""}`}
+                className={`tab flex-1 px-2 py-1.5 ${!isHolo ? "bg-cyan text-ink" : ""}`}
               >
                 Normale
               </button>

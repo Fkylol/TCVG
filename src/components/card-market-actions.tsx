@@ -101,7 +101,7 @@ export function CardMarketActions({
         onClick={toggleWish}
         disabled={wishBusy}
         aria-pressed={wished}
-        className={`btn w-full ${wished ? "btn-acid" : "btn-outline"}`}
+        className={`btn w-full ${wished ? "btn-cyan" : "btn-outline"}`}
       >
         <span aria-hidden>{wished ? "★" : "☆"}</span>
         {wishBusy ? "Enregistrement…" : wished ? "Dans mes envies" : "Ajouter à mes envies"}
@@ -140,7 +140,7 @@ export function CardMarketActions({
           role="status"
           className={`border-l-2 px-3 py-2 text-[11px] leading-relaxed ${
             note.tone === "ok"
-              ? "border-acid/60 bg-acid/[0.06] text-white/70"
+              ? "border-cyan/60 bg-cyan/[0.06] text-white/70"
               : "border-white/25 bg-white/[0.04] text-white/60"
           }`}
         >

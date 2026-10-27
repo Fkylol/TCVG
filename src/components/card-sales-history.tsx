@@ -65,7 +65,7 @@ export function CardSalesHistory({
               className="flex items-center justify-between gap-3 py-2 text-sm"
             >
               <span className="flex items-center gap-2">
-                <span className="font-mono text-acid">◆ {sale.price}</span>
+                <span className="font-mono text-cyan">◆ {sale.price}</span>
                 {sale.holo && (
                   <span className="chip bg-amber-300/15 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-amber-200">
                     Holo
