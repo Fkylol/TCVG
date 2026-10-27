@@ -66,7 +66,7 @@ export function FrameGallery({
               role="tab"
               aria-selected={lane === item.id}
               onClick={() => setLane(item.id)}
-              className={`tab px-3 py-1.5 ${lane === item.id ? "bg-acid text-ink" : ""}`}
+              className={`tab px-3 py-1.5 ${lane === item.id ? "bg-cyan text-ink" : ""}`}
             >
               {item.label}
               <span className={`ml-1.5 font-mono text-[10px] ${lane === item.id ? "text-ink/60" : "text-white/30"}`}>
@@ -98,7 +98,7 @@ export function FrameGallery({
               aria-pressed={selected}
               className={`cut relative flex min-h-[148px] gap-3 border p-3.5 text-left transition ${
                 selected
-                  ? "border-acid bg-acid/[0.08]"
+                  ? "border-cyan bg-cyan/[0.08]"
                   : clickable
                     ? "border-white/10 bg-white/[0.02] hover:border-white/25"
                     : "border-white/[0.07] bg-white/[0.015]"
@@ -113,7 +113,7 @@ export function FrameGallery({
                   locked={!frame.unlocked}
                 />
                 {selected && (
-                  <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 rounded-full bg-acid px-1.5 py-px font-mono text-[8px] font-bold uppercase tracking-wide text-ink">
+                  <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 rounded-full bg-cyan px-1.5 py-px font-mono text-[8px] font-bold uppercase tracking-wide text-ink">
                     Équipé
                   </span>
                 )}
@@ -123,7 +123,7 @@ export function FrameGallery({
                 <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
                   <span className="text-sm font-semibold text-white/90">{frame.name}</span>
                   <span
-                    className="font-mono text-[8px] tracking-[0.12em] text-acid/70"
+                    className="font-mono text-[8px] tracking-[0.12em] text-cyan/70"
                     title={`Prestige ${frame.prestige} sur 5`}
                   >
                     {prestigeLabel(frame.prestige)}
@@ -156,7 +156,7 @@ export function FrameGallery({
                   <>
                     <div className="mt-2 h-1 overflow-hidden rounded-[1px] bg-white/10">
                       <span
-                        className="block h-full bg-acid/70"
+                        className="block h-full bg-cyan/70"
                         style={{ width: `${Math.min(100, progress.percent)}%` }}
                       />
                     </div>

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-/** Onglet de navigation : le vert lime marque uniquement la page courante. */
+/** Onglet de navigation : le cyan marque uniquement la page courante. */
 export function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
   const pathname = usePathname();
   const active = pathname === href || pathname.startsWith(`${href}/`);

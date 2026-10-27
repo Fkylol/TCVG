@@ -1,8 +1,8 @@
-import Image from "next/image";
 import Link from "next/link";
 import { signOut } from "@/app/actions";
 import { AvatarFrame } from "@/components/avatar-frame";
 import { BoosterBadge } from "@/components/booster-badge";
+import { LogoMark } from "@/components/logo-mark";
 import { NavLink } from "@/components/nav-link";
 import { getCardArt } from "@/lib/card-art";
 
@@ -17,6 +17,7 @@ export function SiteHeader({
   serverNow,
   unread = 0,
   admin = false,
+  atelier = false,
 }: {
   username?: string;
   avatarCardId?: string | null;
@@ -32,41 +33,39 @@ export function SiteHeader({
   serverNow?: number;
   /** Notifications non lues, pour la pastille de la cloche. */
   unread?: number;
-  /** Affiche le lien d'administration du marché. */
+  /** Affiche les onglets d'administration (marché, parrainages, cadres). */
   admin?: boolean;
+  /** Affiche l'onglet de l'atelier : réservé aux deux comptes du catalogue. */
+  atelier?: boolean;
 }) {
   const initial = username?.trim().charAt(0).toUpperCase() ?? "?";
   const avatar = avatarCardId ? getCardArt(avatarCardId) : null;
 
   return (
-    <header className="sticky top-0 z-40 border-b border-white/10 bg-ink">
-      <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-1.5 px-3 py-2.5 sm:flex-nowrap sm:gap-2 sm:px-4">
+    <header className="sticky top-0 z-40 px-2 pt-2 sm:px-4 sm:pt-3">
+      <div className="topbar mx-auto flex max-w-6xl flex-wrap items-center gap-1.5 px-3 py-2 sm:flex-nowrap sm:gap-2 sm:px-5">
         <Link href="/" className="flex shrink-0 items-center gap-2 pr-1 sm:gap-2.5 sm:pr-2">
-          {/* Logo fourni par le projet, découpé en pastille (public/logo.png). */}
-          <Image
-            src="/logo.png"
-            alt=""
-            width={36}
-            height={36}
-            priority
-            className="h-8 w-8 shrink-0 sm:h-9 sm:w-9"
-          />
-          <span className="display hidden text-[17px] tracking-[0.14em] text-white sm:inline">
+          {/* Le logo est dessiné : carré arrondi et cercle, dans le dégradé. */}
+          <LogoMark id="header" className="h-7 w-7 shrink-0 sm:h-8 sm:w-8" />
+          <span className="font-display hidden text-[17px] font-extrabold tracking-[0.12em] text-white sm:inline">
             TCVG
           </span>
         </Link>
 
+        {/* Les onglets passent à la ligne plutôt que de défiler : avec ceux de
+            l'administration, la barre débordait et affichait une barre de
+            défilement horizontale qui coupait « Atelier ». */}
         {username && (
-          <nav className="order-last mt-1.5 flex w-full min-w-0 items-center gap-1 overflow-x-auto border-t border-white/10 pt-2 sm:order-none sm:mt-0 sm:w-auto sm:flex-1 sm:border-0 sm:pt-0">
+          <nav className="order-last mt-1.5 flex w-full min-w-0 flex-wrap items-center gap-x-1 gap-y-0.5 border-t border-white/10 pt-2 sm:order-none sm:mt-0 sm:w-auto sm:flex-1 sm:border-0 sm:pt-0">
             <NavLink href="/boosters">Boosters</NavLink>
             <NavLink href="/collection">Collection</NavLink>
-            <NavLink href="/parrainage">Parrainage</NavLink>
-            <NavLink href="/envies">Envies</NavLink>
             <NavLink href="/marche">Marché</NavLink>
-            <NavLink href="/agora">Agora</NavLink>
-            {admin && <NavLink href="/admin/marche">Admin</NavLink>}
-            {admin && <NavLink href="/admin/parrainage">Parrainages</NavLink>}
-            {admin && <NavLink href="/admin/cadres">Cadres</NavLink>}
+            <NavLink href="/classement">Classement</NavLink>
+            {/* Un seul onglet d'administration : le panneau ouvre le marché,
+                les parrainages, les cadres et l'atelier. L'atelier garde son
+                onglet propre pour ses responsables, qui ne sont pas admins. */}
+            {admin && <NavLink href="/admin">Admin</NavLink>}
+            {atelier && !admin && <NavLink href="/atelier">Atelier</NavLink>}
           </nav>
         )}
 
@@ -84,7 +83,7 @@ export function SiteHeader({
               {typeof pixels === "number" && (
                 <span
                   title="Pixels disponibles"
-                  className="chip gap-1 py-1 text-acid sm:px-2.5"
+                  className="chip gap-1 py-1 text-cyan sm:px-2.5"
                 >
                   <span aria-hidden className="text-[9px]">
                     ◆
@@ -101,7 +100,7 @@ export function SiteHeader({
                     ? `${unread} notification${unread > 1 ? "s" : ""} non lue${unread > 1 ? "s" : ""}`
                     : "Notifications"
                 }
-                className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white/55 transition hover:bg-white/5 hover:text-acid"
+                className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white/55 transition hover:bg-white/5 hover:text-cyan"
               >
                 <svg
                   aria-hidden
@@ -117,7 +116,7 @@ export function SiteHeader({
                   <path d="M13.7 21a2 2 0 0 1-3.4 0" />
                 </svg>
                 {unread > 0 && (
-                  <span className="absolute -right-0.5 -top-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-acid px-1 font-mono text-[9px] font-bold text-ink">
+                  <span className="absolute -right-0.5 -top-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-cyan px-1 font-mono text-[9px] font-bold text-ink">
                     {unread > 9 ? "9+" : unread}
                     <span className="sr-only"> notifications non lues</span>
                   </span>

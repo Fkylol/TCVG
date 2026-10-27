@@ -56,7 +56,7 @@ export function FrameLab() {
                       {frame.secret ? " · secret" : ""}
                     </p>
                   </div>
-                  <span className="font-mono text-[9px] text-acid/60">
+                  <span className="font-mono text-[9px] text-cyan/60">
                     {"◆".repeat(frame.prestige)}
                   </span>
                 </div>

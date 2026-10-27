@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { PackEmblem } from "@/components/pack-art";
 import { getFrame, shouldAnimateFrame } from "@/lib/frames.config";
+import { MOTION_EVENT, isMotionForced } from "@/lib/motion";
 import type { PackArtKey } from "@/lib/packs";
 
 /** Compteur global : jamais plus de quelques cadres animés à l'écran. */
@@ -65,11 +66,17 @@ export function AvatarFrame({
   const [animate, setAnimate] = useState(false);
 
   useEffect(() => {
+    // Le mode « toujours » (par défaut) passe outre la demande du téléphone :
+    // un cadre animé reste animé en économie d'énergie.
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const update = () => setSystemReduced(media.matches);
+    const update = () => setSystemReduced(!isMotionForced() && media.matches);
     update();
     media.addEventListener?.("change", update);
-    return () => media.removeEventListener?.("change", update);
+    window.addEventListener(MOTION_EVENT, update);
+    return () => {
+      media.removeEventListener?.("change", update);
+      window.removeEventListener(MOTION_EVENT, update);
+    };
   }, []);
 
   useEffect(() => {
@@ -163,7 +170,7 @@ export function AvatarFrame({
           />
         ) : (
           <span
-            className="grid h-full w-full place-items-center bg-acid/90 font-display font-bold text-ink"
+            className="grid h-full w-full place-items-center bg-cyan/90 font-display font-bold text-ink"
             style={{ fontSize: Math.max(9, Math.round(px * 0.34)) }}
           >
             {initial.trim().charAt(0).toUpperCase() || "?"}
