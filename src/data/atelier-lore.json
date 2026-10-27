@@ -1,0 +1,23 @@
+{
+  "note": "Contenu éditorial des cartes ajoutées par l'atelier (/atelier/cartes). Réservé au serveur : ne pas importer depuis un composant client.",
+  "lore": {
+    "dr-harley-sawyer": {
+      "tagline": "Le scientifique de Playtime",
+      "bio": "Directeur de recherche de Playtime Co., il a transformé des employés en jouets et n'y a jamais vu le moindre problème."
+    },
+    "surt": {
+      "tagline": "Le géant de feu",
+      "bio": "Géant de feu primordial des donjons volcaniques, son épée flamboyante peut raser des armées et annonce la fin des temps prophétisée.",
+      "quote": "Quand mes flammes lécheront les cieux, Midgard ne sera plus."
+    },
+    "dogmeat": {
+      "tagline": "Le compagnon des terres désolées",
+      "bio": "Compagnon canin le plus fidèle du Commonwealth, toujours prêt à dénicher du matériel utile ou à mordre le bras d'un pillard en plein combat.",
+      "quote": "[Aboiement joyeux en désignant une cache de munitions]"
+    },
+    "ted-thompson": {
+      "tagline": "Le quarter-back",
+      "bio": "Chef des Jocks, il fait de la salle, gagne les matchs et se croit au-dessus de la hiérarchie de l'école."
+    }
+  }
+}

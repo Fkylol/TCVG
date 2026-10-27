@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "atelier": "node --import tsx scripts/atelier.ts",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",

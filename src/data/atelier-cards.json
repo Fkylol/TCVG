@@ -1,0 +1,104 @@
+{
+  "note": "Cartes ajoutées par l'atelier (/atelier/cartes). Fichier écrit par l'outil : ne pas éditer à la main.",
+  "cards": [
+    {
+      "id": "dr-harley-sawyer",
+      "name": "Dr. Harley Sawyer",
+      "universe": "poppyplaytime",
+      "emoji": "🧸",
+      "rarity": "C",
+      "genres": [
+        "horreur"
+      ],
+      "portrait": {
+        "url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQlR57rQ_g4-sow4J3-wtNu4y-0xtDHDyVzRCHooL1oUg&s=10",
+        "source": "custom",
+        "sourceName": "encrypted-tbn0.gstatic.com",
+        "page": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQlR57rQ_g4-sow4J3-wtNu4y-0xtDHDyVzRCHooL1oUg&s=10",
+        "file": "encrypted-tbn0.gstatic.com",
+        "width": 359,
+        "height": 557,
+        "checkedAt": "2026-10-26T19:28:20.670Z",
+        "confidence": "medium"
+      },
+      "createdAt": "2026-10-26T19:28:27.865Z"
+    },
+    {
+      "id": "surt",
+      "name": "Surt",
+      "universe": "ragnarok",
+      "emoji": "🔥",
+      "rarity": "R",
+      "genres": [
+        "mmo"
+      ],
+      "portrait": {
+        "url": "https://static.wikia.nocookie.net/ragnarok_gamepedia_en/images/4/44/RO_Surt%28SD%29.png/revision/latest?cb=20180910052946",
+        "source": "fandom",
+        "sourceName": "ragnarok.fandom.com",
+        "wikiHost": "ragnarok.fandom.com",
+        "page": "https://ragnarok.fandom.com/wiki/Surt",
+        "file": "RO Surt(SD).png",
+        "width": 676,
+        "height": 507,
+        "checkedAt": "2026-10-26T18:58:00.000Z",
+        "confidence": "medium",
+        "framing": {
+          "objectFit": "cover",
+          "objectPosition": "56.9% 8.9%",
+          "zoom": 1.45
+        }
+      },
+      "createdAt": "2026-10-26T19:50:09.962Z"
+    },
+    {
+      "id": "dogmeat",
+      "name": "Canigou",
+      "universe": "fallout",
+      "emoji": "🐕",
+      "rarity": "R",
+      "genres": [
+        "rpg",
+        "fps"
+      ],
+      "portrait": {
+        "url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS7FYHiLu4DEAKXeVvb1DLmM5yhnT1kI0--zoEXAlRvwg&s=10",
+        "source": "custom",
+        "sourceName": "encrypted-tbn0.gstatic.com",
+        "page": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS7FYHiLu4DEAKXeVvb1DLmM5yhnT1kI0--zoEXAlRvwg&s=10",
+        "file": "encrypted-tbn0.gstatic.com",
+        "width": 300,
+        "height": 386,
+        "checkedAt": "2026-10-26T21:55:25.395Z",
+        "confidence": "medium"
+      },
+      "createdAt": "2026-10-26T21:55:28.480Z"
+    },
+    {
+      "id": "ted-thompson",
+      "name": "Ted Thompson",
+      "universe": "bully",
+      "emoji": "🎒",
+      "rarity": "C",
+      "genres": [
+        "action-aventure"
+      ],
+      "portrait": {
+        "url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQXNfNnD_rcFQA-YUtp9eHC6qWILeEL9-gq--ylo_FDYA&s=10",
+        "source": "custom",
+        "sourceName": "encrypted-tbn0.gstatic.com",
+        "page": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQXNfNnD_rcFQA-YUtp9eHC6qWILeEL9-gq--ylo_FDYA&s=10",
+        "file": "encrypted-tbn0.gstatic.com",
+        "width": 360,
+        "height": 432,
+        "checkedAt": "2026-10-26T21:56:05.285Z",
+        "confidence": "medium",
+        "framing": {
+          "objectFit": "cover",
+          "objectPosition": "42.8% 57.6%"
+        }
+      },
+      "createdAt": "2026-10-26T21:56:18.169Z"
+    }
+  ]
+}

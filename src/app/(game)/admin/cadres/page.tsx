@@ -124,7 +124,7 @@ export default async function AdminFramesPage() {
                       </div>
                     </td>
                     <td className="px-3 py-2.5 text-white/45">{lane?.label ?? row.lane}</td>
-                    <td className="px-3 py-2.5 font-mono text-[10px] text-acid/70">
+                    <td className="px-3 py-2.5 font-mono text-[10px] text-cyan/70">
                       {"◆".repeat(row.prestige ?? 0)}
                     </td>
                     <td className="px-3 py-2.5 text-right font-mono text-white/60">

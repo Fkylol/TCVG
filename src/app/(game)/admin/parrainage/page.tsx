@@ -12,7 +12,7 @@ export const metadata = {
 
 const STATUS_TONE: Record<ReferralStatus, string> = {
   en_cours: "bg-white/10 text-white/60",
-  eligible: "bg-acid/15 text-acid",
+  eligible: "bg-cyan/15 text-cyan",
   en_attente: "bg-amber-400/15 text-amber-200",
   a_examiner: "bg-amber-400/15 text-amber-200",
   paye: "bg-emerald-400/15 text-emerald-300",
@@ -109,7 +109,7 @@ export default async function AdminReferralPage({
             key={item.label}
             href={item.value ? `/admin/parrainage?statut=${item.value}` : "/admin/parrainage"}
             className={`tab px-3 py-1.5 ${
-              (item.value ?? null) === filter ? "bg-acid text-ink" : ""
+              (item.value ?? null) === filter ? "bg-cyan text-ink" : ""
             }`}
           >
             {item.label}

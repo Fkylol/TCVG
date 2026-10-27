@@ -29,6 +29,19 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  /**
+   * `pg` (connexion de maintenance de l'atelier) charge `pg-cloudflare` par un
+   * `require` conditionnel. La traduction de Next ne copie que la variante
+   * Node de ce paquet : l'import de travail n'a alors plus de fichier, et la
+   * construction Cloudflare échoue sur « Could not resolve pg-cloudflare ».
+   * On force donc la copie des deux variantes avec les pages de l'atelier.
+   */
+  outputFileTracingIncludes: {
+    "/atelier/**": [
+      "./node_modules/pg-cloudflare/dist/**",
+      "./node_modules/pg-cloudflare/esm/**",
+    ],
+  },
   images: {
     // Les visuels sont hotlinkés depuis Wikipédia : aucune copie n'est stockée ni servie
     // par l'optimiseur d'images de Next (voir `unoptimized` dans CardFace).

@@ -97,7 +97,7 @@ export default async function AdminMarketPage({
             <Link
               key={value}
               href={`/admin/marche?jours=${value}`}
-              className={`tab px-3 py-1.5 ${days === value ? "bg-acid text-ink" : ""}`}
+              className={`tab px-3 py-1.5 ${days === value ? "bg-cyan text-ink" : ""}`}
             >
               {value} j
             </Link>
@@ -165,7 +165,7 @@ export default async function AdminMarketPage({
                 <li key={entry.card_id} className="flex items-center justify-between gap-3 py-2">
                   <Link
                     href={`/card/${entry.card_id}`}
-                    className="min-w-0 truncate text-sm text-white/80 hover:text-acid"
+                    className="min-w-0 truncate text-sm text-white/80 hover:text-cyan"
                   >
                     {getCard(entry.card_id)?.name ?? entry.card_id}
                   </Link>
