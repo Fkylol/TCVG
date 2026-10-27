@@ -163,6 +163,42 @@ legend {
   border-color: var(--cyan-line);
 }
 
+/* ————— Tuile de la légende des raretés (accueil) —————
+   La tuile prend un peu la couleur de son palier, comme le carton d'une carte :
+   le halo, le filet et le nom disent tous la même chose. Le halo reste dans le
+   fond de la tuile, jamais devant le texte. */
+.rarity-tile {
+  background-image: radial-gradient(
+    115% 85% at 50% 0%,
+    color-mix(in oklab, var(--tile) 26%, transparent),
+    transparent 72%
+  );
+}
+
+.rarity-tile[data-rarity="C"] {
+  --tile: var(--rarity-C);
+}
+
+.rarity-tile[data-rarity="UC"] {
+  --tile: var(--rarity-U);
+}
+
+.rarity-tile[data-rarity="R"] {
+  --tile: var(--rarity-R);
+}
+
+.rarity-tile[data-rarity="SR"] {
+  --tile: var(--rarity-E);
+}
+
+.rarity-tile[data-rarity="UR"] {
+  --tile: var(--rarity-L);
+}
+
+.rarity-tile[data-rarity="L"] {
+  --tile: var(--rarity-M);
+}
+
 /* Barre du haut : une pastille de verre, détachée des bords, qui flotte
    au-dessus du contenu. Elle est translucide et floutée — mais assez dense
    pour rester lisible quand une page défile dessous. */

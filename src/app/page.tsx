@@ -152,14 +152,20 @@ export default async function Home() {
             </p>
           </div>
 
+          {/* De la plus commune à la plus rare : l'ordre suit le titre, et les
+              six tuiles se lisent d'un seul coup d'œil comme une échelle. */}
           <ul className="mt-6 grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
-            {RARITY_ORDER.map((key) => {
+            {[...RARITY_ORDER].reverse().map((key) => {
               const info = RARITY[key];
               const count = CARDS.filter(
                 (card) => card.rarity === key && card.retired !== true,
               ).length;
               return (
-                <li key={key} className="panel panel-deep relative overflow-hidden p-4">
+                <li
+                  key={key}
+                  data-rarity={key}
+                  className="panel panel-deep rarity-tile relative flex flex-col overflow-hidden p-4"
+                >
                   {/* Filet de rareté : rappelle le liseré des cartes. */}
                   <span className={`absolute inset-x-0 top-0 h-0.5 ${info.bar}`} aria-hidden />
                   <div className="flex items-center justify-between gap-2">
@@ -170,8 +176,17 @@ export default async function Home() {
                       {count} cartes
                     </span>
                   </div>
-                  <p className={`display mt-3 text-base ${info.text}`}>{info.label}</p>
-                  <p className="mt-1 font-mono text-xs text-white/45">
+                  {/* Le nom porte la couleur de sa rareté : `font-display` donne
+                      Syne sans le dégradé de marque de `.display`, qui écrasait
+                      la couleur et rendait les six tuiles identiques. */}
+                  <p
+                    className={`font-display mt-3 text-[15px] font-extrabold leading-tight ${info.text}`}
+                  >
+                    {info.label}
+                  </p>
+                  {/* Poussé en bas de la tuile : « Peu commune » passe sur deux
+                      lignes, les pourcentages restent alignés. */}
+                  <p className="mt-auto pt-3 font-mono text-sm text-white/70">
                     {formatPercent(info.weight / 1000)}
                   </p>
                 </li>
