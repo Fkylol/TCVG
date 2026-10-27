@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import test from "node:test";
 
@@ -47,15 +47,50 @@ test("variantes : chaque clé a un libellé et une explication", () => {
   }
 });
 
-test("variantes : la contrainte SQL accepte exactement les trois misprints", () => {
-  const sql = read("supabase/migrations/013_catalogue_actif.sql");
-  const match = sql.match(/collection_variant_check[\s\S]*?check \(variant is null or variant in \(([^)]+)\)\)/);
-  assert.ok(match, "contrainte collection_variant_check introuvable");
-  const allowed = match[1]
-    .split(",")
-    .map((value) => value.trim().replace(/^'|'$/g, ""))
-    .sort();
-  assert.deepEqual(allowed, [...MISPRINTS].sort());
+/**
+ * Dernière définition de `collection_variant_check`, migrations parcourues de la
+ * plus récente à la plus ancienne : c'est elle qui fait foi en base.
+ */
+function latestVariantConstraint(): string[] {
+  const dir = path.join(ROOT, "supabase/migrations");
+  const files = readdirSync(dir)
+    .filter((file) => file.endsWith(".sql"))
+    .sort()
+    .reverse();
+
+  for (const file of files) {
+    const sql = readFileSync(path.join(dir, file), "utf8");
+    const match = sql.match(
+      /collection_variant_check[\s\S]*?check \(variant is null or variant in \(([^)]+)\)\)/,
+    );
+    if (!match) continue;
+    return match[1]
+      .split(",")
+      .map((value) => value.trim().replace(/^'|'$/g, ""))
+      .sort();
+  }
+
+  throw new Error("contrainte collection_variant_check introuvable");
+}
+
+test("variantes : la contrainte SQL accepte exactement les misprints connus", () => {
+  assert.deepEqual(latestVariantConstraint(), [...MISPRINTS].sort());
+});
+
+test("tirage : les cinq défauts sont pondérés en base", () => {
+  const sql = read("supabase/migrations/055_holos_reverse_bleue.sql");
+  const weights = sql.match(/variant_weights[\s\S]*?\{[^}]+\}/);
+  assert.ok(weights, "réglage variant_weights introuvable");
+  for (const key of MISPRINTS) {
+    assert.match(weights[0], new RegExp(`"${key}"\\s*:`), `poids manquant : ${key}`);
+  }
+  // Le tirage ne peut écrire que ces clés-là, quoi qu'on mette dans le réglage.
+  assert.match(
+    sql,
+    /v_variant_keys text\[\] := array\['holo_bleed', 'off_center', 'ghosting', 'reverse', 'holo_blue'\]/,
+  );
+  // Un réglage vidé retombe sur le tirage historique plutôt que sur rien.
+  assert.match(sql, /if v_variant is null then/);
 });
 
 test("rendu : la carte affiche le libellé de la variante", () => {
@@ -68,7 +103,8 @@ test("rendu : la carte affiche le libellé de la variante", () => {
 test("rendu : une carte retirée perd son visuel mais garde ses infos", () => {
   const source = read("src/components/card-face.tsx");
   assert.match(source, /card\.retired === true/);
-  assert.match(source, /const art = gone \? null : getCardArt/);
+  assert.match(source, /const catalogArt = gone \? null : getCardArt/);
+  assert.match(source, /const art = artOverride === undefined \? catalogArt : artOverride/);
   assert.match(source, /data-retired=\{gone \? "true" : undefined\}/);
   assert.match(source, /Retirée/);
 

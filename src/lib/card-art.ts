@@ -1,4 +1,5 @@
 import manifest from "@/data/card-images.json";
+import { cardEdit } from "@/lib/card-edits";
 import { isRetiredCard } from "@/lib/cards";
 import { getPortrait, getPortraitFraming, sourceLabel, type PortraitFraming } from "@/lib/portraits";
 
@@ -57,7 +58,20 @@ export function resolveCardArt(
  */
 export function getCardArt(cardId: string): CardArt | null {
   if (isRetiredCard(cardId)) return null;
-  return resolveCardArt(cardId, LOCAL[cardId]);
+  const edit = cardEdit(cardId);
+  // Visuel choisi dans l'atelier en ligne : il passe avant le manifeste.
+  if (edit?.imageUrl) {
+    return {
+      src: edit.imageUrl,
+      local: false,
+      framing: edit.framing ?? getPortraitFraming(cardId),
+    };
+  }
+  const art = resolveCardArt(cardId, LOCAL[cardId]);
+  // Cadrage recadré dans l'atelier : il s'applique aussi au visuel du catalogue,
+  // pour pouvoir recentrer une photo déjà en place.
+  if (art && edit?.framing) return { ...art, framing: edit.framing };
+  return art;
 }
 
 /** Nombre de cartes déjà servies par un fichier local (diagnostic / admin). */

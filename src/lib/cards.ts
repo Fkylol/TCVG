@@ -7,10 +7,14 @@
  * renommer/retirer un personnage ici suffit à le retirer du jeu.
  */
 
+import { applyCardEdit, applyCardEdits, cardEditsVersion, isHiddenCard } from "@/lib/card-edits";
+
 /**
  * Paliers de rareté, du plus courant au plus rare.
  * Les clés sont celles de la base ; l'affichage utilise les lettres C/U/R/E/L/M.
  */
+import { ATELIER_CARDS } from "./atelier-data";
+
 export type Rarity = "C" | "UC" | "R" | "SR" | "UR" | "L";
 
 export type UniverseKey = keyof typeof UNIVERSES;
@@ -208,7 +212,7 @@ export type Card = {
   retired?: boolean;
 };
 
-export const CARDS: Card[] = [
+const BASE_CARDS: Card[] = [
   // ——— God of War ———
   {
     id: "kratos", name: "Kratos", universe: "godofwar", emoji: "🪓", rarity: "UR",
@@ -2179,6 +2183,24 @@ export const CARDS: Card[] = [
   },
 ];
 
+// Index des ajouts et corrections de l'atelier, par identifiant.
+const ATELIER_BY_ID = new Map(ATELIER_CARDS.map((card) => [card.id, card]));
+const BASE_IDS = new Set(BASE_CARDS.map((card) => card.id));
+
+/**
+ * Catalogue complet : le catalogue de base ci-dessus, puis les cartes créées
+ * par l'atelier (`src/data/atelier-cards.json`). L'ordre fait les numéros
+ * d'album : un ajout prend donc le dernier numéro, sans renuméroter le reste.
+ *
+ * Une entrée d'atelier qui porte l'identifiant d'une carte de base la remplace
+ * sur place (l'atelier sert aussi à corriger une carte existante) : les numéros
+ * d'album des autres cartes ne bougent pas et aucune carte n'apparaît deux fois.
+ */
+export const CARDS: Card[] = [
+  ...BASE_CARDS.map((card) => ATELIER_BY_ID.get(card.id) ?? card),
+  ...ATELIER_CARDS.filter((card) => !BASE_IDS.has(card.id)),
+];
+
 /**
  * Contrôle d'unicité du catalogue.
  *
@@ -2226,13 +2248,38 @@ export function isRetiredCard(id: string): boolean {
 }
 
 /**
- * Taille du catalogue jouable : les cartes retirées gardent leur entrée et leur
- * numéro d'album, mais ne comptent plus dans les totaux affichés.
+ * Cartes encore au catalogue, telles que le site doit les compter : les
+ * retirées du code et les supprimées depuis l'atelier en ligne sont exclues,
+ * et les corrections faites en ligne (nom, rareté…) sont appliquées.
  */
-export const CATALOG_SIZE = CARDS.filter((card) => card.retired !== true).length;
+export function catalogCards(): Card[] {
+  return applyCardEdits(CARDS).filter((card) => card.retired !== true);
+}
+
+/**
+ * Taille du catalogue jouable — la seule valeur à afficher dans un « sur N ».
+ *
+ * Les cartes retirées gardent leur entrée et leur numéro d'album, mais ne
+ * comptent plus dans les totaux ; une suppression faite depuis l'atelier en
+ * ligne doit donc faire baisser ce nombre sans redéployer. Le résultat est
+ * mémoïsé par version de la couche d'édition, pour rester utilisable dans le
+ * rendu d'une carte (appelé des dizaines de fois par page).
+ */
+let catalogSizeCache: { version: number; size: number } | null = null;
+
+export function catalogSize(): number {
+  const version = cardEditsVersion();
+  if (catalogSizeCache?.version === version) return catalogSizeCache.size;
+  const size = catalogCards().length;
+  catalogSizeCache = { version, size };
+  return size;
+}
 
 export function getCard(id: string): Card | undefined {
-  return CARDS_BY_ID.get(id);
+  // Une carte retirée depuis l'atelier en ligne n'existe plus pour le site.
+  if (isHiddenCard(id)) return undefined;
+  const card = CARDS_BY_ID.get(id);
+  return card ? applyCardEdit(card) : undefined;
 }
 
 export function getCardNumber(id: string): number | undefined {

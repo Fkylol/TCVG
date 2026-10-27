@@ -1,4 +1,4 @@
-import { CARDS, type Card, type Rarity } from "./cards";
+import { CARDS, catalogSize, type Card, type Rarity } from "./cards";
 import { RARITY_META } from "./rarity";
 
 export type RarityInfo = {
@@ -190,8 +190,11 @@ export function formatCountdown(ms: number): string {
 }
 
 export function collectionCompletion(ownedUnique: number): number {
-  if (CARDS.length === 0) return 0;
-  return Math.round((ownedUnique / CARDS.length) * 100);
+  // Le dénominateur est le catalogue jouable : une carte supprimée depuis
+  // l'atelier en ligne rend la collection plus facile à compléter, tout de suite.
+  const total = catalogSize();
+  if (total === 0) return 0;
+  return Math.round((ownedUnique / total) * 100);
 }
 
 export { CARDS };

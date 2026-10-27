@@ -2,9 +2,10 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { CARDS, getCardGradient, getCardNumber, getUniverseLabel, type Card } from "@/lib/cards";
+import { catalogSize, getCardGradient, getCardNumber, getUniverseLabel, type Card } from "@/lib/cards";
 import { RARITY } from "@/lib/game";
-import { getCardArt } from "@/lib/card-art";
+import { getCardArt, type CardArt } from "@/lib/card-art";
+import { framingStyle } from "@/lib/framing";
 import { cardStats } from "@/lib/stats";
 import { useCardTilt } from "@/lib/use-card-tilt";
 import { VARIANT_HINTS, VARIANT_LABELS, type CardVariant } from "@/lib/variants";
@@ -40,6 +41,7 @@ export function CardFace({
   muted = false,
   retired = false,
   holo = false,
+  art: artOverride,
 }: {
   card: Card;
   size?: Size;
@@ -54,6 +56,11 @@ export function CardFace({
   retired?: boolean;
   /** Copie brillante : la pellicule holographique est mise en avant. */
   holo?: boolean;
+  /**
+   * Visuel imposé, pour une carte qui n'est pas encore au catalogue
+   * (aperçu de l'atelier). `undefined` garde la résolution habituelle.
+   */
+  art?: CardArt | null;
 }) {
   const { from, to } = getCardGradient(card);
   const rarity = RARITY[card.rarity];
@@ -62,10 +69,11 @@ export function CardFace({
   // visuel : elle garde son dégradé et son emoji, pour que la collection
   // reste lisible sans image orpheline.
   const gone = retired || card.retired === true;
-  const art = gone ? null : getCardArt(card.id);
+  const catalogArt = gone ? null : getCardArt(card.id);
+  const art = artOverride === undefined ? catalogArt : artOverride;
   const stats = cardStats(card);
   const number = getCardNumber(card.id);
-  const total = CARDS.length;
+  const total = catalogSize();
   // Certains CDN (Fandom) filtrent les requêtes : si l'image échoue, on revient
   // au rendu généré plutôt que d'afficher une vignette cassée.
   const [imageFailed, setImageFailed] = useState(false);
@@ -84,12 +92,8 @@ export function CardFace({
       data-muted={muted ? "true" : undefined}
       data-retired={gone ? "true" : undefined}
       data-holo={holo && !gone ? "true" : undefined}
-      className={`card-face card-shine ${className}`}
+      className={`card-face ${className}`}
     >
-      {/* Foil de la carte entière : posé sous l'illustration, il ne sort que
-          sur les marges (reverse holo des hautes raretés). */}
-      <div className="card-foil" aria-hidden />
-
       <div className="card-head">
         <p className="card-name" title={card.name}>
           {card.name}
@@ -112,7 +116,7 @@ export function CardFace({
             fill
             sizes={s.imageSizes}
             unoptimized={!art.local}
-            style={art.framing}
+            style={framingStyle(art.framing)}
             onError={() => setImageFailed(true)}
           />
         ) : (
@@ -142,9 +146,11 @@ export function CardFace({
           </span>
         )}
 
-        <div className="card-glare" aria-hidden />
-        <div className="holo" aria-hidden />
-        <div className="card-sparkle" aria-hidden />
+        {/* Pellicule holographique : paillettes, grain de foil et dégradé
+            métallique, posés au-dessus du visuel et sous le numéro. Pure CSS,
+            elle suit le pointeur sans rendu React. */}
+        <span className="card-holo" aria-hidden />
+        <span className="card-glare" aria-hidden />
         <div className="grain" aria-hidden />
       </div>
 

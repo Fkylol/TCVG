@@ -11,6 +11,8 @@
  * filtres de l'album ; la source de vérité pour le tirage reste la base.
  */
 
+import { ATELIER_GENRES } from "./atelier-data";
+
 export type GenreSlug =
   | "action-aventure"
   | "plateforme"
@@ -55,7 +57,7 @@ export function getGenreName(slug: GenreSlug): string {
  * Les genres à 0 carte existent quand même : leur pack se rabat sur le pool
  * global (voir le repli du tirage), il ne doit jamais planter.
  */
-export const CARD_GENRES: Record<string, GenreSlug[]> = {
+const BASE_CARD_GENRES: Record<string, GenreSlug[]> = {
   // ——— Banjo-Kazooie ———
   "banjo-kazooie": ["plateforme"],
   gruntilda: ["plateforme"],
@@ -760,6 +762,12 @@ export const CARD_GENRES: Record<string, GenreSlug[]> = {
   "napoleon": ["strategie"],
   "cesar": ["strategie"],
   "duc-de-paille": ["strategie"],
+};
+
+/** Catalogue de base + cartes ajoutées par l'atelier (`/atelier/cartes`). */
+export const CARD_GENRES: Record<string, GenreSlug[]> = {
+  ...BASE_CARD_GENRES,
+  ...ATELIER_GENRES,
 };
 
 /** Genres d'une carte (vide si la carte n'est pas rattachée). */

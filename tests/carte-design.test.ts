@@ -67,12 +67,6 @@ function rarityBlock(rarity: string): string {
   return CSS.slice(start, end);
 }
 
-function numberIn(block: string, property: string): number {
-  const match = block.match(new RegExp(`${property}:\\s*([0-9.]+)\\s*;`));
-  assert.ok(match, `${property} introuvable dans le bloc`);
-  return Number(match[1]);
-}
-
 test("rareté : chaque niveau porte sa couleur", () => {
   for (const rarity of TIERS) {
     assert.match(
@@ -83,43 +77,76 @@ test("rareté : chaque niveau porte sa couleur", () => {
   }
 });
 
-test("rareté : le foil change de calque en montant, sans jamais reculer", () => {
-  const tiers = TIERS.map((rarity) => {
-    const block = rarityBlock(rarity);
-    return {
-      rarity,
-      art: block.includes("--foil-art") ? numberIn(block, "--foil-art") : 0,
-      card: block.includes("--foil-card") ? numberIn(block, "--foil-card") : 0,
-      sparkle: block.includes("--sparkle") ? numberIn(block, "--sparkle") : 0,
-    };
-  });
-  const byRarity = new Map(tiers.map((tier) => [tier.rarity, tier]));
+/** Intensité de la pellicule d'une rareté, lue dans le CSS. */
+function holoStrength(rarity: string): number {
+  const match = CSS.match(
+    new RegExp(`\\.card-face\\[data-rarity="${rarity}"\\] \\{\\s*--ho: ([0-9.]+);`),
+  );
+  assert.ok(match, `--ho introuvable pour ${rarity}`);
+  return Number(match[1]);
+}
 
-  // Jusqu'au Rare : aucun foil sous l'illustration ; à partir de l'Épique :
-  // reverse holo sur les marges, puis les deux calques sur les hautes raretés.
-  assert.equal(byRarity.get("C")?.art, 0);
-  assert.equal(byRarity.get("C")?.card, 0);
-  assert.equal(byRarity.get("UC")?.art, 0);
-  assert.equal(byRarity.get("UC")?.card, 0);
-  assert.ok((byRarity.get("R")?.art ?? 0) > 0, "le Rare foil sa fenêtre");
-  assert.equal(byRarity.get("R")?.card, 0);
-  assert.ok((byRarity.get("SR")?.card ?? 0) > 0, "l'Épique passe en reverse holo");
-  assert.equal(byRarity.get("SR")?.art, 0);
-  assert.ok((byRarity.get("UR")?.art ?? 0) > 0);
-  assert.ok((byRarity.get("UR")?.card ?? 0) > 0);
+test("pellicule : le Commun reste mat, les autres montent sans reculer", () => {
+  // Le Commun n'a ni foil ni reflet : aucun calque à composer.
+  assert.match(
+    CSS,
+    /\.card-face\[data-rarity="C"\] \.card-holo,[\s\S]{0,120}?display: none;/,
+  );
 
-  // Le Mythique porte le foil le plus dense des deux côtés, et un peu plus
-  // de paillettes à chaque niveau.
-  for (const rarity of ["C", "UC", "R", "SR", "UR"] as const) {
-    const tier = byRarity.get(rarity);
-    const mythic = byRarity.get("L");
-    assert.ok((mythic?.art ?? 0) > (tier?.art ?? 0), `foil art ${rarity}`);
-    assert.ok((mythic?.card ?? 0) > (tier?.card ?? 0), `foil carte ${rarity}`);
-    assert.ok((mythic?.sparkle ?? 0) >= (tier?.sparkle ?? 0), `paillettes ${rarity}`);
+  const steps = (["UC", "R", "SR", "UR", "L"] as const).map(holoStrength);
+  for (let index = 1; index < steps.length; index += 1) {
+    assert.ok(steps[index] > steps[index - 1], `pellicule au palier ${index + 1}`);
   }
+  assert.equal(steps.at(-1), 0.85);
+  // Une copie brillante pousse la pellicule à fond.
+  assert.match(CSS, /\.card-face\[data-holo="true"\] \{\s*--ho: 1;/);
 });
 
-test("rareté : le Mythique a sa bordure prismatique et son animation", () => {
+test("copie brillante : la pellicule reste allumée sans pointeur", () => {
+  // La vignette d'une collection ne suit pas le pointeur : sans dérive, une
+  // holo au repos gardait le rendu d'une carte normale.
+  assert.match(
+    CSS,
+    /\.card-face\[data-holo="true"\] \.card-holo,\s*\n\.card-face\[data-holo="true"\] \.card-glare \{\s*display: block;/,
+  );
+  assert.match(
+    CSS,
+    /\.card-face\[data-holo="true"\] \.card-holo \{\s*opacity: calc\(0\.6 \+ 0\.4 \* var\(--intensity, 0\)\);\s*animation: holo-drift 12s linear infinite;/,
+  );
+
+  const keyframes = CSS.slice(CSS.indexOf("@keyframes holo-drift"));
+  assert.ok(keyframes.length > 0, "dérive de la pellicule introuvable");
+  assert.match(keyframes, /filter: hue-rotate\(0deg\)[\s\S]*?filter: hue-rotate\(360deg\)/);
+
+  // Le Commun reste mat, sauf sur une copie brillante : les deux sélecteurs ont
+  // la même spécificité, donc c'est l'ordre du fichier qui décide.
+  assert.ok(
+    CSS.indexOf('.card-face[data-rarity="C"] .card-holo') <
+      CSS.indexOf('.card-face[data-holo="true"] .card-holo'),
+    "la règle de la copie brillante doit passer après celle du Commun",
+  );
+  // Reverse garde son propre foil : la pellicule de fenêtre reste éteinte.
+  assert.ok(
+    CSS.indexOf('.card-face[data-variant="reverse"] .card-holo') >
+      CSS.indexOf('.card-face[data-holo="true"] .card-holo'),
+    "Reverse doit garder le dernier mot sur la pellicule",
+  );
+});
+
+test("pellicule : le Mythique a le seul foil prismatique", () => {
+  const mythic = CSS.slice(
+    CSS.indexOf('.card-face[data-rarity="L"] {\n  --foil'),
+    CSS.indexOf("/* Grain fin du carton. */"),
+  );
+  assert.ok(mythic.length > 0, "foil du Mythique introuvable");
+  assert.match(mythic, /repeating-linear-gradient\(\s*125deg/);
+  assert.match(mythic, /#ff4a6e/);
+  assert.match(mythic, /#4ad7ff/);
+  // Les autres raretés déclinent simplement la couleur du carton.
+  assert.match(CSS, /--foil: repeating-linear-gradient\([\s\S]*?var\(--rarity\)/);
+});
+
+test("rareté : le Mythique a sa bordure prismatique", () => {
   assert.match(CSS, /data-rarity="L"\]::before/);
   // L'anneau est posé dans le padding box : sur la bordure, il serait clippé.
   assert.match(
@@ -128,41 +155,50 @@ test("rareté : le Mythique a sa bordure prismatique et son animation", () => {
     "l'anneau prismatique doit rester dans la zone non clippée",
   );
   assert.match(CSS, /conic-gradient\(/);
-  assert.match(CSS, /@keyframes holo-hue/);
-  // L'animation reste en pause tant que la carte n'est pas survolée.
-  assert.match(CSS, /animation: holo-hue 14s linear infinite paused/);
-  assert.match(
-    CSS,
-    /data-rarity="L"\]\[data-tilt="true"\] \.holo[^{]*\{\s*animation-play-state: running/,
-  );
+  // L'anneau tourne avec l'inclinaison de la carte.
+  assert.match(CSS, /conic-gradient\(\s*from calc\(140deg \+ var\(--rx\) \* 3\)/);
 });
 
-test("calques : foil sous l'illustration, reflet et paillettes au-dessus", () => {
-  assert.match(CARD_FACE, /className="card-foil"/);
+test("calques : la pellicule vit dans la fenêtre d'illustration, sous le numéro", () => {
+  assert.match(CARD_FACE, /className="card-holo"/);
+  assert.match(CARD_FACE, /className="card-glare"/);
   assert.ok(
-    CARD_FACE.indexOf("card-foil") < CARD_FACE.indexOf('className="card-head"'),
-    "le foil carte entière doit être posé avant l'illustration",
+    CARD_FACE.indexOf('className="card-art"') < CARD_FACE.indexOf('className="card-holo"'),
+    "la pellicule doit être posée dans la fenêtre d'illustration",
   );
-  assert.match(CSS, /\.card-foil\s*\{[\s\S]*?z-index:\s*0;/);
-  assert.match(CSS, /\.card-art\s*\{[\s\S]*?z-index:\s*1;/);
+  assert.match(CSS, /\.card-holo\s*\{[\s\S]*?z-index:\s*2;/);
+  assert.match(CSS, /\.card-holo\s*\{[\s\S]*?pointer-events:\s*none;/);
+  // Le numéro d'album et les étiquettes restent au-dessus de la pellicule.
+  assert.match(CSS, /\.card-number\s*\{[\s\S]*?z-index:\s*4;/);
 });
 
 test("variantes : chaque misprint a un rendu et un libellé", () => {
-  for (const variant of ["holo_bleed", "off_center", "ghosting"]) {
+  for (const variant of ["holo_bleed", "off_center", "ghosting", "reverse", "holo_blue"]) {
     assert.match(CSS, new RegExp(`data-variant="${variant}"`), `variante ${variant}`);
   }
+  // Reverse : la pellicule quitte le visuel pour le cadre.
+  assert.match(CSS, /data-variant="reverse"\] \.card-holo,[\s\S]*?display: none/);
+  // Holo bleue : elle reste visible même sur une Commune, sinon le défaut
+  // disparaîtrait sur la majorité des cartes.
+  assert.match(CSS, /data-variant="holo_blue"\] \.card-holo \{\s*display: block;/);
   assert.match(CARD_FACE, /VARIANT_LABELS\[variant\]/);
   assert.match(CARD_FACE, /variant !== "normal"/);
   assert.match(CARD_FACE, /data-variant=\{variant\}/);
 });
 
-test("accessibilité : prefers-reduced-motion éteint tilt et animations", () => {
+test("accessibilité : prefers-reduced-motion éteint l'inclinaison, pas la pellicule", () => {
   const start = CSS.indexOf("@media (prefers-reduced-motion: reduce)");
   assert.ok(start > 0);
-  const block = CSS.slice(start, CSS.indexOf("\n}", CSS.indexOf(".card-shine::after", start)));
-  assert.match(block, /animation: none/);
+  const block = CSS.slice(start, start + 2600);
   assert.match(block, /transform: none/);
-  assert.match(block, /\.card-shine::after\s*\{\s*display: none/);
+  // La pellicule reste allumée : elle ne bouge qu'avec le pointeur.
+  assert.match(block, /html:not\(\[data-motion="full"\]\) \.card-holo,/);
+  assert.match(block, /transition: none;/);
+  // La dérive d'une copie brillante se fige au lieu de tourner.
+  assert.match(
+    block,
+    /html:not\(\[data-motion="full"\]\) \.card-face\[data-holo="true"\] \.card-holo \{\s*animation: none;/,
+  );
 });
 
 test("banc d'essai : l'intensité vient du curseur, pas du pointeur", () => {
@@ -176,16 +212,16 @@ test("performance : aucun contexte 3D au repos", () => {
   assert.match(tilted.slice(0, 300), /perspective\(800px\)/);
 });
 
-test("performance : les effets ne sont rendus que pendant l'interaction", () => {
-  assert.match(
-    CSS,
-    /\.card-face:not\(\[data-tilt="true"\]\) \.holo[\s\S]*\{[\s\S]*display: none;/,
-  );
-  // La carte retournable incline son conteneur, pas ses faces.
-  assert.match(CSS, /\.card-flip-tilt\[data-tilt="true"\] \.card-face \.holo/);
-  // Le banc d'essai garde les effets visibles sans survol.
-  assert.match(CSS, /\.holo-lab \.card-face \.holo/);
-  assert.doesNotMatch(CSS, /background-position:\s*calc\(50% \+ var\(--tx\) \* 40px\)/);
+test("performance : la pellicule est purement CSS, sans particule à rendre", () => {
+  // Deux calques vides : aucune particule, aucun tirage aléatoire, donc rien
+  // à hydrater et rien à recalculer frame par frame côté React.
+  assert.doesNotMatch(CARD_FACE, /CardSparkles|Math\.random/);
+  assert.doesNotMatch(CARD_FACE, /card-shine/);
+  assert.match(CARD_FACE, /<span className="card-holo" aria-hidden \/>/);
+  assert.equal((CARD_FACE.match(/className="card-(holo|glare)"/g) ?? []).length, 2);
+  // Le Commun n'affiche aucun calque, et les textures sont servies en local.
+  assert.match(CSS, /--holo-glitter: url\("\/textures\/holo-glitter\.png"\)/);
+  assert.match(CSS, /--holo-foil: url\("\/textures\/holo-foil\.png"\)/);
 });
 
 test("performance : l'éclat de révélation reste sur le compositeur", () => {
@@ -220,6 +256,47 @@ test("visionneuse : l'inclinaison suit le pointeur sans traîner", () => {
   assert.match(TILT, /const STALE_MARGIN = 80;/);
 });
 
+test("visionneuse : l'inclinaison vit à l'extérieur du retournement", () => {
+  // Trois étages : perspective sur la scène, inclinaison sur le conteneur,
+  // retournement sur la carte intérieure.
+  assert.match(CSS, /\.flip-stage \{\s*perspective: 900px;/);
+  assert.match(
+    CSS,
+    /\.card-flip-tilt \{[\s\S]*?transform: rotateX\(var\(--rx\)\) rotateY\(var\(--ry\)\);/,
+  );
+  assert.match(CSS, /\.card-flip\[data-flipped="true"\] \{\s*transform: rotateY\(180deg\);\s*\}/);
+  assert.match(
+    CSS,
+    /\.card-flip \{[\s\S]*?transition: transform 600ms cubic-bezier\(0\.3, 0\.7, 0\.2, 1\);/,
+  );
+
+  // Les axes ne sont jamais retournés, et le retournement n'est jamais posé
+  // sur le conteneur d'inclinaison (il écraserait le rotateY du verso).
+  assert.doesNotMatch(CSS, /--flip/);
+  assert.doesNotMatch(CSS, /\.card-flip-tilt\[data-flipped/);
+
+  // Le conteneur d'inclinaison enveloppe le retournement.
+  assert.ok(
+    FLIP.indexOf('className="card-flip-tilt') < FLIP.indexOf('className="card-flip"'),
+    "l'inclinaison doit rester à l'extérieur du retournement",
+  );
+  assert.doesNotMatch(FLIP, /data-flipped=\{flipped\}\s+data-flipping/);
+  assert.match(FLIP, /const FLIP_MS = 600;/);
+  // La carte ouverte s'incline plus franchement que les vignettes.
+  assert.match(FLIP, /useCardTilt<HTMLDivElement>\(25\)/);
+  assert.match(TILT, /useCardTilt<T extends HTMLElement>\(maxTilt: number = MAX_TILT\)/);
+
+  // Verso : l'inclinaison est coupée, la carte se remet à plat.
+  assert.match(CSS, /\.card-flip-tilt\[data-flat="true"\] \{\s*transform: none;/);
+  assert.match(FLIP, /\{\.\.\.\(flipped \? \{\} : tilt\)\}/);
+  assert.match(FLIP, /data-flat=\{flipped \? "true" : undefined\}/);
+
+  // Deux faces superposées, dos caché, verso tourné de 180°.
+  assert.match(CSS, /\.card-flip-face \{[\s\S]*?position: absolute;/);
+  assert.match(CSS, /\.card-flip-face \{[\s\S]*?backface-visibility: hidden;/);
+  assert.match(CSS, /\.card-flip-back \{[\s\S]*?transform: rotateY\(180deg\);/);
+});
+
 test("visionneuse : fond opaque et effets coupés pendant le retournement", () => {
   // Un `backdrop-filter` plein écran derrière la grille recomposait toute la
   // page à chaque image de la rotation.
@@ -230,10 +307,10 @@ test("visionneuse : fond opaque et effets coupés pendant le retournement", () =
   const viewer = CSS.slice(viewerStart, CSS.indexOf(".card-flip-tilt {", viewerStart));
   assert.ok(viewer.length > 0);
   assert.doesNotMatch(viewer, /backdrop-filter/);
-  // Foil, paillettes et reflet sortent de l'arbre le temps de la rotation.
+  // La pellicule sort de l'arbre le temps de la rotation.
   assert.match(FLIP, /data-flipping=/);
   assert.match(
     CSS,
-    /\.card-flip-tilt\[data-flipping="true"\] \.card-face \.holo[\s\S]*?display: none;/,
+    /\.card-flip-tilt\[data-flipping="true"\] \.card-face \.card-holo,[\s\S]*?display: none;/,
   );
 });

@@ -7,6 +7,8 @@
  * de la page.
  */
 
+import { ATELIER_LORE } from "./atelier-lore";
+
 export type CardLore = {
   tagline: string;
   /** Citation et pouvoir restent optionnels : certaines fiches n'ont que l'essentiel. */
@@ -15,7 +17,7 @@ export type CardLore = {
   bio: string;
 };
 
-export const CARD_LORE: Record<string, CardLore> = {
+const BASE_CARD_LORE: Record<string, CardLore> = {
   "kratos": {
     tagline: "Fantôme de Sparte, tueur de dieux",
     quote: "Ne t'excuse pas. Sois meilleur.",
@@ -2847,6 +2849,12 @@ export const CARD_LORE: Record<string, CardLore> = {
     quote: "Du pain ? Du pain pour tout le monde ! (Et de la bière, mais pas trop.)",
     bio: "Seigneur porcin à la couronne dorée, il règne sur un château famélique, comptant chaque archer et chaque ferme avant d'envoyer ses voisins au cachot.",
   },
+};
+
+/** Fiches du catalogue de base, complétées par celles de l'atelier. */
+export const CARD_LORE: Record<string, CardLore> = {
+  ...BASE_CARD_LORE,
+  ...ATELIER_LORE,
 };
 
 /** Contenu éditorial d'une carte, ou undefined si l'identifiant est inconnu. */

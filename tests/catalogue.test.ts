@@ -2,7 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { CARD_GENRES, GENRES, cardIdsOfGenre, genresOf } from "../src/lib/card-genres";
-import { CARDS, type Rarity } from "../src/lib/cards";
+import { CARDS, catalogCards, catalogSize, getCard, type Rarity } from "../src/lib/cards";
+import { setCardEdits } from "../src/lib/card-edits";
 import { RARITY } from "../src/lib/game";
 import { RARITY_META } from "../src/lib/rarity";
 
@@ -16,6 +17,35 @@ test("catalogue : 557 cartes, répartition de rareté attendue", () => {
   for (const card of CARDS) counts[card.rarity] = (counts[card.rarity] ?? 0) + 1;
 
   assert.deepEqual(counts, EXPECTED_BY_RARITY);
+});
+
+test("catalogue : une suppression en ligne sort des totaux", () => {
+  const [removed, corrected] = CARDS;
+  const row = {
+    name: null,
+    rarity: null,
+    universe: null,
+    emoji: null,
+    imageUrl: null,
+    framing: null,
+    hidden: false,
+  };
+
+  setCardEdits([
+    { ...row, cardId: removed.id, hidden: true },
+    { ...row, cardId: corrected.id, name: "Nom corrigé" },
+  ]);
+
+  // Le catalogue affiché, le « sur N » et la fiche de la carte suivent la
+  // suppression sans redéploiement.
+  assert.equal(catalogSize(), CARDS.length - 1);
+  const visible = catalogCards();
+  assert.equal(visible.length, CARDS.length - 1);
+  assert.equal(visible.find((card) => card.id === corrected.id)?.name, "Nom corrigé");
+  assert.equal(getCard(removed.id), undefined);
+
+  setCardEdits([]);
+  assert.equal(catalogSize(), CARDS.length);
 });
 
 test("catalogue : les 9 genres existent et sont uniques", () => {

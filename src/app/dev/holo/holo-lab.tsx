@@ -36,7 +36,7 @@ export function HoloLab({
           step={0.05}
           value={intensity}
           onChange={(event) => setIntensity(Number(event.target.value))}
-          className="h-1 w-48 accent-acid"
+          className="h-1 w-48 accent-cyan"
         />
         <span className="font-mono text-xs text-white/70">{intensity.toFixed(2)}</span>
       </div>

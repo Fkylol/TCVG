@@ -4,10 +4,10 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
 /** Durée du retournement : pendant ce temps les effets lourds sont coupés. */
-const FLIP_MS = 520;
+const FLIP_MS = 600;
 import { createPortal } from "react-dom";
 import { CardFace } from "@/components/card-face";
-import { CARDS, getCardNumber, getUniverseLabel, type Card } from "@/lib/cards";
+import { catalogSize, getCardNumber, getUniverseLabel, type Card } from "@/lib/cards";
 import { RARITY } from "@/lib/game";
 import { cardStats } from "@/lib/stats";
 import { useCardTilt } from "@/lib/use-card-tilt";
@@ -44,9 +44,12 @@ function formatDate(iso: string): string {
  * centrée sur fond assombri. Un clic sur la carte la retourne, un second la
  * remet à l'endroit ; Échap, la croix ou le fond ferment la visionneuse.
  *
- * L'inclinaison 3D de la visionneuse est portée par le conteneur : elle reste
- * active une fois la carte retournée, et le reflet suit le pointeur sur les
- * deux faces.
+ * L'inclinaison 3D de la visionneuse est portée par le conteneur extérieur
+ * (`.card-flip-tilt`), le retournement par l'élément intérieur (`.card-flip`) :
+ * les deux transformations ne partagent jamais le même élément, donc le
+ * `rotateY(180deg)` du verso n'écrase jamais l'inclinaison et ses axes ne sont
+ * pas retournés. Les variables `--rx`/`--ry`/`--tx`/`--ty` posées sur le
+ * conteneur descendent jusqu'aux deux faces.
  */
 export function CardFlip({
   card,
@@ -70,7 +73,9 @@ export function CardFlip({
   const [open, setOpen] = useState(false);
   const [flipped, setFlipped] = useState(false);
   const [flipping, setFlipping] = useState(false);
-  const tilt = useCardTilt<HTMLDivElement>();
+  // La carte seule a droit à une inclinaison plus franche que les vignettes
+  // (±25° au lieu de ±15°) : c'est une pièce tenue à la main, plein écran.
+  const tilt = useCardTilt<HTMLDivElement>(25);
   const closeButton = useRef<HTMLButtonElement>(null);
   const flipTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const rarity = RARITY[card.rarity];
@@ -124,7 +129,7 @@ export function CardFlip({
           setFlipped(false);
           setOpen(true);
         }}
-        className="collection-tile block w-full rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-acid/70"
+        className="collection-tile block w-full rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan/70"
         aria-haspopup="dialog"
         aria-label={`Ouvrir la carte ${card.name}`}
       >
@@ -169,13 +174,17 @@ export function CardFlip({
             </button>
 
             <div className="flip-stage relative flex w-full max-w-[min(92vw,380px)] flex-col items-center">
+              {/* Inclinaison : uniquement sur ce conteneur, et coupée dès que
+                  le verso est visible — inclinée, la carte rendait le lien
+                  « Voir la fiche » difficile à viser. */}
               <div
-                {...tilt}
-                data-flipped={flipped}
+                {...(flipped ? {} : tilt)}
+                data-flat={flipped ? "true" : undefined}
                 data-flipping={flipping ? "true" : undefined}
                 data-rarity={card.rarity}
                 className="card-flip-tilt w-full"
               >
+                {/* Retournement : uniquement sur cette face intérieure. */}
                 <div className="card-flip" data-flipped={flipped}>
                   <button
                     type="button"
@@ -209,7 +218,7 @@ export function CardFlip({
                     <div className="flip-back-top">
                       <span className="flip-back-rarity">{rarity.label}</span>
                       <span className="flip-back-number">
-                        #{String(number).padStart(2, "0")}/{CARDS.length}
+                        #{String(number).padStart(2, "0")}/{catalogSize()}
                       </span>
                     </div>
 
@@ -265,8 +274,6 @@ export function CardFlip({
                       </button>
                     </div>
 
-                    <div className="card-glare" aria-hidden />
-                    <div className="holo" aria-hidden />
                     <div className="grain" aria-hidden />
                   </div>
                 </div>

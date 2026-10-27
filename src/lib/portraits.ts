@@ -1,9 +1,17 @@
 import data from "@/data/portraits.json";
 
+import { ATELIER_PORTRAITS } from "./atelier-data";
+import { clampFraming, type PortraitFraming } from "./framing";
+
+export type { PortraitFraming } from "./framing";
+
 export type Portrait = {
   url: string;
-  /** Source du visuel : article Wikipédia, wiki Fandom de la franchise, ou Wikidata. */
-  source: "wikipedia" | "fandom" | "wikidata";
+  /**
+   * Source du visuel : article Wikipédia, wiki Fandom de la franchise, Wikidata,
+   * ou une URL fournie à la main dans l'atelier (recherche d'images).
+   */
+  source: "wikipedia" | "fandom" | "wikidata" | "custom";
   /** Libellé de provenance affiché (« Wikidata (P18) », « zelda.fandom.com »). */
   sourceName?: string;
   /** Hôte du wiki Fandom (« spyro.fandom.com »). */
@@ -20,13 +28,17 @@ export type Portrait = {
   checkedAt?: string;
   /** Confiance de la source : nom exact Wikidata (`high`) ou wiki de franchise (`medium`). */
   confidence?: "high" | "medium";
+  /**
+   * Cadrage réglé à la main dans l'atelier (position et zoom). Absent : les
+   * réglages de `PORTRAIT_FRAMING`, sinon haut-centre.
+   */
+  framing?: PortraitFraming;
 };
 
-const ITEMS = data.items as unknown as Record<string, Portrait>;
-
-export type PortraitFraming = {
-  objectFit: "cover" | "contain";
-  objectPosition: string;
+const ITEMS: Record<string, Portrait> = {
+  ...(data.items as unknown as Record<string, Portrait>),
+  // Les visuels choisis dans l'atelier prennent le pas sur un ancien portrait.
+  ...ATELIER_PORTRAITS,
 };
 
 /** Cadrage par défaut : haut-centre, adapté aux portraits debout. */
@@ -47,6 +59,9 @@ export const PORTRAIT_FRAMING: Record<string, PortraitFraming> = {
   // Rendu large (500×304) sur fond transparent : en `cover`, la tête du dragon
   // part hors cadre à gauche. On garde donc l'image entière, centrée.
   "ender-dragon": { objectFit: "contain", objectPosition: "50% 50%" },
+  // Surt : rendu 676×507 du géant de feu, presque carré. En `cover`, les cornes
+  // et les bras sortent du cadre ; on garde le monstre entier.
+  surt: { objectFit: "contain", objectPosition: "50% 50%" },
   // Artwork très allongé (1:3,7) : le visage est au tiers haut de l'image, il
   // faut donc descendre la fenêtre de cadrage pour le centrer dans la carte.
   ciri: { objectFit: "cover", objectPosition: "50% 34%" },
@@ -69,9 +84,16 @@ export const PORTRAIT_FRAMING: Record<string, PortraitFraming> = {
   "bandana-waddle-dee": { objectFit: "cover", objectPosition: "62% 50%" },
 };
 
-/** `object-fit`/`object-position` à appliquer au visuel de la carte. */
+/**
+ * Cadrage à appliquer au visuel de la carte.
+ *
+ * Priorité au réglage enregistré avec le portrait (atelier : position et zoom
+ * choisis à la souris), puis au cadrage écrit à la main par carte, puis au
+ * défaut.
+ */
 export function getPortraitFraming(cardId?: string | null): PortraitFraming {
-  return (cardId && PORTRAIT_FRAMING[cardId]) || DEFAULT_FRAMING;
+  if (!cardId) return DEFAULT_FRAMING;
+  return clampFraming(ITEMS[cardId]?.framing ?? PORTRAIT_FRAMING[cardId] ?? DEFAULT_FRAMING);
 }
 
 /**
@@ -86,6 +108,7 @@ export function sourceLabel(portrait: Portrait): string {
   if (portrait.sourceName) return portrait.sourceName;
   if (portrait.source === "fandom") return portrait.wikiHost ?? "Fandom";
   if (portrait.source === "wikidata") return "Wikidata";
+  if (portrait.source === "custom") return "Lien externe";
   return "Wikipédia";
 }
 

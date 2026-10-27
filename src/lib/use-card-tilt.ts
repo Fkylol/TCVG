@@ -2,8 +2,14 @@
 
 import { useCallback, useEffect, useRef, type PointerEvent as ReactPointerEvent } from "react";
 
-/** Inclinaison maximale, en degrés, sur chaque axe. */
-const MAX_TILT = 15;
+/**
+ * Inclinaison maximale par défaut, en degrés, sur chaque axe.
+ *
+ * La carte seule (visionneuse plein écran) peut demander plus : voir
+ * `useCardTilt(25)` dans `card-flip.tsx`. Au-delà de 30°, le texte des bords
+ * devient pénible à lire.
+ */
+export const MAX_TILT = 15;
 const REDUCED_MOTION = "(prefers-reduced-motion: reduce)";
 /**
  * Marge au-delà de laquelle le cadre de la carte est remesuré. Une carte inclinée
@@ -35,8 +41,11 @@ function prefersReducedMotion(): boolean {
  * donc aucun ref n'est nécessaire côté rendu. Au doigt, l'effet suit le
  * contact entre `pointerdown` et `pointerup` ; avec `prefers-reduced-motion`,
  * l'inclinaison est annulée mais le reflet continue de suivre le pointeur.
+ *
+ * `maxTilt` se règle à l'appel : 15° par défaut (vignettes, fiches), 25° pour
+ * la carte ouverte dans la visionneuse.
  */
-export function useCardTilt<T extends HTMLElement>() {
+export function useCardTilt<T extends HTMLElement>(maxTilt: number = MAX_TILT) {
   const frame = useRef<number | null>(null);
   const element = useRef<T | null>(null);
   const point = useRef<TiltPoint | null>(null);
@@ -91,8 +100,8 @@ export function useCardTilt<T extends HTMLElement>() {
 
       point.current = {
         // La souris en haut incline le haut de la carte vers l'arrière.
-        rx: (0.5 - y) * 2 * MAX_TILT * tilt,
-        ry: (x - 0.5) * 2 * MAX_TILT * tilt,
+        rx: (0.5 - y) * 2 * maxTilt * tilt,
+        ry: (x - 0.5) * 2 * maxTilt * tilt,
         tx: x * 2 - 1,
         ty: y * 2 - 1,
       };
@@ -100,7 +109,7 @@ export function useCardTilt<T extends HTMLElement>() {
       node.style.setProperty("--intensity", "1");
       schedule();
     },
-    [measure, schedule],
+    [maxTilt, measure, schedule],
   );
 
   const rest = useCallback(() => {

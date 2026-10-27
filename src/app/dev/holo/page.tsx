@@ -6,14 +6,22 @@ import { createClient } from "@/lib/supabase/server";
 import { HoloLab } from "./holo-lab";
 
 export const metadata: Metadata = {
-  title: "Laboratoire holo — TCVG",
+  title: "Laboratoire d'effets — TCVG",
   robots: { index: false, follow: false },
 };
 
 // Page de travail : elle ne doit jamais être servie en cache ni indexée.
 export const dynamic = "force-dynamic";
 
-const VARIANTS = ["normal", "misprint", "ghosting", "off_center", "holo_bleed"] as const;
+const VARIANTS = [
+  "normal",
+  "misprint",
+  "ghosting",
+  "off_center",
+  "holo_bleed",
+  "reverse",
+  "holo_blue",
+] as const;
 
 /** Une carte représentative par rareté, pour comparer les traitements. */
 function sampleByRarity(): { rarity: Rarity; card: Card }[] {
@@ -36,11 +44,11 @@ export default async function HoloLabPage() {
   return (
     <article>
       <span className="eyebrow">Atelier</span>
-      <h1 className="display mt-2 text-4xl">Laboratoire holo</h1>
+      <h1 className="display mt-2 text-4xl">Laboratoire d&apos;effets</h1>
       <span className="title-rule" aria-hidden />
       <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/55">
-        Les six raretés, puis les variantes misprint. Le curseur fixe l&apos;intensité des
-        effets (0 = carte au repos, 1 = survol) : il sert à vérifier ce qui reste lisible
+        Les six raretés, puis les variantes misprint. Le curseur fixe l&apos;intensité de la
+        pellicule (0 = carte au repos, 1 = survol) : il sert à vérifier ce qui reste lisible
         sans pointeur, notamment sur mobile.
       </p>
 
