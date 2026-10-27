@@ -100,6 +100,17 @@ test("pellicule : le Commun reste mat, les autres montent sans reculer", () => {
   assert.equal(steps.at(-1), 0.85);
   // Une copie brillante pousse la pellicule à fond.
   assert.match(CSS, /\.card-face\[data-holo="true"\] \{\s*--ho: 1;/);
+
+  // Le repos porte le plus gros de la pellicule : une carte de rareté haute
+  // doit déjà briller dans une grille, sans pointeur dessus. Le survol ne fait
+  // que compléter (cf. le Commun, qui monte de 0,5 à 0,55 seulement).
+  const film = CSS.match(
+    /\.card-holo \{[\s\S]*?opacity: calc\(([0-9.]+) \+ ([0-9.]+) \* var\(--intensity, 0\)\);/,
+  );
+  assert.ok(film, "l'opacité de la pellicule a changé de forme");
+  const rest = Number(film[1]);
+  assert.ok(rest >= 0.7, `la pellicule doit briller au repos (repos = ${rest})`);
+  assert.equal(rest + Number(film[2]), 1, "le survol complète la pellicule, sans la dépasser");
 });
 
 test("copie brillante : la pellicule reste allumée sans pointeur", () => {
@@ -109,10 +120,18 @@ test("copie brillante : la pellicule reste allumée sans pointeur", () => {
     CSS,
     /\.card-face\[data-holo="true"\] \.card-holo,\s*\n\.card-face\[data-holo="true"\] \.card-glare \{\s*display: block;/,
   );
-  assert.match(
-    CSS,
-    /\.card-face\[data-holo="true"\] \.card-holo \{\s*opacity: calc\(0\.6 \+ 0\.4 \* var\(--intensity, 0\)\);\s*animation: holo-drift 12s linear infinite;/,
+
+  // Le repos doit porter l'essentiel de la pellicule : c'est lui qu'on voit
+  // dans une collection, sur un téléphone, sans jamais survoler la carte. Le
+  // pointeur ne fait que finir d'allumer les dernières marches.
+  const rule = CSS.match(
+    /\.card-face\[data-holo="true"\] \.card-holo \{\s*opacity: calc\(([0-9.]+) \+ ([0-9.]+) \* var\(--intensity, 0\)\);\s*animation: holo-drift 12s linear infinite;/,
   );
+  assert.ok(rule, "la règle de la copie brillante a changé de forme");
+  const rest = Number(rule[1]);
+  const pointer = Number(rule[2]);
+  assert.ok(rest >= 0.8, `une holo doit briller au repos (repos = ${rest})`);
+  assert.equal(rest + pointer, 1, "le survol complète la pellicule, sans la dépasser");
 
   const keyframes = CSS.slice(CSS.indexOf("@keyframes holo-drift"));
   assert.ok(keyframes.length > 0, "dérive de la pellicule introuvable");
@@ -252,8 +271,25 @@ test("visionneuse : l'inclinaison suit le pointeur sans traîner", () => {
   // Une transition sur l'inclinaison la faisait courir derrière le curseur.
   assert.match(CSS, /\.card-flip-tilt\[data-tilt="true"\]\s*\{\s*transition: transform 0s;/);
   // Le cadre est mesuré au repos : l'inclinaison ne déforme plus sa référence.
-  assert.match(TILT, /bounds\.current = node\.getBoundingClientRect\(\)/);
-  assert.match(TILT, /const STALE_MARGIN = 80;/);
+  // La transformation est retirée le temps de la lecture, sinon la mesure
+  // porterait sur la boîte inclinée.
+  assert.match(TILT, /node\.style\.transform = "none";[\s\S]{0,120}getBoundingClientRect\(\)/);
+  // Mesurée une fois par survol, pas à chaque image.
+  assert.match(TILT, /const measure = useCallback\(\(node: T\) => \{/);
+});
+
+test("inclinaison : le pointeur posé sur un bord ne fait plus sauter la carte", () => {
+  // La forme inclinée s'écarte du curseur : un `pointerleave` ne suffit pas à
+  // conclure, sinon la carte sort, revient à plat, est survolée, ressort…
+  assert.match(TILT, /const EDGE_SLACK = 8;/);
+  assert.match(
+    TILT,
+    /onPointerLeave\(event: ReactPointerEvent<T>\) \{[\s\S]{0,400}if \(inside\(event\.clientX, event\.clientY\)\) return;/,
+  );
+  // Le pointeur reste suivi sur le document pendant le survol : près d'un
+  // bord, la carte ne reçoit plus les déplacements.
+  assert.match(TILT, /document\.addEventListener\("pointermove", onMove, \{ passive: true \}\)/);
+  assert.match(TILT, /removeEventListener\("pointermove", onMove\)/);
 });
 
 test("visionneuse : l'inclinaison vit à l'extérieur du retournement", () => {

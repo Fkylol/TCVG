@@ -25,6 +25,7 @@
  * Effet torche (zone assombrie + lampe qui suit la souris + coupures de batterie) :
  *   torch: true, torchTarget: '.ma-zone-cartes'   // sélecteur CSS de la zone
  *   torchRadius: 170 (px), torchDarkness: 0.86 (0 à 1), torchPadding: 12 (px),
+ *   torchPaddingTop: (px) marge du haut, si la zone doit en garder plus
  *   torchFlicker: true, torchTouch: false (inactif sur écrans tactiles)
  *   Test manuel d'une coupure : HalloweenOverlay.flicker() (ou flicker(0..3) pour un scénario précis)
  */
@@ -37,7 +38,7 @@
       boosterPumpkin: false,
       boosterEndpoint: null, boosterCooldownMs: 3600000, onClaim: null,
       torch: false, torchTarget: null, torchRadius: 170, torchDarkness: 0.86,
-      torchPadding: 12, torchFlicker: true, torchTouch: false },
+      torchPadding: 12, torchPaddingTop: null, torchFlicker: true, torchTouch: false },
     window.HALLOWEEN_OVERLAY || {}
   );
 
@@ -460,7 +461,11 @@
       return;
     }
     var pad = opts.torchPadding;
-    var L = rc.left - pad, T = rc.top - pad, W = rc.width + pad * 2, H = rc.height + pad * 2;
+    // La zone mesurée n'inclut pas les transformations de ses enfants : quand
+    // l'un d'eux flotte et se soulève, il sort du cadre par le haut. Une marge
+    // du haut distincte lui laisse la place, sans élargir les trois autres.
+    var padT = opts.torchPaddingTop == null ? pad : opts.torchPaddingTop;
+    var L = rc.left - pad, T = rc.top - padT, W = rc.width + pad * 2, H = rc.height + padT + pad;
     var key = Math.round(L) + ',' + Math.round(T) + ',' + Math.round(W) + ',' + Math.round(H);
     if (key !== boxKey) {
       boxKey = key;

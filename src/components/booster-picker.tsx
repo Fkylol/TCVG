@@ -295,7 +295,10 @@ export function BoosterPicker({
       </header>
 
       {/* ————— La scène : le pack choisi en grand, une flèche de chaque côté ————— */}
-      <div ref={stage} className="relative mt-10">
+      {/* `mt-14` et non `mt-10` : le cadre assombri d'Halloween remonte de 36 px
+          au-dessus de la grille pour laisser flotter le poster, et ces 16 px de
+          plus gardent la même distance au bandeau d'en haut. */}
+      <div ref={stage} className="relative mt-14">
         {/* Halo du pack choisi : un calque par pack, un seul allumé — la
             sélection se fond au lieu de sauter. */}
         <div className="v-scene" aria-hidden>

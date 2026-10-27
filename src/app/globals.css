@@ -1110,11 +1110,12 @@ button:focus-visible .pack-poster[data-flat="true"] {
 
 /* ————— Pellicule holographique —————
 
-   Trois textures superposées : les paillettes, le grain de foil et un dégradé
-   métallique teinté par la rareté. Chacune glisse à sa propre vitesse avec le
-   pointeur, mélangées en `color-dodge` ; un reflet en `overlay` suit la main.
-   Le Commun n'en porte aucune : la rareté se lit d'abord à la couleur du
-   carton, puis à l'intensité de la pellicule. */
+   Quatre couches superposées : les bandes de lumière — c'est elles qui font
+   « brillant » —, les paillettes, le grain de foil, et un dégradé métallique
+   teinté par la rareté. Chacune glisse à sa propre vitesse avec le pointeur,
+   mélangées en `color-dodge` ; un reflet en `overlay` suit la main. Le Commun
+   n'en porte aucune : la rareté se lit d'abord à la couleur du carton, puis à
+   l'intensité de la pellicule. */
 :root {
   --holo-glitter: url("/textures/holo-glitter.png");
   --holo-foil: url("/textures/holo-foil.png");
@@ -1127,13 +1128,18 @@ button:focus-visible .pack-poster[data-flat="true"] {
   border-radius: inherit;
   pointer-events: none;
   mix-blend-mode: color-dodge;
-  opacity: calc(var(--ho, 0) * (0.45 + var(--intensity, 0) * 0.55));
-  background-image: var(--holo-glitter), var(--holo-foil), var(--foil);
+  /* Les trois quarts de la pellicule restent au repos : sans pointeur —
+     vignette de collection, téléphone — une carte de rareté haute doit déjà
+     briller. Le quart restant s'allume au survol. */
+  opacity: calc(var(--ho, 0) * (0.75 + var(--intensity, 0) * 0.25));
+  background-image: var(--holo-bands), var(--holo-glitter), var(--holo-foil), var(--foil);
   background-size:
+    190% 190%,
     200px 200px,
     128px 128px,
     400% 400%;
   background-position:
+    calc(50% + var(--tx, 0) * 42%) calc(50% + var(--ty, 0) * 42%),
     calc(var(--tx, 0) * -65px) calc(var(--ty, 0) * -65px),
     calc(var(--tx, 0) * 45px) calc(var(--ty, 0) * 45px),
     calc(50% + var(--tx, 0) * 32%) calc(50% + var(--ty, 0) * 32%);
@@ -1165,7 +1171,7 @@ button:focus-visible .pack-poster[data-flat="true"] {
   border-radius: inherit;
   pointer-events: none;
   mix-blend-mode: overlay;
-  opacity: calc(0.25 + var(--intensity, 0) * 0.75);
+  opacity: calc(0.32 + var(--intensity, 0) * 0.68);
   background: radial-gradient(
     farthest-corner circle at calc(50% + var(--tx, 0) * 50%) calc(50% + var(--ty, 0) * 50%),
     rgba(255, 255, 255, 0.7),
@@ -1220,7 +1226,7 @@ button:focus-visible .pack-poster[data-flat="true"] {
    une holo au repos avait exactement le rendu d'une carte normale. Les teintes
    tournent lentement, en `filter` pour rester composées par le GPU. */
 .card-face[data-holo="true"] .card-holo {
-  opacity: calc(0.6 + 0.4 * var(--intensity, 0));
+  opacity: calc(0.9 + 0.1 * var(--intensity, 0));
   animation: holo-drift 12s linear infinite;
 }
 
@@ -1235,6 +1241,33 @@ button:focus-visible .pack-poster[data-flat="true"] {
 
 /* Dégradé métallique : la teinte de la rareté, du plus sombre au plus clair. */
 .card-face {
+  /* Les bandes du foil : des filets de lumière inclinés, séparés par des creux.
+     C'est elles qui font le « brillant » — les textures ne donnent que le grain
+     et les paillettes — et elles restent propres à chaque palier, le prisme
+     arc-en-ciel restant au foil du Mythique.
+
+     Elles sont écrites ici, dans la règle du carton, et pas dans `:root` :
+     `--rarity` n'existe qu'ici, et une variable se résout là où elle est écrite.
+
+     La lumière garde 42 % de la teinte du carton : assez clair pour se voir,
+     assez coloré pour ne pas virer au blanc. Plus blanc, le `color-dodge`
+     sature et une illustration claire (Kirby, un ciel) part en aplat blanc. */
+  --holo-light: color-mix(in oklab, var(--rarity) 42%, white);
+  --holo-bands: linear-gradient(
+    118deg,
+    transparent 3%,
+    color-mix(in oklab, var(--holo-light) 70%, transparent) 10%,
+    transparent 17%,
+    transparent 29%,
+    color-mix(in oklab, var(--holo-light) 84%, transparent) 36%,
+    transparent 43%,
+    transparent 55%,
+    color-mix(in oklab, var(--holo-light) 66%, transparent) 62%,
+    transparent 69%,
+    transparent 81%,
+    color-mix(in oklab, var(--holo-light) 78%, transparent) 88%,
+    transparent 95%
+  );
   --foil: repeating-linear-gradient(
     115deg,
     color-mix(in oklab, var(--rarity) 18%, #04060a) 0%,
@@ -1336,6 +1369,8 @@ button:focus-visible .pack-poster[data-flat="true"] {
    reste allumé même sur une Commune — c'est précisément le défaut. */
 .card-face[data-variant="holo_blue"] {
   --ho: 1;
+  /* Les bandes suivent le foil : elles passent au bleu froid, elles aussi. */
+  --holo-light: color-mix(in oklab, #4ad7ff 45%, white);
   --foil: repeating-linear-gradient(
     115deg,
     #061428 0%,
