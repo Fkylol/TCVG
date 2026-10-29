@@ -11,6 +11,12 @@ export const HALLOWEEN_END = { month: 11, day: 2 } as const;
 export const HALLOWEEN_TIME_ZONE = "Europe/Paris";
 export const HALLOWEEN_BOOSTER_NAME = "Booster d'Halloween";
 export const HALLOWEEN_COOLDOWN_MS = 60 * 60 * 1000;
+/**
+ * Événement émis par l'overlay quand la citrouille obtient son booster, avec la
+ * réponse du serveur en `detail`. Le script d'ambiance l'écrit en clair (il ne
+ * peut rien importer) : c'est le même nom des deux côtés.
+ */
+export const HALLOWEEN_BOOSTER_EVENT = "halloween:booster";
 
 /** Jour civil à Paris, sans dépendre du fuseau du serveur ou du navigateur. */
 export function parisDay(date: Date): { month: number; day: number } {

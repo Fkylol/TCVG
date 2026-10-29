@@ -1,12 +1,8 @@
 import { requireSession } from "@/lib/auth";
 import { getReferralAdminReport } from "@/lib/referral/service";
+import { csvCell } from "@/lib/referral/rules";
 
 export const dynamic = "force-dynamic";
-
-function csvCell(value: unknown): string {
-  const text = value === null || value === undefined ? "" : String(value);
-  return `"${text.replace(/"/g, '""')}"`;
-}
 
 /** Export CSV des parrainages — réservé aux administrateurs (`is_admin()`). */
 export async function GET() {

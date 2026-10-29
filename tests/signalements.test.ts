@@ -132,16 +132,15 @@ test("atelier : l'accueil donne accès aux deux outils", () => {
   assert.doesNotMatch(ACCUEIL, /Indisponible en ligne/);
 });
 
-test("atelier : accès réservé aux deux comptes du catalogue, en ligne", () => {
-  // Liste nominative : l'atelier ne suit pas le rôle d'administration.
-  assert.match(ACCES, /ATELIER_USERNAMES = \["fkyzu", "deathsky74", "asperge"\]/);
-  assert.match(ACCES, /export function canUseAtelier\(/);
-  assert.match(ACCES, /select\("username"\)/);
-  assert.doesNotMatch(ACCES, /is_admin/);
+test("atelier : accès fondé sur la permission en base, en ligne", () => {
+  // La permission est vérifiée par la base, sans dépendre du pseudo.
+  assert.match(ACCES, /export async function canUseAtelier\(/);
+  assert.match(ACCES, /supabase\.rpc\("is_atelier"\)/);
+  assert.doesNotMatch(ACCES, /select\("username"\)/);
 
   assert.match(ACCES, /if \(process\.env\.NODE_ENV !== "production"\) return null;/);
   assert.match(ACCES, /if \(!session\) redirect\("\/login"\)/);
-  assert.match(ACCES, /if \(error \|\| !canUseAtelier\(data\?\.username as string \| null\)\) notFound\(\)/);
+  assert.match(ACCES, /if \(!\(await canUseAtelier\(session\.supabase\)\)\) notFound\(\)/);
 
   // Le layout applique la garde à toutes les pages de l'atelier.
   assert.match(ATELIER_LAYOUT, /const session = await atelierSession\(\);/);
@@ -161,9 +160,10 @@ test("atelier : les deux comptes n'ont plus le rôle d'administration", () => {
   );
   assert.match(migration, /set is_admin = false/);
   assert.match(migration, /lower\(username\) in \('deathsky74', 'asperge'\)/);
-  // L'onglet Atelier est calculé depuis le pseudo du profil.
+  // L'onglet Atelier utilise la même permission que la base.
   const game = fs.readFileSync(path.join(process.cwd(), "src/app/(game)/layout.tsx"), "utf8");
-  assert.match(game, /atelier=\{canUseAtelier\(profile\.username\)\}/);
+  assert.match(game, /canUseAtelier\(supabase\)/);
+  assert.match(game, /atelier=\{atelier\}/);
 });
 
 test("signalement : lecture par session admin, ou par la connexion de maintenance en local", () => {

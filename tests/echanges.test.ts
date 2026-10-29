@@ -99,6 +99,15 @@ test("échange : statut inconnu ramené à « en attente », refus sans tableau"
   assert.equal(parseOfferBoard("nope"), null);
 });
 
+test("échange : les réponses malformées ne cassent pas le tableau", () => {
+  for (const incoming of [{}, "texte", [null], ["offre"], [[]]]) {
+    assert.equal(parseOfferBoard({ ok: true, incoming, outgoing: [] }), null);
+  }
+  assert.equal(parseOfferBoard({ ok: true, incoming: [], outgoing: {} }), null);
+  const board = parseOfferBoard({ ok: true, incoming: [offerRow({ status: "toString" })] });
+  assert.equal(board?.incoming[0].status, "pending");
+});
+
 test("échange : une offre n'est ouverte que tant qu'elle vit", () => {
   const base: ChatOffer = {
     id: 1,

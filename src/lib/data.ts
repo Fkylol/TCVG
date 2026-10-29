@@ -15,6 +15,10 @@ export type Profile = {
   boosterStock: number;
   /** Boosters bonus (parrainage) : hors plafond, sans expiration. */
   bonusBoosters: number;
+  /** Ouvertures permanentes depuis la migration 067, pour le rythme doré. */
+  standardBoostersOpened: number;
+  /** Pity Mythique restant depuis la migration 067. */
+  pityMythic: number;
   /** Carte utilisée comme avatar, si le joueur en a choisi une. */
   avatarCardId: string | null;
   /** Cadre d'avatar débloqué (voir `lib/profile`). */
@@ -39,7 +43,7 @@ export async function getProfile(supabase: SupabaseClient, user: User): Promise<
   const { data, error } = await supabase
     .from("profiles")
     .select(
-      "username, last_booster_at, boosters_opened, booster_stock, bonus_boosters, avatar_card_id, frame, pixels",
+      "username, last_booster_at, boosters_opened, booster_stock, bonus_boosters, standard_boosters_opened, pity_mythic, avatar_card_id, frame, pixels",
     )
     .eq("id", user.id)
     .maybeSingle();
@@ -51,6 +55,8 @@ export async function getProfile(supabase: SupabaseClient, user: User): Promise<
       boostersOpened: 0,
       boosterStock: 0,
       bonusBoosters: 0,
+      standardBoostersOpened: 0,
+      pityMythic: 0,
       avatarCardId: null,
       frame: "steel",
       pixels: 0,
@@ -63,6 +69,8 @@ export async function getProfile(supabase: SupabaseClient, user: User): Promise<
     boostersOpened: data.boosters_opened ?? 0,
     boosterStock: data.booster_stock ?? 0,
     bonusBoosters: data.bonus_boosters ?? 0,
+    standardBoostersOpened: data.standard_boosters_opened ?? 0,
+    pityMythic: data.pity_mythic ?? 0,
     avatarCardId: (data.avatar_card_id as string | null) ?? null,
     frame: (data.frame as string | null) ?? "steel",
     pixels: (data.pixels as number | null) ?? 0,
@@ -935,6 +943,29 @@ export async function getCardOwners(supabase: SupabaseClient): Promise<Record<st
   return owners;
 }
 
+export type PackGuarantees = {
+  hasMythic: boolean;
+  hasHighRarity: boolean;
+  goldenEvery: number;
+  divineChance: number;
+  mythicPityEvery: number;
+  slot4MinRank: number;
+  slot5MinRank: number;
+};
+
+function parsePackGuarantees(chances: Record<string, unknown> | null | undefined): PackGuarantees | undefined {
+  if (!chances || typeof chances.golden_every !== "number") return undefined;
+  return {
+    hasMythic: chances.has_mythic === true,
+    hasHighRarity: chances.has_high_rarity === true,
+    goldenEvery: chances.golden_every,
+    divineChance: typeof chances.divine_chance === "number" ? chances.divine_chance : 0,
+    mythicPityEvery: typeof chances.mythic_pity_every === "number" ? chances.mythic_pity_every : 250,
+    slot4MinRank: typeof chances.slot_4_min_rank === "number" ? chances.slot_4_min_rank : 0,
+    slot5MinRank: typeof chances.slot_5_min_rank === "number" ? chances.slot_5_min_rank : 0,
+  };
+}
+
 export type PackStats = {
   /** Personnages actifs du pack : c'est le pool réellement utilisé au tirage. */
   poolSize: number;
@@ -942,8 +973,10 @@ export type PackStats = {
   minPoolSize: number;
   available: boolean;
   cardsCount: number;
-  /** Chance d'obtenir au moins une carte de chaque rareté, calculée en base. */
+  /** Chances de base d'obtenir au moins une carte de chaque rareté, calculées en base. */
   chances: Record<string, number>;
+  /** Garanties de pack (distinctes des probabilités brutes). */
+  guarantees?: PackGuarantees;
 };
 
 /**
@@ -968,14 +1001,17 @@ export async function getPackStats(
     pool_size: number;
     min_pool_size: number;
     available: boolean;
-    chances: Record<string, number>;
+    chances: Record<string, unknown>;
   }[]) {
     stats[row.slug] = {
       poolSize: row.pool_size,
       minPoolSize: row.min_pool_size,
       available: row.available,
       cardsCount: row.cards_count,
-      chances: row.chances ?? {},
+      chances: Object.fromEntries(
+        Object.entries(row.chances ?? {}).filter(([, value]) => typeof value === "number"),
+      ) as Record<string, number>,
+      guarantees: parsePackGuarantees(row.chances),
     };
   }
 

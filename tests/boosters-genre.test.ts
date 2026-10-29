@@ -10,6 +10,8 @@ const ROOT = path.resolve(import.meta.dirname, "..");
 const read = (file: string) => readFileSync(path.join(ROOT, file), "utf8");
 
 const MIGRATION = read("supabase/migrations/037_boosters_de_genre_stricts.sql");
+const DRAW_MIGRATION = read("supabase/migrations/055_holos_reverse_bleue.sql");
+const FIX_MIGRATION = read("supabase/migrations/059_repli_raretes_booster.sql");
 
 test("boosters de genre : le pool est une frontière", () => {
   assert.match(MIGRATION, /v_strict := exists/);
@@ -29,6 +31,26 @@ test("boosters de genre : les chances sont calculées sur le pool", () => {
   assert.match(MIGRATION, /c\.id = any \(p_pool\) and c\.rarity = e\.key/);
   assert.match(MIGRATION, /cg\.genre_id = v_row\.genre_id/);
   assert.match(MIGRATION, /where e\.key = any \(v_rarities\)/);
+});
+
+test("boosters : le repli inclut les six raretés sans remplacer les autres règles", () => {
+  const order = (sql: string, key: string) => {
+    const match = sql.match(new RegExp(`${key}[^\\n]*array\\[([^\\]]+)\\]`));
+    assert.ok(match, `ordre ${key} introuvable`);
+    return [...match[1].matchAll(/'([A-Z]+)'/g)].map((item) => item[1]);
+  };
+  const old = order(DRAW_MIGRATION, "v_order");
+  // Les littéraux SQL de la migration corrective doublent les apostrophes.
+  const fix = FIX_MIGRATION.replace(/''/g, "'");
+  const previous = order(fix, "v_old");
+  const corrected = order(fix, "v_new");
+  assert.deepEqual(previous, old);
+  assert.deepEqual(corrected, ["L", "UR", "SR", "R", "UC", "C"]);
+  assert.deepEqual(corrected.slice(corrected.indexOf("R") + 1), ["UC", "C"]);
+  assert.deepEqual(corrected.slice(corrected.indexOf("UC") + 1), ["C"]);
+  assert.match(FIX_MIGRATION, /pg_get_functiondef/);
+  assert.match(FIX_MIGRATION, /raise exception 'Ordre de repli/);
+  assert.match(FIX_MIGRATION, /execute replace\(v_definition, v_old, v_new\)/);
 });
 
 test("pool MMO : assez de basses raretés pour un paquet de cinq cartes", () => {

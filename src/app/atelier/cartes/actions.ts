@@ -41,12 +41,9 @@ function isKnownUniverse(value: string): value is keyof typeof UNIVERSES {
  *
  * Rien n'est enregistré à ce stade : le formulaire montre tout, modifiable.
  */
-export async function prepareAction(input: { universe: string; name: string }): Promise<PrepareResult> {
-  if (process.env.NODE_ENV === "production") {
-    return { ok: false, error: "L'atelier est réservé au développement local." };
-  }
-
+export async function prepareAction(input: { universe: string; name: string; universeLabel?: string }): Promise<PrepareResult> {
   const requested = input.universe?.trim() ?? "";
+  const requestedLabel = input.universeLabel?.trim().replace(/\s+/g, " ") ?? "";
   const name = input.name?.trim().replace(/\s+/g, " ") ?? "";
   if (name.length < 2) return { ok: false, error: "Indique le nom du personnage (2 caractères minimum)." };
   if (name.length > 60) return { ok: false, error: "Nom trop long (60 caractères maximum)." };
@@ -66,8 +63,12 @@ export async function prepareAction(input: { universe: string; name: string }): 
     }
     universe = guess.universe;
   }
-  if (!isKnownUniverse(universe)) {
-    return { ok: false, error: "Choisis une franchise dans la liste." };
+  if (!isKnownUniverse(universe) && (!requested || requested !== requestedLabel)) {
+    return { ok: false, error: "Franchise invalide : sélectionne une franchise du catalogue." };
+  }
+  const universeLabel = isKnownUniverse(universe) ? UNIVERSES[universe].label : requestedLabel;
+  if (universeLabel.length < 2 || universeLabel.length > 80) {
+    return { ok: false, error: "Le nom de la franchise doit faire entre 2 et 80 caractères." };
   }
 
   const existing = CARDS.find(
@@ -77,7 +78,13 @@ export async function prepareAction(input: { universe: string; name: string }): 
     return { ok: false, error: `« ${existing.name} » est déjà au catalogue (${existing.id}).` };
   }
 
-  const { candidates, notes } = await searchPortraitCandidates({ universe, name });
+  // Portraits et rareté contactent des sources indépendantes : les lancer
+  // ensemble évite de faire attendre toute une branche réseau à l'autre.
+  const [portraitSearch, estimate] = await Promise.all([
+    searchPortraitCandidates({ universe, universeLabel, name }),
+    estimateRarity({ universe, name }),
+  ]);
+  const { candidates, notes } = portraitSearch;
   const best = candidates[0] ?? null;
 
   // Fiche : la page qui porte exactement le nom (et non « The Characters of
@@ -92,10 +99,7 @@ export async function prepareAction(input: { universe: string; name: string }): 
     loreCandidates[0] ??
     null;
 
-  const [lore, estimate] = await Promise.all([
-    draftLore({ candidate: loreCandidate, name, universe }),
-    estimateRarity({ universe, name }),
-  ]);
+  const lore = await draftLore({ candidate: loreCandidate, name, universe, universeLabel });
 
   const draft: CardDraft = {
     id: uniqueCardId(name, CARDS.map((card) => card.id)),

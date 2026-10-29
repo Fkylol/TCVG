@@ -19,11 +19,12 @@ export default async function GameLayout({ children }: { children: React.ReactNo
   const bonus = await claimDailyBonus(supabase);
   // Une visite authentifiée compte comme jour d'activité (série « Assidu »).
   await recordActivityDay(supabase);
-  const [profile, unread, admin, rarityUpdate] = await Promise.all([
+  const [profile, unread, admin, rarityUpdate, atelier] = await Promise.all([
     getProfile(supabase, user),
     getUnreadNotificationCount(supabase),
     supabase.rpc("is_admin").then(({ data }) => data === true),
     getRarityUpdate(supabase),
+    canUseAtelier(supabase),
   ]);
 
   return (
@@ -39,7 +40,7 @@ export default async function GameLayout({ children }: { children: React.ReactNo
         serverNow={serverNowMs()}
         unread={unread}
         admin={admin}
-        atelier={canUseAtelier(profile.username)}
+        atelier={atelier}
       />
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8">
         <DailyBonusNote bonus={bonus} />

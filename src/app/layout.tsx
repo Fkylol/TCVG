@@ -1,10 +1,15 @@
 import type { Metadata } from "next";
 import { DM_Sans, IBM_Plex_Mono, Syne } from "next/font/google";
 import Script from "next/script";
+import { cookies } from "next/headers";
+import { HalloweenOpening } from "@/components/halloween-opening";
 import { HalloweenOverlay } from "@/components/halloween-overlay";
+import { RevealHost } from "@/components/reveal-host";
 import { XmasOverlay } from "@/components/xmas-overlay";
 import { installCardEdits } from "@/lib/card-edits.server";
 import { MOTION_BOOT_SCRIPT, MOTION_DEFAULT } from "@/lib/motion";
+import { isLocale, LOCALE_COOKIE } from "@/lib/locale";
+import { LocaleProvider } from "@/components/locale-provider";
 import "./globals.css";
 
 // Texte courant : DM Sans.
@@ -58,12 +63,16 @@ export const metadata: Metadata = {
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   // Le catalogue édité en ligne est chargé avant tout rendu : le serveur et le
   // navigateur lisent la même liste (nom, rareté, visuel, cartes retirées).
-  const cardEdits = await installCardEdits();
+  const [cardEdits, localeCookie] = await Promise.all([
+    installCardEdits(),
+    cookies().then((jar) => jar.get(LOCALE_COOKIE)?.value),
+  ]);
+  const locale = isLocale(localeCookie) ? localeCookie : "fr";
   const cardEditsJson = JSON.stringify(cardEdits).replace(/</g, "\\u003c");
 
   return (
     <html
-      lang="fr"
+      lang={locale}
       // Le mode par défaut est écrit ici : le CSS s'y fie avant même le script
       // d'amorçage, qui ne corrige que les navigateurs réglés sur « suivre le
       // système ».
@@ -87,7 +96,15 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             __html: `globalThis.__CARD_EDITS__=${cardEditsJson};`,
           }}
         />
-        {children}
+        <LocaleProvider locale={locale}>
+          {children}
+          {/* L'écran d'ouverture de booster, monté une fois pour toutes : la
+              citrouille d'Halloween l'affiche depuis n'importe quelle page. */}
+          <RevealHost />
+        </LocaleProvider>
+        {/* La citrouille a accordé son booster : on tire le pack saisonnier. */}
+        <HalloweenOpening />
+        {/* CAPTURE-OG : overlay coupé le temps de la capture */}
         <HalloweenOverlay
           force={process.env.NEXT_PUBLIC_HALLOWEEN_FORCE === "1"}
           zIndex={35}

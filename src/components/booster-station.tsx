@@ -1,13 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import { openPack } from "@/app/actions";
 import { getCard } from "@/lib/cards";
 import { BoosterPack } from "@/components/booster-pack";
-import { BoosterReveal, type RevealItem } from "@/components/booster-reveal";
+import type { RevealItem } from "@/components/booster-reveal";
 import { getPack } from "@/lib/packs";
-import { setPendingReveal, usePendingReveal } from "@/lib/reveal-queue";
+import { setPendingReveal } from "@/lib/reveal-queue";
 import {
   BOOSTER_COOLDOWN_MS,
   BOOSTER_STOCK_MAX,
@@ -34,12 +33,9 @@ export function BoosterStation({
   uniqueOwned: number;
   totalCards: number;
 }) {
-  const router = useRouter();
   const [stock, setStock] = useState(initialStock);
   const [anchor, setAnchor] = useState(initialAnchor);
   const [now, setNow] = useState(serverNow);
-  // Révélation hors composant : elle survit à un remontage pendant l'ouverture.
-  const reveal = usePendingReveal();
   const [opening, setOpening] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // Verrou synchrone contre le double-clic : un seul tirage par ouverture.
@@ -78,6 +74,9 @@ export function BoosterStation({
                 isNew: entry.isNew,
                 quantity: entry.quantity,
                 variant: entry.variant,
+                guaranteed: entry.guaranteed,
+                guaranteeType: entry.guaranteeType,
+                boosterSpecial: entry.boosterSpecial,
               },
             ]
           : [];
@@ -101,87 +100,75 @@ export function BoosterStation({
   return (
     <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
       <section>
-        {reveal && mix ? (
-          <BoosterReveal
-            title="Booster ouvert"
-            subtitle={`${reveal.items.length} carte${reveal.items.length > 1 ? "s" : ""}`}
-            items={reveal.items}
-            pack={mix}
-            onClose={() => {
-              setPendingReveal(null);
-              router.refresh();
-            }}
-            closeLabel="Retour"
-          />
-        ) : (
-          <div className="panel panel-accent flex flex-col items-center justify-center px-6 py-10 text-center">
+        {/* La révélation vit à la racine du site (`components/reveal-host.tsx`),
+            où qu'ait lieu l'ouverture. */}
+        <div className="panel panel-accent flex flex-col items-center justify-center px-6 py-10 text-center">
+          <button
+            type="button"
+            onClick={open}
+            disabled={available < 1 || opening}
+            aria-label="Ouvrir un booster"
+            className="group relative disabled:cursor-not-allowed"
+          >
+            <div
+              className={`relative w-40 transition sm:w-44 ${
+                opening ? "scale-95 opacity-40" : ""
+              }`}
+            >
+              {mix && (
+                <BoosterPack
+                  pack={mix}
+                  float={available > 0 && !opening}
+                  locked={available < 1}
+                />
+              )}
+              {available > 0 && (
+                <span className="chip absolute right-0 top-2 z-10 bg-black/70 text-[11px] font-semibold text-white">
+                  ×{available}
+                </span>
+              )}
+            </div>
+          </button>
+
+          <div className="mt-6 flex items-center gap-1.5" aria-label={`Stock : ${available} sur ${BOOSTER_STOCK_MAX}`}>
+            {Array.from({ length: BOOSTER_STOCK_MAX }, (_, index) => (
+              <span
+                key={index}
+                className={`h-2 w-5 transition ${
+                  index < available ? "bg-cyan" : "bg-white/12"
+                }`}
+              />
+            ))}
+          </div>
+          <p className="mt-2 font-mono text-xs text-white/45">
+            Stock {available}/{BOOSTER_STOCK_MAX}
+          </p>
+
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
             <button
               type="button"
               onClick={open}
               disabled={available < 1 || opening}
-              aria-label="Ouvrir un booster"
-              className="group relative disabled:cursor-not-allowed"
+              className="btn btn-primary"
             >
-              <div
-                className={`relative w-40 transition sm:w-44 ${
-                  opening ? "scale-95 opacity-40" : ""
-                }`}
-              >
-                {mix && (
-                  <BoosterPack
-                    pack={mix}
-                    float={available > 0 && !opening}
-                    locked={available < 1}
-                  />
-                )}
-                {available > 0 && (
-                  <span className="chip absolute right-0 top-2 z-10 bg-black/70 text-[11px] font-semibold text-white">
-                    ×{available}
-                  </span>
-                )}
-              </div>
+              {opening ? "Ouverture…" : available < 1 ? "Aucun booster" : "Ouvrir un booster"}
             </button>
-
-            <div className="mt-6 flex items-center gap-1.5" aria-label={`Stock : ${available} sur ${BOOSTER_STOCK_MAX}`}>
-              {Array.from({ length: BOOSTER_STOCK_MAX }, (_, index) => (
-                <span
-                  key={index}
-                  className={`h-2 w-5 transition ${
-                    index < available ? "bg-cyan" : "bg-white/12"
-                  }`}
-                />
-              ))}
-            </div>
-            <p className="mt-2 font-mono text-xs text-white/45">
-              Stock {available}/{BOOSTER_STOCK_MAX}
-            </p>
-
-            <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
-              <button
-                type="button"
-                onClick={open}
-                disabled={available < 1 || opening}
-                className="btn btn-primary"
-              >
-                {opening ? "Ouverture…" : available < 1 ? "Aucun booster" : "Ouvrir un booster"}
-              </button>
-            </div>
-
-            <p className="mt-4 text-xs text-white/45">
-              {full
-                ? "Stock plein — ouvre avant de continuer à accumuler."
-                : nextIn !== null
-                  ? `Prochain booster dans ${formatCountdown(nextIn)}`
-                  : `Un booster toutes les ${Math.round(BOOSTER_COOLDOWN_MS / 60000)} minutes, jusqu'à ${BOOSTER_STOCK_MAX}.`}
-            </p>
-
-            {error && (
-              <p className="mt-4 rounded-lg border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-200">
-                {error}
-              </p>
-            )}
           </div>
-        )}
+
+          <p className="mt-4 text-xs text-white/45">
+            {full
+              ? "Stock plein — ouvre avant de continuer à accumuler."
+              : nextIn !== null
+                ? `Prochain booster dans ${formatCountdown(nextIn)}`
+                : `Un booster toutes les ${Math.round(BOOSTER_COOLDOWN_MS / 60000)} minutes, jusqu'à ${BOOSTER_STOCK_MAX}.`}
+          </p>
+
+          {error && (
+            <p className="mt-4 rounded-lg border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-200">
+              {error}
+            </p>
+          )}
+        </div>
       </section>
 
       <aside className="space-y-4">

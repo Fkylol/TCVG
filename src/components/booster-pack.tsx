@@ -61,7 +61,7 @@ export function BoosterPack({
   flat?: boolean;
   className?: string;
 }) {
-  const { frameRef, titleRef, subtitleRef } = useFitTitle(0.8);
+  const { frameRef, titleRef, subtitleRef } = useFitTitle(0.8, pack.id);
   const veil = hasLightInk(pack.colors.ink) ? "rgba(8, 9, 14, 0.32)" : "rgba(8, 9, 14, 0)";
 
   // « Action-aventure » se compose sur deux lignes, à la césure naturelle.
@@ -133,7 +133,7 @@ export function BoosterPack({
             </svg>
           </span>
 
-          <span className="pack-title" ref={titleRef}>
+          <span className="pack-title" ref={titleRef} key={pack.id}>
             {titleLines.map((line) => (
               <span key={line} className="pack-title-line">
                 {line}

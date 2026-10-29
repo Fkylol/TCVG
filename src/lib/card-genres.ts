@@ -12,6 +12,7 @@
  */
 
 import { ATELIER_GENRES } from "./atelier-data";
+import { cardEdit, publishedCardRows } from "./card-edits";
 
 export type GenreSlug =
   | "action-aventure"
@@ -579,6 +580,7 @@ const BASE_CARD_GENRES: Record<string, GenreSlug[]> = {
   "thrall": ["mmo"],
   "jaina": ["mmo"],
   "anduin": ["mmo"],
+  "murloc": ["mmo"],
   "emet-selch": ["mmo"],
   "yshtola": ["mmo"],
   "alphinaud": ["mmo"],
@@ -586,6 +588,7 @@ const BASE_CARD_GENRES: Record<string, GenreSlug[]> = {
   "estinien": ["mmo"],
   "urianger": ["mmo"],
   "goultard": ["mmo"],
+  "comte-harebourg": ["mmo"],
   "dark-vlad": ["mmo"],
   "nox": ["mmo"],
   "joris-jurgen": ["mmo"],
@@ -772,12 +775,16 @@ export const CARD_GENRES: Record<string, GenreSlug[]> = {
 
 /** Genres d'une carte (vide si la carte n'est pas rattachée). */
 export function genresOf(cardId: string): GenreSlug[] {
+  const published = cardEdit(cardId)?.publishedGenres;
+  if (published?.length) return published.filter((slug): slug is GenreSlug => GENRES.some((genre) => genre.slug === slug));
   return CARD_GENRES[cardId] ?? [];
 }
 
 /** Identifiants des cartes rattachées à un genre. */
 export function cardIdsOfGenre(slug: GenreSlug | null): string[] {
-  const entries = Object.entries(CARD_GENRES);
-  if (slug === null) return entries.map(([id]) => id);
-  return entries.filter(([, genres]) => genres.includes(slug)).map(([id]) => id);
+  const entries = Object.keys(CARD_GENRES).filter((id) => !cardEdit(id)?.publishedCard);
+  const published = publishedCardRows().map((edit) => edit.cardId);
+  const ids = [...entries, ...published];
+  if (slug === null) return ids;
+  return ids.filter((id) => genresOf(id).includes(slug));
 }

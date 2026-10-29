@@ -19,15 +19,18 @@ export default async function PagesLayout({ children }: { children: React.ReactN
   // Le drapeau d'administration et l'atelier sont calculés ici aussi : sinon
   // la barre du haut change d'onglets d'une page à l'autre.
   let admin = false;
+  let atelier = false;
   if (session) {
     bonus = await claimDailyBonus(session.supabase);
     await recordActivityDay(session.supabase);
-    const [loaded, isAdmin] = await Promise.all([
+    const [loaded, isAdmin, isAtelier] = await Promise.all([
       getProfile(session.supabase, session.user),
       session.supabase.rpc("is_admin").then(({ data }) => data === true),
+      canUseAtelier(session.supabase),
     ]);
     profile = loaded;
     admin = isAdmin;
+    atelier = isAtelier;
   }
 
   return (
@@ -42,7 +45,7 @@ export default async function PagesLayout({ children }: { children: React.ReactN
         boosterAnchor={profile?.lastBoosterAt}
         serverNow={serverNowMs()}
         admin={admin}
-        atelier={canUseAtelier(profile?.username)}
+        atelier={atelier}
       />
       <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-10 sm:py-14">
         <DailyBonusNote bonus={bonus} />

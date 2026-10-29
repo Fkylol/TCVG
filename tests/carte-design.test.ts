@@ -101,41 +101,48 @@ test("pellicule : le Commun reste mat, les autres montent sans reculer", () => {
   // Une copie brillante pousse la pellicule à fond.
   assert.match(CSS, /\.card-face\[data-holo="true"\] \{\s*--ho: 1;/);
 
-  // Le repos porte le plus gros de la pellicule : une carte de rareté haute
-  // doit déjà briller dans une grille, sans pointeur dessus. Le survol ne fait
-  // que compléter (cf. le Commun, qui monte de 0,5 à 0,55 seulement).
-  const film = CSS.match(
-    /\.card-holo \{[\s\S]*?opacity: calc\(([0-9.]+) \+ ([0-9.]+) \* var\(--intensity, 0\)\);/,
+  // Rien au repos : la pellicule est proportionnelle au survol, et une carte
+  // qu'on ne touche pas n'a donc aucun voile sur son illustration — c'est ce
+  // qui garde aux visuels leur contraste dans une grille. Sous la main elle
+  // monte à sa pleine densité (`--ho`).
+  assert.match(
+    CSS,
+    /\.card-holo \{[\s\S]*?opacity: calc\(var\(--ho, 0\) \* var\(--intensity, 0\)\);/,
+    "la pellicule doit suivre le pointeur, sans reste au repos",
   );
-  assert.ok(film, "l'opacité de la pellicule a changé de forme");
-  const rest = Number(film[1]);
-  assert.ok(rest >= 0.7, `la pellicule doit briller au repos (repos = ${rest})`);
-  assert.equal(rest + Number(film[2]), 1, "le survol complète la pellicule, sans la dépasser");
+  // Le reflet suit exactement la même règle : en `overlay`, posé en permanence
+  // sur toute la surface, il bouchait les noirs et écrasait les hautes lumières
+  // de chaque visuel.
+  assert.match(
+    CSS,
+    /\.card-glare \{[\s\S]*?opacity: var\(--intensity, 0\);/,
+    "le reflet doit s'éteindre au repos",
+  );
 });
 
-test("copie brillante : la pellicule reste allumée sans pointeur", () => {
-  // La vignette d'une collection ne suit pas le pointeur : sans dérive, une
-  // holo au repos gardait le rendu d'une carte normale.
+test("copie brillante : la pellicule revient, mais sous la main", () => {
+  // Le Commun reste mat, sauf sur une copie brillante : la pellicule y est
+  // réaffichée même quand la rareté la coupe.
   assert.match(
     CSS,
     /\.card-face\[data-holo="true"\] \.card-holo,\s*\n\.card-face\[data-holo="true"\] \.card-glare \{\s*display: block;/,
   );
 
-  // Le repos doit porter l'essentiel de la pellicule : c'est lui qu'on voit
-  // dans une collection, sur un téléphone, sans jamais survoler la carte. Le
-  // pointeur ne fait que finir d'allumer les dernières marches.
-  const rule = CSS.match(
-    /\.card-face\[data-holo="true"\] \.card-holo \{\s*opacity: calc\(([0-9.]+) \+ ([0-9.]+) \* var\(--intensity, 0\)\);\s*animation: holo-drift 12s linear infinite;/,
+  // Elle s'allume comme les autres : au repos, l'illustration reste nette, et
+  // c'est l'étoile `✦` de la vignette qui annonce la copie holo.
+  assert.match(
+    CSS,
+    /\.card-face\[data-holo="true"\] \.card-holo \{\s*opacity: var\(--intensity, 0\);\s*\}/,
+    "la règle de la copie brillante a changé de forme",
   );
-  assert.ok(rule, "la règle de la copie brillante a changé de forme");
-  const rest = Number(rule[1]);
-  const pointer = Number(rule[2]);
-  assert.ok(rest >= 0.8, `une holo doit briller au repos (repos = ${rest})`);
-  assert.equal(rest + pointer, 1, "le survol complète la pellicule, sans la dépasser");
-
-  const keyframes = CSS.slice(CSS.indexOf("@keyframes holo-drift"));
-  assert.ok(keyframes.length > 0, "dérive de la pellicule introuvable");
-  assert.match(keyframes, /filter: hue-rotate\(0deg\)[\s\S]*?filter: hue-rotate\(360deg\)/);
+  // Plus aucune pellicule allumée sans pointeur : ni dérive de teintes, ni
+  // reste d'opacité sur une variante.
+  assert.doesNotMatch(CSS, /@keyframes holo-drift/);
+  assert.doesNotMatch(
+    CSS,
+    /\.card-holo \{\s*opacity: calc\([0-9.]+ \+ [0-9.]+ \* var\(--intensity, 0\)\);/,
+    "une pellicule brille encore au repos",
+  );
 
   // Le Commun reste mat, sauf sur une copie brillante : les deux sélecteurs ont
   // la même spécificité, donc c'est l'ordre du fichier qui décide.
@@ -355,6 +362,26 @@ test("visionneuse : les variables d'inclinaison traversent la carte", () => {
   for (const name of ["--rx", "--ry", "--tx", "--ty", "--intensity", "--tilt-scale"]) {
     assert.match(root, new RegExp(`${name}:`), `${name} manque aux valeurs de repos`);
   }
+});
+
+test("vignette : les étages de texte ne se compressent pas", () => {
+  // Trois étages fixes — en-tête, univers, statistiques — et un seul souple :
+  // l'illustration. Compressés, le nom et l'univers se coupaient en deux au
+  // lieu de déborder franchement, et les stats passaient sous le bord.
+  assert.match(
+    CSS,
+    /\.card-head,\s*\n\.card-universe,\s*\n\.card-stats \{\s*flex: 0 0 auto;\s*\}/,
+  );
+
+  // La vignette d'annonce du marché était trop étroite (80 px) pour une carte
+  // en taille « sm » : les deux listes, actives et terminées, lui donnent 96 px.
+  const MARKET = readFileSync(path.join(ROOT, "src/components/market-browser.tsx"), "utf8");
+  assert.equal(
+    (MARKET.match(/w-24 shrink-0 self-start/g) ?? []).length,
+    2,
+    "les deux listes d'annonces doivent partager la même vignette",
+  );
+  assert.doesNotMatch(MARKET, /w-20 shrink-0/);
 });
 
 test("visionneuse : fond opaque et effets coupés pendant le retournement", () => {

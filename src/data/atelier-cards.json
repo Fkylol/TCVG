@@ -99,6 +99,28 @@
         }
       },
       "createdAt": "2026-10-26T21:56:18.169Z"
+    },
+    {
+      "id": "murloc",
+      "name": "Murloc",
+      "universe": "wow",
+      "emoji": "🐟",
+      "rarity": "C",
+      "genres": [
+        "mmo"
+      ],
+      "portrait": {
+        "url": "https://warcraft.wiki.gg/images/A_Murloc%27s_Ambition_by_Samwise.jpg?83aca1",
+        "source": "custom",
+        "sourceName": "Warcraft Wiki · concept art de Samwise Didier",
+        "page": "https://warcraft.wiki.gg/wiki/File:A_Murloc%27s_Ambition_by_Samwise.jpg",
+        "file": "A Murloc's Ambition by Samwise.jpg",
+        "width": 750,
+        "height": 750,
+        "checkedAt": "2026-10-27T18:28:49.554Z",
+        "confidence": "medium"
+      },
+      "createdAt": "2026-10-27T18:28:49.554Z"
     }
   ]
 }

@@ -1,6 +1,7 @@
 import data from "@/data/portraits.json";
 
 import { ATELIER_PORTRAITS } from "./atelier-data";
+import { cardEdit } from "./card-edits";
 import { clampFraming, type PortraitFraming } from "./framing";
 
 export type { PortraitFraming } from "./framing";
@@ -37,6 +38,18 @@ export type Portrait = {
 
 const ITEMS: Record<string, Portrait> = {
   ...(data.items as unknown as Record<string, Portrait>),
+  // Murloc : concept art officiel de Blizzard par Samwise Didier, via Warcraft Wiki.
+  murloc: {
+    url: "https://warcraft.wiki.gg/images/A_Murloc%27s_Ambition_by_Samwise.jpg?83aca1",
+    source: "custom",
+    sourceName: "Warcraft Wiki · concept art de Samwise Didier",
+    page: "https://warcraft.wiki.gg/wiki/File:A_Murloc%27s_Ambition_by_Samwise.jpg",
+    file: "A Murloc's Ambition by Samwise.jpg",
+    width: 750,
+    height: 750,
+    checkedAt: "2026-10-27T18:28:49.554Z",
+    confidence: "medium",
+  },
   // Les visuels choisis dans l'atelier prennent le pas sur un ancien portrait.
   ...ATELIER_PORTRAITS,
 };
@@ -93,7 +106,8 @@ export const PORTRAIT_FRAMING: Record<string, PortraitFraming> = {
  */
 export function getPortraitFraming(cardId?: string | null): PortraitFraming {
   if (!cardId) return DEFAULT_FRAMING;
-  return clampFraming(ITEMS[cardId]?.framing ?? PORTRAIT_FRAMING[cardId] ?? DEFAULT_FRAMING);
+  const edited = cardEdit(cardId)?.framing;
+  return clampFraming(edited ?? ITEMS[cardId]?.framing ?? PORTRAIT_FRAMING[cardId] ?? DEFAULT_FRAMING);
 }
 
 /**
@@ -101,6 +115,20 @@ export function getPortraitFraming(cardId?: string | null): PortraitFraming {
  * avec image sur aucune des deux sources : le rendu retombe alors sur dégradé + emoji.
  */
 export function getPortrait(cardId: string): Portrait | undefined {
+  const edit = cardEdit(cardId);
+  if (edit?.imageUrl) {
+    return {
+      url: edit.imageUrl,
+      source: "custom",
+      sourceName: edit.imageSourceName ?? undefined,
+      page: edit.imageSourcePage ?? undefined,
+      file: edit.imageFile ?? undefined,
+      width: edit.imageWidth ?? 1,
+      height: edit.imageHeight ?? 1,
+      credit: edit.imageCredit ?? undefined,
+      license: edit.imageLicense ?? undefined,
+    };
+  }
   return ITEMS[cardId];
 }
 

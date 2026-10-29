@@ -16,20 +16,19 @@ export const metadata = {
  * que les présenter, avec le compteur de signalements de l'atelier.
  */
 export default async function AdminHomePage() {
-  const { supabase, user } = await requireSession();
+  const { supabase } = await requireSession();
 
   const { data: isAdmin } = await supabase.rpc("is_admin");
   // Pas d'écran « accès refusé » : la page n'existe pas pour les joueurs.
   if (isAdmin !== true) notFound();
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("username")
-    .eq("id", user.id)
-    .maybeSingle();
-  // L'atelier est une liste nominative, pas un droit d'administration.
-  const atelier = canUseAtelier(profile?.username as string | null);
-  const waiting = atelier ? await countOpenReports(supabase) : 0;
+  // L'accès à l'atelier est distinct du droit d'administration.
+  const atelier = await canUseAtelier(supabase);
+  const [waiting, { count: suggestionsCount }] = await Promise.all([
+    atelier ? countOpenReports(supabase) : 0,
+    supabase.from("card_suggestions").select("id", { count: "exact", head: true }).eq("status", "pending"),
+  ]);
+  const pendingSuggestions = suggestionsCount ?? 0;
 
   return (
     <article>
@@ -53,6 +52,13 @@ export default async function AdminHomePage() {
           title="Parrainages"
           badge="paiements"
           description="Parrainages en attente, seuils atteints et récompenses à vérifier avant paiement."
+        />
+        <AdminTile
+          href="/admin/suggestions"
+          title="Personnages"
+          badge={String(pendingSuggestions)}
+          description="Génère des propositions de personnages absents du catalogue, corrige leur fiche, puis publie-les ou rejette-les."
+          highlight={pendingSuggestions > 0}
         />
         <AdminTile
           href="/admin/cadres"

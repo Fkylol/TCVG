@@ -90,7 +90,9 @@ function number(value: unknown): number {
 
 function parseStatus(value: unknown): ChatOfferStatus {
   const status = text(value);
-  return status && status in OFFER_STATUS_LABEL ? (status as ChatOfferStatus) : "pending";
+  return status && Object.prototype.hasOwnProperty.call(OFFER_STATUS_LABEL, status)
+    ? (status as ChatOfferStatus)
+    : "pending";
 }
 
 function parsePlayer(name: unknown, avatar: unknown, frame: unknown): OfferPlayer {
@@ -122,10 +124,15 @@ export function parseOfferBoard(value: unknown): ChatOfferBoard | null {
   if (!value || typeof value !== "object") return null;
   const row = value as Raw;
   if (row.ok === false) return null;
+  const incoming = row.incoming ?? [];
+  const outgoing = row.outgoing ?? [];
+  const validRows = (items: unknown): items is Raw[] =>
+    Array.isArray(items) && items.every((item) => item !== null && typeof item === "object" && !Array.isArray(item));
+  if (!validRows(incoming) || !validRows(outgoing)) return null;
 
   return {
-    incoming: ((row.incoming ?? []) as Raw[]).map(parseOffer),
-    outgoing: ((row.outgoing ?? []) as Raw[]).map(parseOffer),
+    incoming: incoming.map(parseOffer),
+    outgoing: outgoing.map(parseOffer),
   };
 }
 

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34" width="34" height="34" role="img" aria-label="TCVG">
+  <defs>
+    <linearGradient id="tcvg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#36e2ff"/>
+      <stop offset="1" stop-color="#ff4fd8"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="34" height="34" rx="10" fill="#080a16"/>
+  <rect x="1.6" y="1.6" width="30.8" height="30.8" rx="9" fill="none" stroke="url(#tcvg)" stroke-width="2.4"/>
+  <circle cx="17" cy="17" r="6.5" fill="none" stroke="url(#tcvg)" stroke-width="2.4"/>
+</svg>

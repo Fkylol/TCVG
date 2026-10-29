@@ -2,7 +2,7 @@ import Link from "next/link";
 import { MotionToggle } from "@/components/motion-toggle";
 import { ProfileEditor, type AvatarChoice } from "@/components/profile-editor";
 import { requireSession } from "@/lib/auth";
-import { CARDS, getCardNumber, getUniverseLabel, type Card } from "@/lib/cards";
+import { getCard, getCardNumber, getUniverseLabel, type Card } from "@/lib/cards";
 import { getCollection, getProfile } from "@/lib/data";
 import { evaluateFrames, getFrameOverview } from "@/lib/frames";
 import { collectionStats } from "@/lib/profile";
@@ -30,7 +30,7 @@ export default async function ProfilePage({
   ]);
 
   const owned = collection
-    .map((row) => CARDS.find((card) => card.id === row.cardId))
+    .map((row) => getCard(row.cardId))
     .filter((card): card is Card => Boolean(card));
 
   const stats = collectionStats(owned);
@@ -60,6 +60,12 @@ export default async function ProfilePage({
         {stats.unique} personnage{stats.unique > 1 ? "s" : ""} · {stats.legendary} légendaire
         {stats.legendary > 1 ? "s" : ""} · {stats.mythic} mythique{stats.mythic > 1 ? "s" : ""}
       </p>
+      <Link
+        href={`/joueur/${encodeURIComponent(profile.username)}`}
+        className="btn btn-outline btn-sm mt-4"
+      >
+        Voir mon profil public →
+      </Link>
 
       {evaluation.newlyUnlocked.length > 0 && (
         <div className="mt-4 border-l-2 border-cyan bg-cyan/[0.08] px-4 py-3 text-sm">

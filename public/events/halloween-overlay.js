@@ -629,6 +629,10 @@
       } else if (res && res.retryAfterMs > 0) {
         setNext(Date.now() + res.retryAfterMs);
         toast('🎃 Reviens dans ' + fmtWait(res.retryAfterMs) + ' pour un nouveau booster !');
+      } else if (res && res.reason === 'auth') {
+        // La citrouille est visible pour tout le monde : un visiteur non
+        // connecté doit lire ce qu'il peut faire, pas une panne générique.
+        toast('🎃 Connecte-toi avec Discord pour recevoir ton booster d’Halloween.');
       } else {
         toast((res && res.message) || 'Oups, impossible de récupérer le booster pour le moment.');
       }

@@ -5,6 +5,7 @@ import { REFERRAL_CONFIG } from "../src/lib/referral/config";
 import {
   activityDaysBetween,
   capState,
+  csvCell,
   choosePath,
   claimPayment,
   deferredEligibleAt,
@@ -20,6 +21,15 @@ import {
   paymentBlockers,
   planOpenings,
 } from "../src/lib/referral/rules";
+
+test("export CSV : les données ne deviennent pas des formules de tableur", () => {
+  for (const value of ["=1+1", "+cmd", "-2+3", "@SUM(A1)", "  =1+1", "\t=1+1"]) {
+    assert.equal(csvCell(value), `"'${value}"`);
+  }
+  assert.equal(csvCell('Joueur "test"; normal'), '"Joueur ""test""; normal"');
+  assert.equal(csvCell(null), '""');
+  assert.equal(csvCell(12), '"12"');
+});
 
 /** Contexte « tout va bien » pour les décisions de rattachement. */
 function link(overrides: Partial<Parameters<typeof linkDecision>[0]> = {}) {

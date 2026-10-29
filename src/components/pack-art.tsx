@@ -32,6 +32,23 @@ const STAR_POINTS = Array.from({ length: 10 }, (_, index) => {
 
 const HEX_POINTS = polygon(19, 6);
 
+/**
+ * Silhouette d'une chauve-souris : le corps au centre, deux ailes festonnées.
+ * Dessinée par calcul pour pouvoir être posée à plusieurs tailles, comme les
+ * emblèmes, sans dupliquer de coordonnées.
+ */
+function batPath(cx: number, cy: number, scale: number): string {
+  return [
+    `M${round(cx - 15 * scale)} ${round(cy)}`,
+    `C${round(cx - 12 * scale)} ${round(cy - 7 * scale)} ${round(cx - 6 * scale)} ${round(cy - 6 * scale)} ${round(cx - 3 * scale)} ${round(cy - 2 * scale)}`,
+    `L${round(cx)} ${round(cy - 5 * scale)}`,
+    `L${round(cx + 3 * scale)} ${round(cy - 2 * scale)}`,
+    `C${round(cx + 6 * scale)} ${round(cy - 6 * scale)} ${round(cx + 12 * scale)} ${round(cy - 7 * scale)} ${round(cx + 15 * scale)} ${round(cy)}`,
+    `C${round(cx + 10 * scale)} ${round(cy + 6 * scale)} ${round(cx + 4 * scale)} ${round(cy + 4 * scale)} ${round(cx)} ${round(cy + 6 * scale)}`,
+    `C${round(cx - 4 * scale)} ${round(cy + 4 * scale)} ${round(cx - 10 * scale)} ${round(cy + 6 * scale)} ${round(cx - 15 * scale)} ${round(cy)}Z`,
+  ].join("");
+}
+
 /* ————— Textures : formes répétées, calculées une fois ————— */
 
 // Croix du Mix : toutes à distance des bords et du bas.
@@ -120,6 +137,28 @@ const HORROR_WAVES = Array.from({ length: 14 }, (_, row) => {
   const y = 8 + row * 22;
   return `M-8 ${y}q12 -7 24 0${"t24 0".repeat(8)}`;
 });
+
+// Halloween : trois chauves-souris (à distance des bords), une toile dans
+// l'angle supérieur droit — un motif qui couvre le fond, il peut donc aller
+// jusqu'au bord — et des éclats épars.
+const HALLOWEEN_BATS = [batPath(58, 78, 1), batPath(126, 122, 0.72), batPath(72, 200, 0.86)];
+
+const HALLOWEEN_WEB = [
+  "M190 0q-34 12-46 42",
+  "M190 0q-24 22-32 58",
+  "M190 0q-10 34-16 74",
+  "M190 0l-58 6",
+  "M190 0l-42 42",
+  "M190 0l-18 62",
+];
+
+const HALLOWEEN_SPARKS: [number, number][] = [
+  [42, 132],
+  [150, 64],
+  [112, 244],
+  [48, 262],
+  [154, 210],
+];
 
 const STRATEGY_HEXES = (() => {
   const radius = 19;
@@ -249,6 +288,19 @@ export function PackEmblem({ name }: { name: PackArtKey }) {
         </>
       );
 
+    // Citrouille d'Halloween : corps, queue, yeux et bouche évidés. Le creux
+    // prend l'encre du médaillon, comme le fait le dos de carte.
+    case "halloween":
+      return (
+        <>
+          <path d="M24 41c-9.6 0-17.4-6.1-17.4-13.6S14.4 13.8 24 13.8s17.4 6.1 17.4 13.6S33.6 41 24 41z" />
+          <path d="M22.8 14.4c-.6-3.4.5-6 3.2-7.9-.5 2.8 0 5.2 1.4 7.3z" />
+          <path d="M13.9 23.5h6.9l-3.4 5.7z" fill="#0b0b14" />
+          <path d="M27.2 23.5H34l-3.4 5.7z" fill="#0b0b14" />
+          <path d="M16.2 32.3h15.6c-1.2 4.3-4.1 6.5-7.8 6.5s-6.6-2.2-7.8-6.5z" fill="#0b0b14" />
+        </>
+      );
+
     default:
       return null;
   }
@@ -354,6 +406,20 @@ export function PackTexture({ name }: { name: PackArtKey }) {
 
       {name === "strategie" &&
         STRATEGY_HEXES.map((d, index) => <path key={index} d={d} />)}
+
+      {name === "halloween" && (
+        <>
+          {HALLOWEEN_WEB.map((d, index) => (
+            <path key={`web-${index}`} d={d} />
+          ))}
+          {HALLOWEEN_BATS.map((d, index) => (
+            <path key={`bat-${index}`} d={d} fill="var(--pack-tx)" fillOpacity="0.32" />
+          ))}
+          {HALLOWEEN_SPARKS.map(([x, y]) => (
+            <path key={`${x}-${y}`} d={`M${x - 4} ${y}h8M${x} ${y - 4}v8`} />
+          ))}
+        </>
+      )}
 
     </g>
   );

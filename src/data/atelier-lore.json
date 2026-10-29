@@ -18,6 +18,11 @@
     "ted-thompson": {
       "tagline": "Le quarter-back",
       "bio": "Chef des Jocks, il fait de la salle, gagne les matchs et se croit au-dessus de la hiérarchie de l'école."
+    },
+    "murloc": {
+      "tagline": "Le cri qui retentit sur les côtes d'Azeroth",
+      "quote": "Mrrglrlrl!",
+      "bio": "Amphibien humanoïde des rivages, des lacs et des rivières d'Azeroth, le murloc vit en tribu, manie ses armes avec férocité et parle le mystérieux nerglish."
     }
   }
 }

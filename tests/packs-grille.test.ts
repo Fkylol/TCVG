@@ -24,9 +24,11 @@ const HOOK = read("src/lib/use-fit-title.ts");
 const CSS = read("src/app/globals.css");
 const SQL = read("supabase/migrations/035_packs_toujours_disponibles.sql");
 
-test("les dix packs, dans l'ordre d'affichage demandé", () => {
+test("les dix packs de genre, dans l'ordre d'affichage demandé", () => {
   assert.deepEqual(
-    PACKS.map((pack) => pack.id),
+    // Le pack saisonnier ferme la liste : il ne prend la place d'aucun pack
+    // permanent, et `PACKS[0]` reste le Mix.
+    PACKS.filter((pack) => pack.season === undefined).map((pack) => pack.id),
     [
       "mix",
       "action-aventure",
@@ -39,6 +41,10 @@ test("les dix packs, dans l'ordre d'affichage demandé", () => {
       "horreur",
       "strategie",
     ],
+  );
+  assert.deepEqual(
+    PACKS.filter((pack) => pack.season !== undefined).map((pack) => pack.id),
+    ["halloween"],
   );
 });
 
@@ -73,8 +79,8 @@ test("vitrine : tous les packs dans l'étagère, un seul sélectionné, Mix par 
 
   // Une scène, pas une grille : un poster en grand, une flèche de chaque côté,
   // et l'étagère en bas pour circuler entre les douze packs.
-  assert.match(PICKER, /aria-label="Booster précédent"/);
-  assert.match(PICKER, /aria-label="Booster suivant"/);
+  assert.match(PICKER, /aria-label=\{t\("Booster précédent"\)\}/);
+  assert.match(PICKER, /aria-label=\{t\("Booster suivant"\)\}/);
   assert.match(PICKER, /className="v-shelf"/);
   assert.match(PICKER, /className="v-shelf-tile"/);
   assert.doesNotMatch(PICKER, /grid-cols/);
@@ -95,8 +101,8 @@ test("vitrine : tous les packs dans l'étagère, un seul sélectionné, Mix par 
 
   // Deux chiffres seulement : le stock et l'album. Un compteur de packs
   // ouvrables se lisait comme un second stock, à côté du vrai.
-  assert.match(PICKER, />Stock</);
-  assert.match(PICKER, />Album</);
+  assert.match(PICKER, /\{t\("Stock"\)\}/);
+  assert.match(PICKER, /\{t\("Album"\)\}/);
   assert.doesNotMatch(PICKER, /Packs disponibles/);
 
   // Le poster n'est pas un bouton : la tuile entière reste le contrôle.

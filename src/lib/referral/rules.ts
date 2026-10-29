@@ -35,6 +35,13 @@ export const STATUS_LABEL: Record<ReferralStatus, string> = {
   refuse: "Refusé",
 };
 
+/** Empêche les tableurs d'interpréter les données de l'export comme des formules. */
+export function csvCell(value: unknown): string {
+  let text = value === null || value === undefined ? "" : String(value);
+  if (/^[\s\u0000-\u001f]*[=+\-@]/u.test(text) || /^[\t\r\n]/u.test(text)) text = `'${text}`;
+  return `"${text.replace(/"/g, '""')}"`;
+}
+
 /** L'alphabet évite les caractères confondus (0/O, 1/I/l). */
 const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 

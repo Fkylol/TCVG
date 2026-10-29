@@ -450,6 +450,92 @@ npm run portraits   # réécrit src/data/portraits.json
   pour retirer l'entrée : la carte retombe sur le rendu généré. Une carte qui quitte
   `src/lib/cards.ts` est supprimée de la base par `npm run db:cards`, copies comprises.
 
+## Préparation des migrations 058 à 060
+
+**Cette procédure ne constitue pas une autorisation d'appliquer les migrations ou de déployer.**
+Les fichiers 058, 059 et 060 et les changements applicatifs associés doivent d'abord être relus et
+validés. Vérifier la cible Supabase et le domaine Cloudflare indépendamment : les fichiers locaux et
+`origin/main` ne prouvent pas ce qui est effectivement en production.
+
+### Avant toute application
+
+- Disposer d'une sauvegarde récente **et restaurable**, et savoir la restaurer ; tester si possible sur
+  un projet de préproduction isolé. Ne pas recopier de données personnelles dans les journaux ou le dépôt.
+- Identifier les comptes atelier par leurs **UUID Supabase Auth confirmés auprès de leurs titulaires**,
+  pas par leur pseudo : celui-ci peut être choisi ou modifié. Préparer aussi un compte connecté sans
+  autorisation pour les vérifications. La migration 058 ne donne d'accès à personne automatiquement.
+- Sur la cible, en lecture seule, comparer les définitions, propriétaires et privilèges actuels des
+  fonctions concernées avec les migrations locales, et conserver ces informations hors du dépôt comme
+  référence de restauration. Confirmer notamment que la fonction interne Halloween n'existe pas déjà
+  à la suite d'une application partielle ou différente ; le cas échéant, arrêter et examiner son état.
+  Vérifier l'application effective des migrations antérieures, notamment 023, 048, 054 à 057 :
+  leurs fichiers présents localement ne prouvent pas leur application.
+- La 059 n'accepte que l'ordre de repli attendu ou déjà corrigé ; si sa définition diffère, elle doit
+  échouer et être analysée, pas être forcée. La 060 remplace la fonction d'appariement entière : toute
+  divergence de la fonction de production par rapport à la version attendue doit être résolue avant
+  l'application, pour ne pas écraser un correctif propre à la production.
+- Vérifier le comportement de l'atelier côté site **et côté SQL** : l'ancien site vérifie encore le
+  pseudo tandis que le nouveau interroge `is_atelier()`. Coordonner migration, attribution des UUID et
+  déploiement du nouveau site ; pendant la transition, ne pas considérer l'ancienne garde du site comme
+  une autorisation fiable. Le nouveau code ferme l'accès si la RPC est absente ou échoue. La lecture
+  et le traitement des signalements restent soumis aux policies administrateur existantes : être membre
+  de l'atelier ne les accorde pas automatiquement.
+
+Inspection SQL en lecture seule à exécuter uniquement sur la cible vérifiée :
+
+```sql
+select current_database(), current_user, version();
+select to_regprocedure('public.is_atelier()') as atelier,
+       to_regprocedure('public.claim_halloween_booster(text)') as halloween,
+       to_regprocedure('public._claim_halloween_booster_internal(text)') as halloween_interne,
+       to_regprocedure('public._draw_cards(text[],integer,jsonb)') as tirage,
+       to_regprocedure('public.match_card_orders(text,boolean)') as appariement;
+select p.oid::regprocedure as signature, pg_get_userbyid(p.proowner) as proprietaire,
+       p.prosecdef, p.proacl, pg_get_functiondef(p.oid) as definition
+  from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+ where n.nspname = 'public'
+   and p.oid in (to_regprocedure('public.is_atelier()'),
+                 to_regprocedure('public.claim_halloween_booster(text)'),
+                 to_regprocedure('public._claim_halloween_booster_internal(text)'),
+                 to_regprocedure('public._draw_cards(text[],integer,jsonb)'),
+                 to_regprocedure('public.match_card_orders(text,boolean)'));
+```
+
+### Ordre prévu après validation explicite
+
+1. Répéter les contrôles et les essais sur la préproduction ; choisir une fenêtre où l'atelier est
+   indisponible. Préparer **une seule transaction SQL** : `BEGIN`, contenu de 058, insertion explicite
+   des seuls UUID vérifiés dans `public.atelier_members`, contenu de 059, puis contenu de 060, contrôles
+   SQL, et enfin `COMMIT`. En cas d'erreur ou de doute, `ROLLBACK` et arrêter. Les requêtes doivent être
+   envoyées dans une même session et les erreurs doivent interrompre l'exécution ; ne pas supposer que
+   des exécutions séparées dans l'éditeur ou l'API partagent une transaction.
+2. Vérifier que la transaction a effectivement été validée avant de déployer le code applicatif
+   correspondant, avec une validation distincte pour le déploiement. L'attribution d'UUID est une
+   modification de droits de production et exige sa propre validation. Ne jamais remplir la table
+   depuis les pseudos ni utiliser l'UUID fictif donné en exemple dans 058.
+3. Vérifier `is_atelier()` avec une session de chaque compte autorisé et une session non autorisée ;
+   contrôler également les privilèges sur la table, la fonction interne Halloween, le tirage et
+   l'appariement. Vérifier en préproduction les dates limites Halloween à Paris, les scénarios de
+   tirage et d'appariement (auto-achat interdit, priorité, remboursement, expiration), puis les
+   parcours utilisateur appropriés sur le site. Ne pas provoquer d'achats ou d'ouvertures réels sur des
+   comptes joueurs pour tester. Surveiller les erreurs après mise en ligne.
+
+`npm run db:migrate` envoie un fichier à la fois, sans suivi de versions de migration ; sa voie
+Management API peut retenter après 429/5xx et n'offre pas ici de garantie de résultat connue après une
+perte de réponse. Ne pas enchaîner aveuglément ces commandes pour cette opération. De même,
+`npm run db:verify` crée et modifie des données de test : ne pas l'exécuter sur la production comme
+simple contrôle en lecture seule.
+
+### Retour arrière
+
+En cas d'échec **avant** `COMMIT`, annuler la transaction. **Après** `COMMIT`, interrompre les actions
+concernées, diagnostiquer puis restaurer uniquement les définitions et droits effectivement capturés
+avant l'opération, ou utiliser la sauvegarde selon le plan de restauration validé. Ne pas rejouer
+intégralement les migrations historiques : elles contiennent aussi des changements de données. Ne pas
+réactiver la garde atelier par pseudo, et ne pas supposer qu'une restauration de fonction annule les
+achats ou transferts déjà effectués. Un retour arrière en production nécessite lui aussi une décision
+explicite.
+
 ## Atelier : ajouter ou corriger une carte
 
 `npm run atelier` démarre le serveur de développement s'il ne tourne pas déjà et ouvre
@@ -577,14 +663,16 @@ sans article propre). **Rien n'a donc été appliqué** — voir `RAPPORT_FINAL.
   d'intensité : c'est le rendu au repos qu'il faut juger, le survol n'existant pas sur mobile.
   Une copie brillante (`data-holo="true"`, posée par `CardFace`) ne suit pas cette règle : sa
   pellicule reste allumée à toute rareté, y compris en Commune, et dérive toute seule sans
-  pointeur — une vignette de collection ne s'incline pas, c'est cette dérive qui la trahit.
+  pointeur — une vignette de collection ne s'incline pas, c'est cette dérive qui la trahit.
 - **Ajouter un booster** :
   1. ajoute une entrée dans `PACKS` (`src/lib/packs.ts`) : `id`, nom, sous-titre, genre (`null`
      pour le Mix), palette, facteur de titre et clé d'illustration ;
   2. dessine son SVG dans `src/components/booster-art.tsx` (formes géométriques uniquement) et
      ajoute la clé au type `PackArt` ;
   3. insère le pack dans `public.booster_types` (migration) avec `cards_count = 5`, son genre et
-     `active = true` ; le pool vient des cartes actives de ce genre ;
+     `active = true` ; le pool vient des cartes actives de ce genre. Pour un pack **saisonnier**,
+     mets `season` au lieu de `genre` : son pool se limite aux cartes de cette saison, et les packs
+     permanents cessent de les tirer (migration `061`, pack d'Halloween) ;
   4. vérifie le poster et l'inclinaison sur `/dev/packs` (réservé aux admins), puis ouvre un pack
      de test : le tirage et le cooldown restent entièrement en base.
 - **Disponibilité des packs** : les douze packs sont ouvrables en permanence ; seul le seuil de
@@ -743,6 +831,23 @@ La migration est `supabase/migrations/048_halloween.sql` ; son rollback est
 commenté en fin de fichier. L'overlay respecte `prefers-reduced-motion` (la
 sorcière reste dans un coin) et met toutes les animations en pause quand
 l'onglet est caché.
+
+### Le booster d'Halloween et ses vingt cartes exclusives
+
+La migration `061_booster_halloween.sql` ouvre le pack `halloween` : vingt cartes spectrales
+(octobre 2026), deux par franchise, une seule par personnage. Elles ne portent **aucun genre** et
+leur saison est écrite des deux côtés (`cards.season`, `booster_types.season`) : le pack d'Halloween
+ne tire que sa saison, le Mix et les packs de genre ne la tirent jamais. Le pool est le même partout
+— `open_pack()`, `pack_stats()`, `card_booster_chances()` et `pack_cards()` — pour que la fiche carte
+n'annonce pas d'autres chances que le tirage. Le pack n'est pas dans `shopPacks()` : sa seule porte
+est la citrouille de l'overlay, qui l'ouvre aussitôt après avoir crédité le booster.
+
+`npm run db:cards` écrit la saison avec le reste de la carte ; sans la migration, la colonne manque
+et la synchronisation s'arrête. Hors saison, passer `booster_types.active` à false ferme le pack
+sans toucher aux fonctions ; les taux restent ceux de `game_config`, et `booster_types.drop_rates`
+permet de régler ce pack à part sans redéployer. Le rollback est commenté en fin de migration, et
+`npm test -- tests/halloween-booster.test.ts` vérifie les deux côtés : le catalogue et les patchs
+textuels, qui refusent de deviner si un bloc de pool a changé de forme.
 
 ## Animations
 

@@ -14,6 +14,7 @@ const HOOK = read("src/lib/use-fit-title.ts");
 const CSS = read("src/app/globals.css");
 const REVEAL = read("src/components/booster-reveal.tsx");
 const PICKER = read("src/components/booster-picker.tsx");
+const HOST = read("src/components/reveal-host.tsx");
 const DEMO = read("src/app/dev/packs/page.tsx");
 const LAB = read("src/app/dev/packs/pack-lab.tsx");
 const LAYOUT = read("src/app/layout.tsx");
@@ -84,7 +85,9 @@ test("inclinaison : propre à chaque pack, redressée au survol et au focus", ()
 });
 
 test("titre : mesure réelle et plafond à 80 % de la largeur du pack", () => {
-  assert.match(HOOK, /useFitTitle\(maxRatio = 0\.8\)/);
+  assert.match(HOOK, /useFitTitle\(maxRatio = 0\.8, contentKey\?: string\)/);
+  assert.match(HOOK, /\}, \[maxRatio, contentKey\]\);/);
+  assert.match(COMPONENT, /useFitTitle\(0\.8, pack\.id\)/);
   assert.match(HOOK, /document\.fonts\.ready/);
   assert.match(HOOK, /ResizeObserver/);
   assert.match(HOOK, /frame\.offsetWidth/);
@@ -111,7 +114,10 @@ test("ouverture : le poster est déchiré, l'animation peut être passée", () =
   assert.match(CSS, /prefers-reduced-motion[\s\S]*?\.pack-cast/);
   assert.match(REVEAL, /Passer l'animation/);
   assert.match(REVEAL, /Doublon ×/);
-  assert.match(PICKER, /pack=\{packs\.find/);
+  // Le poster déchiré est celui du pack réellement ouvert : l'hôte le relit
+  // dans la liste complète, à partir du pack noté dans la révélation.
+  assert.match(HOST, /getPack\(reveal\.packId\)/);
+  assert.match(HOST, /pack=\{pack\}/);
   // La soudure se déchire au doigt : trois morceaux du même poster, la ligne
   // de soudure révélée derrière le doigt, et le point qui suit le geste.
   assert.match(REVEAL, /className="pack-half pack-body"/);
@@ -122,6 +128,111 @@ test("ouverture : le poster est déchiré, l'animation peut être passée", () =
   assert.match(CSS, /\.pack-spark\s*\{[\s\S]*?box-shadow: 0 0 10px 4px/);
   assert.match(CSS, /\.pack-stage\[data-tearing="true"\]/);
   assert.match(CSS, /\.pack-stage\[data-torn="true"\] \.pack-fringe/);
+});
+
+/** Contenu d'une règle ou d'un bloc `@keyframes`, accolades intérieures comprises. */
+function cssBlock(css: string, header: string): string {
+  const start = css.indexOf(header);
+  assert.ok(start !== -1, `bloc introuvable : ${header}`);
+  let depth = 0;
+  let index = css.indexOf("{", start);
+  const from = index;
+  while (index < css.length) {
+    if (css[index] === "{") depth += 1;
+    else if (css[index] === "}") {
+      depth -= 1;
+      if (depth === 0) break;
+    }
+    index += 1;
+  }
+  return css.slice(from + 1, index);
+}
+
+test("ouverture : la soudure cède dans une explosion de confettis et de traînées", () => {
+  // La gerbe éclate au milieu de la soudure, en haut du sachet — pas au centre
+  // du poster, où la lumière sortait de nulle part.
+  assert.match(REVEAL, /className="fx-stage"/);
+  assert.match(REVEAL, /className="fx-origin"/);
+  assert.match(cssBlock(CSS, ".fx-origin {"), /top: 8\.4%/);
+  // Elle n'est jouée qu'une fois la soudure cédée (`progress >= 1`).
+  assert.match(REVEAL, /\{progress >= 1 && \(/);
+
+  // Elle est un calque à part, posé après l'aura et devant le poster sur
+  // lequel elle éclate : solidaire de l'aura, elle s'éteindrait avec elle dès
+  // la sortie des cartes.
+  assert.ok(
+    REVEAL.indexOf('className="fx-stage"') > REVEAL.indexOf('className="aura-stage"'),
+    "la gerbe est un calque à part, après l'aura",
+  );
+  const aura = REVEAL.match(/<div className="aura-stage"[\s\S]*?<\/div>\s*\)\}/)?.[0] ?? "";
+  assert.ok(aura.includes("aura-seed"), "bloc d'aura introuvable");
+  assert.doesNotMatch(aura, /fx-/, "la gerbe n'est pas solidaire de l'aura");
+  const stage = cssBlock(CSS, ".fx-stage {");
+  assert.match(stage, /z-index: 30/);
+  assert.match(stage, /overflow: hidden/);
+  assert.match(stage, /pointer-events: none/);
+
+  // Aucune particule tirée au hasard : le rendu serveur doit égaler le client.
+  assert.doesNotMatch(REVEAL, /Math\.random/);
+  assert.match(REVEAL, /const TRAILS = Array\.from\(\{ length: 18 \}/);
+  assert.match(REVEAL, /const BLAST_SPARKS = Array\.from\(\{ length: 22 \}/);
+  assert.match(REVEAL, /const CONFETTI = Array\.from\(\{ length: 64 \}/);
+  const confettiParts = REVEAL.slice(REVEAL.indexOf("const CONFETTI = "));
+  assert.match(confettiParts, /delay: \(index % 8\) \* 26/, "les confettis partent par vagues");
+  // L'ancienne poussière qui montait a disparu des deux côtés.
+  assert.doesNotMatch(REVEAL, /aura-mote/);
+  assert.doesNotMatch(CSS, /\.aura-mote\b/);
+  assert.doesNotMatch(CSS, /\.fw-burst|\.fw-flake|@keyframes fw-fly|@keyframes fw-wave/);
+
+  // La gerbe ne touche à rien d'autre qu'à `transform` et `opacity`.
+  const frames = ["fx-flash", "fx-bloom", "fx-wave", "fx-trail", "fx-spark", "fx-confetti"];
+  for (const name of frames) {
+    const block = cssBlock(CSS, `@keyframes ${name} {`);
+    assert.match(block, /opacity:/, `images clés ${name} muettes`);
+    assert.doesNotMatch(
+      block,
+      /(top|left|width|height|margin|box-shadow|filter):/,
+      `images clés ${name} hors du compositeur`,
+    );
+  }
+  assert.match(CSS, /\.fx-confetti\s*\{[\s\S]*?animation: fx-confetti/);
+  assert.match(CSS, /\.fx-trail\s*\{[\s\S]*?animation: fx-trail/);
+  assert.match(CSS, /\.fx-spark\s*\{[\s\S]*?animation: fx-spark/);
+  assert.match(CSS, /\.fx-wave\s*\{[\s\S]*?animation: fx-wave/);
+
+  // Le confetti monte, culbute (`scaleX`) puis retombe plus bas que sa course.
+  const confetti = cssBlock(CSS, "@keyframes fx-confetti {");
+  assert.match(confetti, /calc\(var\(--fx-x, 0px\) \* 0\.58\)/);
+  assert.match(confetti, /calc\(var\(--fx-y, 0px\) \+ var\(--fx-fall, 0px\)\)/);
+  assert.match(confetti, /rotate\(calc\(var\(--fx-spin, 360deg\) \* 0\.36\)\)/);
+  assert.match(confetti, /scaleX\(0\.22\)/);
+  assert.match(confetti, /rotate\(var\(--fx-spin, 360deg\)\)/);
+
+  // Trois formes de confetti, six tons, trois ondes de choc étalées.
+  assert.match(CSS, /\.fx-confetti\[data-shape="dot"\]/);
+  assert.match(CSS, /\.fx-confetti\[data-shape="ribbon"\]/);
+  assert.match(REVEAL, /"flake" as const/);
+  for (const tone of ["aura", "cyan", "violet", "pink", "white", "gold"]) {
+    assert.match(CSS, new RegExp(`\\.fx-confetti\\[data-tone="${tone}"\\]`), tone);
+  }
+  assert.match(REVEAL, /const WAVES = \[0, 96, 208\]/);
+  assert.equal(
+    (REVEAL.match(/const WAVES = \[([^\]]*)\]/)?.[1].split(",").length ?? 0),
+    3,
+    "trois ondes de choc attendues",
+  );
+  assert.match(REVEAL, /\{WAVES\.map\(\(delay\) => \(/);
+
+  // Économie d'énergie : la gerbe ne part pas du tout (chaque pièce reste à
+  // `opacity: 0`).
+  assert.match(CSS, /html:not\(\[data-motion="full"\]\) \.fx-confetti,/);
+  assert.match(CSS, /html:not\(\[data-motion="full"\]\) \.fx-trail,/);
+
+  // Le flash de la soudure et ses fibres ont quitté le vert de l'ancienne
+  // identité pour le cyan de la marque : plus une seule teinte lime dans
+  // l'ouverture.
+  assert.doesNotMatch(CSS, /214, 255, 170|226, 255, 190/);
+  assert.match(CSS, /\.pack-fringe\s*\{[\s\S]*?rgba\(54, 226, 255, 0\.6\)/);
 });
 
 test("ouverture : pas d'attente ni de rechargement serveur avant la révélation", () => {
@@ -136,15 +247,18 @@ test("ouverture : pas d'attente ni de rechargement serveur avant la révélation
   ] as const) {
     assert.doesNotMatch(source, /new Promise\(\(resolve\) => setTimeout/, `${name} : attente artificielle`);
     assert.match(source, /busy\.current/, `${name} : verrou anti-double-clic manquant`);
-    assert.equal((source.match(/router\.refresh\(\)/g) ?? []).length, 1, `${name} : refresh unique attendu`);
-    // La révélation vit hors du composant (`setPendingReveal`) : elle est
-    // effacée à la fermeture, puis la page est relue.
-    assert.match(
-      source,
-      /setPendingReveal\(null\);[\s\S]{0,200}router\.refresh\(\)/,
-      `${name} : refresh à la fermeture`,
-    );
+    const opening = source.slice(source.indexOf("async function open()"), source.indexOf("\n  return (", source.indexOf("async function open()")));
+    // La révélation vit hors du composant (`setPendingReveal`) et c'est l'hôte
+    // unique qui la ferme : aucun rechargement serveur ici, ni pendant
+    // l'ouverture ni pour effacer la révélation.
+    assert.doesNotMatch(opening, /router\.refresh\(\)/, `${name} : rechargement pendant l'ouverture`);
+    assert.doesNotMatch(opening, /setPendingReveal\(null\)/, `${name} : effacement pendant l'ouverture`);
   }
+
+  // L'hôte, à la racine : il affiche la révélation en attente et relit la page
+  // à sa fermeture, où que l'ouverture ait eu lieu.
+  assert.match(code(HOST), /setPendingReveal\(null\);[\s\S]{0,200}router\.refresh\(\)/);
+  assert.equal((code(HOST).match(/router\.refresh\(\)/g) ?? []).length, 1, "hôte : refresh unique");
 });
 
 test("révélation : la carte sort au format du poster, ni plus large ni plus haute", () => {
@@ -187,4 +301,41 @@ test("démo : /dev/packs, douze posters, fond clair/sombre, pack simulé", () =>
   assert.match(LAB, /Fond clair/);
   assert.match(LAB, /Fond sombre/);
   assert.match(LAB, /Simuler un pack indisponible/);
+});
+
+/**
+ * Largeur du titre, en pourcentage de celle du poster, par unité de `cqw`.
+ *
+ * Mesuré sur la planche `/dev/packs`, Syne 800 chargée : le rapport est le même
+ * à toutes les largeurs de pack (le titre et le poster grandissent ensemble),
+ * donc ces valeurs suffisent à vérifier n'importe quel agencement. Une carte
+ * renommée ou une taille de titre retouchée doit être remesurée ici.
+ */
+const TITLE_UNITS: Record<string, number> = {
+  mix: 2.87,
+  "action-aventure": 7.03,
+  plateforme: 9.07,
+  rpg: 3.67,
+  mmo: 4.47,
+  fps: 3.33,
+  inde: 3.47,
+  combat: 6.72,
+  horreur: 5.94,
+  strategie: 7.16,
+  halloween: 8.39,
+};
+
+test("titre : aucun pack n'écrit plus large que lui, même sans JavaScript", () => {
+  // Le titre est réglé en `cqw` ; l'ajustement côté navigateur ne fait que le
+  // rogner en dernier recours. Ce qu'il faut garantir, c'est qu'il tient déjà
+  // au repos — au premier rendu, ou si le calcul ne tourne pas.
+  for (const pack of PACKS) {
+    const unit = TITLE_UNITS[pack.id];
+    assert.ok(unit, `rapport non mesuré pour ${pack.id}`);
+    const width = pack.titleSize * unit;
+    assert.ok(
+      width <= 80,
+      `${pack.id} : le titre occupe ${width.toFixed(1)} % du pack à sa taille de repos`,
+    );
+  }
 });

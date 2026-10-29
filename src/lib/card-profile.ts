@@ -14,6 +14,8 @@ export type CardProfile = {
   /** Résumé de tête de fiche. */
   overview: string | null;
   bio: string | null;
+  quote: string | null;
+  power: string | null;
   appearances: CardAppearance[];
   studio: string | null;
   voice: string | null;
@@ -26,6 +28,8 @@ type RawProfile = {
   unlocked?: unknown;
   overview?: unknown;
   bio?: unknown;
+  quote?: unknown;
+  power?: unknown;
   appearances?: unknown;
   studio?: unknown;
   voice?: unknown;
@@ -51,6 +55,8 @@ export function parseCardProfile(payload: unknown): CardProfile | null {
   return {
     overview: text(raw.overview),
     bio: text(raw.bio),
+    quote: text(raw.quote),
+    power: text(raw.power),
     appearances: Array.isArray(raw.appearances)
       ? raw.appearances.flatMap((item): CardAppearance[] => {
           if (!item || typeof item !== "object") return [];

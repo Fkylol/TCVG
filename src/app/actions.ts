@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { displayName, getSession } from "@/lib/auth";
 import { sendFeedbackEmail } from "@/lib/email";
-import { getPack } from "@/lib/packs";
+import { getPack, isPackOpenNow } from "@/lib/packs";
 import { evaluateFrames, fetchFrameStats } from "@/lib/frames";
 import { resolveSelectedFrame } from "@/lib/frames.config";
 import { BOOSTER_STOCK_MAX, WISHLIST_LIMIT } from "@/lib/game";
@@ -64,6 +64,11 @@ export type PurchaseCard = {
   quantity: number;
   /** Variante cosmétique éventuelle (misprint), normalisée pour le rendu. */
   variant: CardVariant;
+  /** Une rareté minimum est due sur cet emplacement du paquet. */
+  guaranteed?: boolean;
+  guaranteeType?: "uncommon" | "rare" | "mythic" | "divine" | "golden";
+  /** Marque le lot spécial qui contient cette carte. */
+  boosterSpecial?: "golden" | "divine" | "mythic";
 };
 
 /** Forme brute renvoyée par `open_pack()` / `buy_booster()` (jsonb en base). */
@@ -74,6 +79,9 @@ type RpcCard = {
   variant: string | null;
   is_new: boolean;
   quantity: number;
+  guaranteed?: boolean;
+  guarantee_type?: PurchaseCard["guaranteeType"];
+  booster_special?: PurchaseCard["boosterSpecial"];
 };
 
 function mapCards(cards: RpcCard[] | undefined): PurchaseCard[] {
@@ -84,6 +92,9 @@ function mapCards(cards: RpcCard[] | undefined): PurchaseCard[] {
     isNew: card.is_new,
     quantity: card.quantity,
     variant: toCardVariant(card.variant),
+    guaranteed: card.guaranteed,
+    guaranteeType: card.guarantee_type,
+    boosterSpecial: card.booster_special,
   }));
 }
 
@@ -879,6 +890,46 @@ export async function saveProfileStyle(_prev: StyleState, formData: FormData): P
   return { message: "Profil mis à jour." };
 }
 
+export type ShowcaseSaveResult = { error?: string; message?: string };
+
+/** Enregistre les huit emplacements de la vitrine du compte connecté. */
+export async function saveProfileShowcase(cardIds: string[]): Promise<ShowcaseSaveResult> {
+  const session = await getSession();
+  if (!session) return { error: "Session expirée : reconnecte-toi." };
+  if (!Array.isArray(cardIds) || cardIds.length !== 8 || cardIds.some((id) => typeof id !== "string")) {
+    return { error: "La vitrine doit contenir exactement huit emplacements." };
+  }
+
+  const { data, error } = await session.supabase.rpc("save_profile_showcase", {
+    p_card_ids: cardIds.map((id) => id.trim().slice(0, 100) || null),
+  });
+  if (error) {
+    if (error.message.includes("card_not_owned")) {
+      return { error: "Tu ne possèdes plus une des cartes choisies." };
+    }
+    if (error.message.includes("duplicate_showcase_card")) {
+      return { error: "Chaque carte ne peut apparaître qu'une fois dans la vitrine." };
+    }
+    if (error.message.includes("invalid_showcase")) {
+      return { error: "La vitrine doit contenir exactement huit emplacements." };
+    }
+    console.error("save_profile_showcase", error);
+    return { error: "Impossible d'enregistrer la vitrine. Vérifie que la migration 063 est appliquée." };
+  }
+  if (!(data as { ok?: boolean } | null)?.ok) {
+    return { error: "Impossible d'enregistrer la vitrine." };
+  }
+
+  const { data: profile } = await session.supabase
+    .from("profiles")
+    .select("username")
+    .eq("id", session.user.id)
+    .maybeSingle();
+  revalidatePath("/profil");
+  if (profile?.username) revalidatePath(`/joueur/${encodeURIComponent(profile.username)}`);
+  return { message: "Vitrine enregistrée." };
+}
+
 export type OpenPackResult =
   | {
       status: "ok";
@@ -980,6 +1031,12 @@ export async function openPacks(packId: string, count = 1): Promise<OpenPacksRes
 
   const pack = getPack(packId);
   if (!pack) return { status: "error", message: "Ce booster n'existe pas." };
+  // Un pack saisonnier (Halloween) ne s'ouvre que dans sa fenêtre. La vitrine
+  // ne le propose pas, mais l'action reste appelable directement : le refus
+  // doit venir du serveur, pas seulement de l'interface.
+  if (!isPackOpenNow(pack)) {
+    return { status: "error", message: "Ce booster n'est pas ouvert en ce moment." };
+  }
 
   const requested = Math.min(BOOSTER_STOCK_MAX, Math.max(1, Math.trunc(count) || 1));
   const cards: RpcCard[] = [];

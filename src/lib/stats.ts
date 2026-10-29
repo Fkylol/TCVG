@@ -70,6 +70,7 @@ export const CARD_STATS: Record<string, { power: number; aura: number }> = {
 
   // ——— Dofus ———
   goultard: { power: 97, aura: 96 },
+  "comte-harebourg": { power: 92, aura: 94 },
   arpagone: { power: 83, aura: 82 },
   rushu: { power: 99, aura: 96 },
   "joris-jurgen": { power: 86, aura: 91 },
@@ -256,6 +257,7 @@ export const CARD_STATS: Record<string, { power: number; aura: number }> = {
  */
 export const CARD_COEFFICIENTS: Record<string, number> = {
   // ——— Commun ———
+  murloc: 0.55,
   atreus: 0.75,
   luigi: 0.88,
   yoshi: 0.8,
@@ -670,6 +672,7 @@ export const CARD_COEFFICIENTS: Record<string, number> = {
   "emet-selch": 0.9,
   aurene: 0.88,
   goultard: 0.86,
+  "comte-harebourg": 0.82,
   illidan: 0.82,
   sylvanas: 0.76,
   yshtola: 0.74,
@@ -856,6 +859,28 @@ export const CARD_COEFFICIENTS: Record<string, number> = {
   "napoleon": 0.9,
   "cesar": 0.5,
   "duc-de-paille": 0.5,
+
+  // ——— Halloween (octobre 2026) ———
+  "luigi-halloween": 0.92,
+  "yoshi-halloween": 0.84,
+  "papyrus-halloween": 0.76,
+  "eggman-halloween": 0.88,
+  "pikachu-halloween": 0.98,
+  "knuckles-halloween": 0.8,
+  "cuphead-halloween": 0.82,
+  "crash-halloween": 0.84,
+  "bowser-halloween": 0.92,
+  "peach-halloween": 0.76,
+  "zelda-halloween": 0.89,
+  "alucard-halloween": 0.89,
+  "nemesis-halloween": 0.74,
+  "doom-slayer-halloween": 0.9,
+  "master-chief-halloween": 0.92,
+  "dante-halloween": 0.91,
+  "mario-halloween": 0.98,
+  "link-halloween": 0.98,
+  "sonic-halloween": 0.94,
+  "kirby-halloween": 0.98,
 };
 
 /** Coefficient d'une carte, borné entre 0 et 1. */

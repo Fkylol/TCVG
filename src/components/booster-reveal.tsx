@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   useEffect,
+  useMemo,
   useRef,
   useState,
   useSyncExternalStore,
@@ -14,13 +15,14 @@ import { BoosterPack } from "@/components/booster-pack";
 import { CardBack } from "@/components/card-back";
 import { CardFace } from "@/components/card-face";
 import { getUniverseLabel, type Card, type Rarity } from "@/lib/cards";
-import { RARITY, rarestRarity } from "@/lib/game";
+import { RARITY, rarestRarity, sortByRarity } from "@/lib/game";
 import { getCardArt } from "@/lib/card-art";
 import { PACKS, type Pack } from "@/lib/packs";
 import { haptic, setSoundOn, sfx, useSoundOn } from "@/lib/sfx";
 import { VARIANT_LABELS, type CardVariant } from "@/lib/variants";
 import { framingStyle } from "@/lib/framing";
 import { MOTION_EVENT, isMotionForced } from "@/lib/motion";
+import { useLocale } from "@/components/locale-provider";
 
 export type RevealItem = {
   card: Card;
@@ -30,6 +32,9 @@ export type RevealItem = {
   quantity: number;
   /** Misprint éventuel tiré avec la carte. */
   variant: CardVariant;
+  guaranteed?: boolean;
+  guaranteeType?: "uncommon" | "rare" | "mythic" | "divine" | "golden";
+  boosterSpecial?: "golden" | "divine" | "mythic";
 };
 
 /** Couleur de l'aura révélée avant les cartes, par rareté. */
@@ -42,6 +47,13 @@ const AURA: Record<Rarity, { glow: string; soft: string }> = {
   // Pas d'arc-en-ciel : le Mythique garde un platine chaud, comme son foil.
   L: { glow: "rgba(255, 238, 190, 0.92)", soft: "rgba(255, 238, 190, 0.34)" },
 };
+
+/**
+ * Halo neutre du dos de carte. Le verso ne doit jamais trahir la rareté qu'il
+ * cache : cerclé de la couleur de la rareté, le dos annonçait la carte avant
+ * même qu'on la retourne.
+ */
+const BACK_GLOW = "rgba(255, 255, 255, 0.28)";
 
 /** Hauteur de la soudure sur le poster, en pourcentage de sa hauteur. */
 const SEAM_Y = 8.4;
@@ -68,6 +80,77 @@ const SPARKS = Array.from({ length: 18 }, (_, index) => {
     size: index % 4 === 0 ? 4 : 2,
   };
 });
+
+/** Tons de la gerbe : la rareté du tirage, le blanc et l'or, la marque. */
+type BurstTone = "aura" | "cyan" | "violet" | "pink" | "white" | "gold";
+
+const TRAIL_TONES: BurstTone[] = ["white", "aura", "cyan", "white", "violet", "gold", "aura", "cyan"];
+const SPARK_TONES: BurstTone[] = ["aura", "white", "gold", "cyan", "pink"];
+const CONFETTI_TONES: BurstTone[] = ["aura", "cyan", "violet", "pink", "white", "gold", "cyan", "aura"];
+
+/**
+ * L'explosion de la soudure : trois gerbes calculées une fois pour toutes.
+ *
+ * Rien n'est tiré au hasard — le rendu serveur et le rendu client doivent
+ * produire exactement le même HTML, comme la soudure et ses fibres. Tout part
+ * du milieu de la soudure, en haut du sachet, et chaque pièce ne décrit que son
+ * écart, sa retombée, sa rotation et son retard.
+ */
+
+/** Traînées du feu d'artifice : un trait file vers l'extérieur et s'allonge. */
+const TRAILS = Array.from({ length: 18 }, (_, index) => ({
+  id: index,
+  angle: (index / 18) * 360 + (index % 3) * 5,
+  reach: 44 + ((index * 23) % 62),
+  length: 30 + ((index * 17) % 52),
+  width: index % 4 === 0 ? 4 : index % 2 === 0 ? 3 : 2,
+  delay: (index % 6) * 24,
+  tone: TRAIL_TONES[index % TRAIL_TONES.length],
+}));
+
+/** Étincelles rondes : plus courtes, elles se glissent entre les traînées. */
+const BLAST_SPARKS = Array.from({ length: 22 }, (_, index) => {
+  const angle = (index / 22) * Math.PI * 2 + 0.18;
+  const distance = 104 + ((index * 37) % 118);
+  return {
+    id: index,
+    x: Math.round(Math.cos(angle) * distance),
+    y: Math.round(Math.sin(angle) * distance * 0.86),
+    fall: 26 + ((index * 13) % 52),
+    delay: (index % 7) * 22,
+    size: index % 4 === 0 ? 5 : index % 3 === 0 ? 2 : 3,
+    tone: SPARK_TONES[index % SPARK_TONES.length],
+  };
+});
+
+/**
+ * Confettis : la gerbe principale. Ils partent dans tous les sens depuis la
+ * soudure, culbutent pendant leur vol — c'est le `scaleX` des images clés — et
+ * retombent plus bas que leur trajectoire, comme des éclats qui perdent leur
+ * vitesse.
+ */
+const CONFETTI = Array.from({ length: 64 }, (_, index) => {
+  const angle = (index / 64) * Math.PI * 2;
+  const spread = 112 + ((index * 41) % 188);
+  const shape =
+    index % 11 === 0 ? ("dot" as const) : index % 7 === 0 ? ("ribbon" as const) : ("flake" as const);
+  return {
+    id: index,
+    x: Math.round(Math.cos(angle) * spread * 0.94),
+    y: Math.round(Math.sin(angle) * spread * 0.78),
+    fall: 74 + ((index * 29) % 92),
+    spin: (index % 2 === 0 ? 1 : -1) * (320 + ((index * 47) % 620)),
+    delay: (index % 8) * 26,
+    duration: 1320 + ((index * 31) % 380),
+    width: shape === "ribbon" ? 3 : shape === "dot" ? 5 : index % 5 === 0 ? 8 : 6,
+    height: shape === "ribbon" ? 15 : shape === "dot" ? 5 : index % 5 === 0 ? 11 : 8,
+    shape,
+    tone: CONFETTI_TONES[index % CONFETTI_TONES.length],
+  };
+});
+
+/** Trois ondes de choc décalées : le « boum » s'étale au lieu de claquer. */
+const WAVES = [0, 96, 208];
 
 /**
  * Délai avant que l'écran n'accepte les clics. Le second clic d'un double-clic
@@ -198,10 +281,12 @@ export function BoosterReveal({
   onClose: () => void;
   closeLabel?: string;
 }) {
+  const { t } = useLocale();
   const [phase, setPhase] = useState<Phase>("pack");
   const [progress, setProgress] = useState(0);
   const [revealed, setRevealed] = useState(0);
   const [flipped, setFlipped] = useState<number | null>(null);
+  const [faceRevealed, setFaceRevealed] = useState(false);
   const [leaving, setLeaving] = useState<number | null>(null);
   const [armed, setArmed] = useState(false);
   const reduced = usePrefersReducedMotion();
@@ -215,15 +300,16 @@ export function BoosterReveal({
   // du pack scellé et de la déchirure pour télécharger tout le tirage.
   const preloaded = useRef<HTMLImageElement[]>([]);
 
-  const total = items.length;
-  const current = items[Math.min(revealed, Math.max(total - 1, 0))];
-  const best = rarestRarity(items.map((entry) => entry.card.rarity));
+  const revealItems = useMemo(() => sortByRarity(items, (entry) => entry.card.rarity), [items]);
+  const total = revealItems.length;
+  const current = revealItems[Math.min(revealed, Math.max(total - 1, 0))];
+  const best = rarestRarity(revealItems.map((entry) => entry.card.rarity));
   const aura = AURA[best];
   const hot = current ? HOT_RARITIES.includes(current.card.rarity) : false;
   const shapes = tearShapes(progress);
 
-  const newCount = new Set(items.filter((entry) => entry.isNew).map((entry) => entry.card.id)).size;
-  const holoCount = items.filter((entry) => entry.holo).length;
+  const newCount = new Set(revealItems.filter((entry) => entry.isNew).map((entry) => entry.card.id)).size;
+  const holoCount = revealItems.filter((entry) => entry.holo).length;
 
   useEffect(() => {
     const timer = setTimeout(() => setArmed(true), ARM_MS);
@@ -246,7 +332,7 @@ export function BoosterReveal({
 
   useEffect(() => {
     const images: HTMLImageElement[] = [];
-    for (const entry of items) {
+    for (const entry of revealItems) {
       const art = getCardArt(entry.card.id);
       if (!art) continue;
       const image = new window.Image();
@@ -258,7 +344,7 @@ export function BoosterReveal({
     return () => {
       preloaded.current = [];
     };
-  }, [items]);
+  }, [revealItems]);
 
   // L'ouverture occupe tout l'écran : on bloque le défilement de la page.
   useEffect(() => {
@@ -382,12 +468,14 @@ export function BoosterReveal({
 
   function flipCard() {
     if (phase !== "fan" || flipped !== null || leaving !== null) return;
-    const entry = items[revealed];
+    const entry = revealItems[revealed];
     if (!entry) return;
     const hold = reduced ? 140 : FLIP_HOLD;
     const leave = reduced ? 60 : LEAVE_MS;
 
     setFlipped(revealed);
+    setFaceRevealed(false);
+    if (reduced) later(() => setFaceRevealed(true), 60);
     sfx.card(entry.card.rarity, { holo: entry.holo });
     haptic(entry.card.rarity);
 
@@ -395,6 +483,7 @@ export function BoosterReveal({
     later(() => {
       const next = revealed + 1;
       setFlipped(null);
+      setFaceRevealed(false);
       setLeaving(null);
       setRevealed(next);
       if (next >= total) setPhase("done");
@@ -409,6 +498,7 @@ export function BoosterReveal({
     frame.current = null;
     sfx.stopRip();
     setFlipped(null);
+    setFaceRevealed(false);
     setLeaving(null);
     setPhase("done");
   }
@@ -432,9 +522,12 @@ export function BoosterReveal({
     return () => window.removeEventListener("keydown", onKey);
   });
 
-  const visible = items.slice(revealed, revealed + FAN_VISIBLE);
+  const visible = revealItems.slice(revealed, revealed + FAN_VISIBLE);
   const rarity = current ? RARITY[current.card.rarity] : null;
-  const held = flipped !== null ? items[flipped] : null;
+  const held = flipped !== null ? revealItems[flipped] : null;
+  // Rareté et nom d'une carte ne sont affichés qu'une fois sa face découverte :
+  // les annoncer avant le retournement vidait l'ouverture de son intérêt.
+  const faceShown = faceRevealed && flipped === revealed;
 
   const stageStyle = {
     "--aura": aura.glow,
@@ -457,13 +550,13 @@ export function BoosterReveal({
         <div className="min-w-0 flex-1 text-center">
           <p className="truncate text-sm font-semibold text-white/90">{title}</p>
           <p className="truncate text-[11px] text-white/40">
-            {subtitle ?? "Booster"}
+            {subtitle ? t(subtitle) : t("Booster")}
             {phase === "tearing"
-              ? " · la soudure cède…"
+              ? ` · ${t("la soudure cède…")}`
               : phase === "fan"
-                ? " · retourne les cartes"
+                ? ` · ${t("retourne les cartes")}`
                 : phase === "pack"
-                  ? " · booster scellé"
+                  ? ` · ${t("Booster scellé")}`
                   : ""}
           </p>
         </div>
@@ -473,8 +566,8 @@ export function BoosterReveal({
             onClick={() => setSoundOn(!soundOn)}
             className="btn btn-outline btn-sm px-2"
             aria-pressed={soundOn}
-            aria-label={soundOn ? "Couper le son" : "Rétablir le son"}
-            title={soundOn ? "Couper le son" : "Rétablir le son"}
+            aria-label={t(soundOn ? "Couper le son" : "Rétablir le son")}
+            title={t(soundOn ? "Couper le son" : "Rétablir le son")}
           >
             <SoundIcon on={soundOn} />
           </button>
@@ -483,9 +576,9 @@ export function BoosterReveal({
               type="button"
               onClick={revealAll}
               className="btn btn-outline btn-sm"
-              aria-label="Passer l'animation"
+              aria-label={t("Passer l'animation")}
             >
-              Passer
+              {t("Passer")}
             </button>
           )}
           <span className="reveal-bar-count">
@@ -515,15 +608,71 @@ export function BoosterReveal({
                 <span className="aura-ring" />
                 <span className="pack-rays" />
                 <span className="aura-seed" />
-                <span className="aura-motes">
-                  {SPARKS.slice(0, 12).map((mote) => (
+              </div>
+            )}
+            {/* La soudure cède : la gerbe part du milieu de la soudure, devant
+                le poster. Elle n'est pas solidaire de l'aura — celle-ci
+                s'efface dès que les cartes sortent, l'explosion continue. */}
+            {progress >= 1 && (
+              <div className="fx-stage" aria-hidden>
+                <span className="fx-origin">
+                  <span className="fx-bloom" />
+                  <span className="fx-flash" />
+                  {WAVES.map((delay) => (
                     <span
-                      key={`mote-${mote.id}`}
-                      className="aura-mote"
+                      key={`wave-${delay}`}
+                      className="fx-wave"
+                      style={{ "--fx-delay": `${delay}ms` } as CSSProperties}
+                    />
+                  ))}
+                  {TRAILS.map((trail) => (
+                    <span
+                      key={`trail-${trail.id}`}
+                      className="fx-trail"
+                      data-tone={trail.tone}
                       style={
                         {
-                          "--mote-x": `${Math.round(mote.x * 0.6)}px`,
-                          "--mote-delay": `${mote.delay * 2}ms`,
+                          "--fx-angle": `${trail.angle}deg`,
+                          "--fx-reach": `${trail.reach}px`,
+                          "--fx-len": trail.length,
+                          "--fx-w": `${trail.width}px`,
+                          "--fx-delay": `${trail.delay}ms`,
+                        } as CSSProperties
+                      }
+                    />
+                  ))}
+                  {BLAST_SPARKS.map((spark) => (
+                    <span
+                      key={`spark-${spark.id}`}
+                      className="fx-spark"
+                      data-tone={spark.tone}
+                      style={
+                        {
+                          "--fx-x": `${spark.x}px`,
+                          "--fx-y": `${spark.y}px`,
+                          "--fx-fall": `${spark.fall}px`,
+                          "--fx-size": `${spark.size}px`,
+                          "--fx-delay": `${spark.delay}ms`,
+                        } as CSSProperties
+                      }
+                    />
+                  ))}
+                  {CONFETTI.map((piece) => (
+                    <span
+                      key={`confetti-${piece.id}`}
+                      className="fx-confetti"
+                      data-shape={piece.shape}
+                      data-tone={piece.tone}
+                      style={
+                        {
+                          "--fx-x": `${piece.x}px`,
+                          "--fx-y": `${piece.y}px`,
+                          "--fx-fall": `${piece.fall}px`,
+                          "--fx-spin": `${piece.spin}deg`,
+                          "--fx-dur": `${piece.duration}ms`,
+                          "--fx-w": `${piece.width}px`,
+                          "--fx-h": `${piece.height}px`,
+                          "--fx-delay": `${piece.delay}ms`,
                         } as CSSProperties
                       }
                     />
@@ -609,17 +758,30 @@ export function BoosterReveal({
                     const isTop = slot === 0;
                     const isFlipped = flipped === globalIndex;
                     const isLeaving = leaving === globalIndex;
-                    const marks = isFlipped && (entry.isNew || entry.holo || entry.variant !== "normal");
+                    const marks = isFlipped && (entry.isNew || entry.holo || entry.variant !== "normal" || entry.guaranteed || entry.boosterSpecial);
 
                     const inner = (
                       <>
-                        <span className="rip-card-inner">
+                        <span
+                          className="rip-card-inner"
+                          onTransitionEnd={(event) => {
+                            if (event.propertyName === "transform" && isFlipped && isTop) {
+                              setFaceRevealed(true);
+                            }
+                          }}
+                        >
                           <span
                             className="rip-face rip-face-back"
-                            style={{ "--glow": AURA[entry.card.rarity].glow } as CSSProperties}
+                            style={{
+                              "--glow": isFlipped ? AURA[entry.card.rarity].glow : BACK_GLOW,
+                            } as CSSProperties}
                           >
                             <CardBack pack={pack} />
                           </span>
+                          {/* La face reste montée pendant le retournement : c'est
+                              elle qu'on voit arriver quand la carte pivote. La
+                              masquer à la place du dos donnait un simple
+                              remplacement d'image, sans rotation. */}
                           <span className="rip-face rip-face-front">
                             <CardFace
                               card={entry.card}
@@ -635,17 +797,27 @@ export function BoosterReveal({
                           <span className="pointer-events-none absolute inset-x-0 -top-2 z-20 flex justify-center gap-1">
                             {entry.isNew && (
                               <span className="chip bg-emerald-400 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-emerald-950">
-                                Nouveau
+                                {t("Nouveau")}
                               </span>
                             )}
                             {entry.holo && (
                               <span className="chip bg-amber-300 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-amber-950">
-                                Holo
+                                {t("Holo")}
                               </span>
                             )}
                             {entry.variant !== "normal" && (
                               <span className="chip bg-white/15 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white/80">
                                 {VARIANT_LABELS[entry.variant]}
+                              </span>
+                            )}
+                            {entry.guaranteed && (
+                              <span className="chip bg-cyan/90 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-ink">
+                                {t("Garantie")}
+                              </span>
+                            )}
+                            {entry.boosterSpecial && (
+                              <span className="chip bg-amber-200/90 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-amber-950">
+                                {t(entry.boosterSpecial === "golden" ? "Booster doré" : entry.boosterSpecial === "divine" ? "Booster divin" : "Booster mythique")}
                               </span>
                             )}
                           </span>
@@ -672,9 +844,9 @@ export function BoosterReveal({
                         {...common}
                         onClick={flipCard}
                         aria-label={
-                          isFlipped
+                          faceShown && isFlipped
                             ? `${entry.card.name}, ${RARITY[entry.card.rarity].label}`
-                            : `Retourner ${entry.card.name}`
+                            : t("Retourner la carte")
                         }
                         aria-disabled={isFlipped || isLeaving}
                       >
@@ -710,12 +882,11 @@ export function BoosterReveal({
                   disabled={phase === "tearing"}
                   className="btn btn-primary disabled:cursor-wait"
                 >
-                  {phase === "tearing" ? "Déchirure…" : "Déchirer le booster"}
+                  {phase === "tearing" ? t("Déchirure…") : t("Déchirer le booster")}
                 </button>
                 <p className="text-xs text-white/40">
-                  Glisse le long de la soudure, ou touche le bouton
-                  <span className="text-white/25"> · </span>
-                  {total} carte{total > 1 ? "s" : ""} à l&apos;intérieur
+                  {t("Glisse le long de la soudure, ou touche le bouton")}<span className="text-white/25"> · </span>
+                  {total} {t("carte")} {t("à l'intérieur")}
                 </p>
               </>
             )}
@@ -724,16 +895,26 @@ export function BoosterReveal({
               <>
                 <div className="min-h-14 text-center" aria-live="polite">
                   <p className="flex items-center justify-center gap-2 text-sm">
-                    <span className={`chip px-2 py-0.5 text-[10px] font-bold ${rarity.badge}`}>
-                      {rarity.short}
-                    </span>
-                    <span className={`font-semibold ${rarity.text}`}>{rarity.label}</span>
+                    {faceShown ? (
+                      <>
+                        <span className={`chip px-2 py-0.5 text-[10px] font-bold ${rarity.badge}`}>
+                          {rarity.short}
+                        </span>
+                        <span className={`font-semibold ${rarity.text}`}>{rarity.label}</span>
+                      </>
+                    ) : (
+                      <span className="chip bg-white/10 px-2 py-0.5 text-[10px] font-bold text-white/50">
+                        ?
+                      </span>
+                    )}
                   </p>
-                  <p className="display mt-1 text-2xl text-white">{current.card.name}</p>
+                  <p className="display mt-1 text-2xl text-white">
+                    {faceShown ? current.card.name : t("Carte à découvrir")}
+                  </p>
                   <p className="mt-0.5 text-xs text-white/45">
                     {getUniverseLabel(current.card.universe)}
                     <span className="text-white/25"> · </span>
-                    {current.isNew ? "Nouvelle carte" : `Doublon ×${current.quantity}`}
+                    {current.isNew ? t("Nouvelle carte") : `${t("Doublon ×")}${current.quantity}`}
                     <span className="text-white/25"> · </span>
                     {revealed + 1} / {total}
                   </p>
@@ -741,8 +922,10 @@ export function BoosterReveal({
 
                 {total <= 10 ? (
                   <div className="flex flex-wrap justify-center gap-1.5" aria-hidden>
-                    {items.map((entry, position) => {
-                      const shown = position < revealed || position === flipped;
+                    {revealItems.map((entry, position) => {
+                      // La vignette en cours reste un dos jusqu'à la face découverte,
+                      // sinon elle annonçait la carte avant le retournement.
+                      const shown = position < revealed || (position === flipped && faceRevealed);
                       return (
                         <span
                           key={`thumb-${entry.card.id}-${position}`}
@@ -757,7 +940,7 @@ export function BoosterReveal({
                   </div>
                 ) : (
                   <div className="flex flex-wrap items-center gap-1" aria-hidden>
-                    {items.slice(0, 24).map((entry, position) => (
+                    {revealItems.slice(0, 24).map((entry, position) => (
                       <span
                         key={`dot-${entry.card.id}-${position}`}
                         className={`h-1.5 rounded-full transition-all ${
@@ -775,18 +958,17 @@ export function BoosterReveal({
                     disabled={flipped !== null || leaving !== null}
                     className="btn btn-primary"
                   >
-                    {flipped !== null ? "Retournée" : "Retourner la carte"}
+                    {flipped !== null ? t("Retournée") : t("Retourner la carte")}
                   </button>
                   {total - revealed > 1 && (
                     <button type="button" onClick={revealAll} className="btn btn-outline">
-                      Tout révéler
+                      {t("Tout révéler")}
                     </button>
                   )}
                 </div>
 
                 <p className="text-[11px] text-white/35">
-                  Touche la carte <span className="text-white/20">·</span> Espace / Entrée{" "}
-                  <span className="text-white/20">·</span> retourner
+                  {t("Touche la carte")} <span className="text-white/20">·</span> {t("Espace / Entrée")} <span className="text-white/20">·</span> {t("retourner")}
                 </p>
               </>
             )}
@@ -797,14 +979,14 @@ export function BoosterReveal({
           <div className="mt-1 w-full">
             {/* Petit tirage : éventail. Lot de plusieurs boosters : grille
                 scrollable, plus lisible et plus rapide à parcourir. */}
-            {items.length > FAN_MAX ? (
-              <RevealGrid items={items} />
+            {revealItems.length > FAN_MAX ? (
+              <RevealGrid items={revealItems} />
             ) : (
               <ul className="fan-scene">
-                {items.map((entry, position) => {
-                  const middle = (items.length - 1) / 2;
+                {revealItems.map((entry, position) => {
+                  const middle = (revealItems.length - 1) / 2;
                   const offset = position - middle;
-                  const step = items.length > 7 ? 5 : 8;
+                  const step = revealItems.length > 7 ? 5 : 8;
                   return (
                     <li
                       key={`${entry.card.id}-${position}`}
@@ -832,16 +1014,16 @@ export function BoosterReveal({
                         <span className="pointer-events-none absolute inset-x-0 -top-1.5 z-10 flex justify-center gap-1">
                           {entry.isNew ? (
                             <span className="chip bg-emerald-400 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-emerald-950">
-                              Nouveau
+                              {t("Nouveau")}
                             </span>
                           ) : (
                             <span className="chip bg-black/70 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white/75">
-                              Doublon ×{entry.quantity}
+                              {t("Doublon ×")}{entry.quantity}
                             </span>
                           )}
                           {entry.holo && (
                             <span className="chip bg-amber-300 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-amber-950">
-                              Holo
+                              {t("Holo")}
                             </span>
                           )}
                           {entry.variant !== "normal" && (
@@ -849,6 +1031,8 @@ export function BoosterReveal({
                               {VARIANT_LABELS[entry.variant]}
                             </span>
                           )}
+                          {entry.guaranteed && <span className="chip bg-cyan/90 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-ink">{t("Garantie")}</span>}
+                          {entry.boosterSpecial && <span className="chip bg-amber-200/90 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-amber-950">{t(entry.boosterSpecial === "golden" ? "Doré" : entry.boosterSpecial === "divine" ? "Divin" : "Mythique")}</span>}
                         </span>
                       </Link>
                     </li>
@@ -857,28 +1041,28 @@ export function BoosterReveal({
               </ul>
             )}
 
-            {items.length <= FAN_MAX && (
+            {revealItems.length <= FAN_MAX && (
               <p className="text-center text-[11px] text-white/35">
                 <span className="hidden sm:inline">
-                  Survole une carte pour la voir en grand, clique pour ouvrir sa fiche
+                  {t("Survole une carte pour la voir en grand, clique pour ouvrir sa fiche")}
                 </span>
-                <span className="sm:hidden">Touche une carte pour ouvrir sa fiche</span>
+                <span className="sm:hidden">{t("Touche une carte pour ouvrir sa fiche")}</span>
               </p>
             )}
 
             <p className="mt-4 text-center text-sm text-white/60">
               {newCount > 0 ? (
                 <span className="font-semibold text-emerald-300">
-                  {newCount} nouvelle{newCount > 1 ? "s" : ""} carte{newCount > 1 ? "s" : ""}
+                  {newCount} {t(newCount === 1 ? "nouvelle carte" : "nouvelles cartes")}
                 </span>
               ) : (
-                "Aucune nouvelle carte cette fois"
+                t("Aucune nouvelle carte cette fois")
               )}
               {holoCount > 0 && (
                 <>
                   <span className="text-white/25"> · </span>
                   <span className="font-semibold text-amber-200">
-                    {holoCount} holo{holoCount > 1 ? "s" : ""}
+                    {holoCount} {t(holoCount === 1 ? "holo" : "holos")}
                   </span>
                 </>
               )}
@@ -886,7 +1070,7 @@ export function BoosterReveal({
 
             <div className="mt-6 flex justify-center">
               <button type="button" onClick={onClose} className="btn btn-primary">
-                Terminé
+                {t("Terminé")}
               </button>
             </div>
           </div>
@@ -898,10 +1082,12 @@ export function BoosterReveal({
 
 /**
  * Récapitulatif d'un lot : toutes les cartes d'un coup, dans une grille qui
- * défile. Les pastilles (« Nouveau », « ×N », « Holo ») restent visibles, ce
- * que l'éventail ne permet pas sans survol.
+ * défile. Les pastilles de nouveauté, de doublon et d'holo restent visibles,
+ * ce que l'éventail ne permet pas sans survol.
  */
 function RevealGrid({ items }: { items: RevealItem[] }) {
+  const { t } = useLocale();
+
   return (
     <ul className="mx-auto grid max-h-[54vh] w-full max-w-3xl grid-cols-3 gap-2.5 overflow-y-auto px-1 pb-2 sm:grid-cols-4 sm:gap-3 lg:grid-cols-6">
       {items.map((entry, position) => (
@@ -921,7 +1107,7 @@ function RevealGrid({ items }: { items: RevealItem[] }) {
             <span className="pointer-events-none absolute inset-x-0 -top-1.5 z-10 flex justify-center gap-1">
               {entry.isNew ? (
                 <span className="chip bg-emerald-400 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-emerald-950">
-                  Nouveau
+                  {t("Nouveau")}
                 </span>
               ) : (
                 <span className="chip bg-black/70 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white/75">
@@ -930,7 +1116,7 @@ function RevealGrid({ items }: { items: RevealItem[] }) {
               )}
               {entry.holo && (
                 <span className="chip bg-amber-300 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-amber-950">
-                  Holo
+                  {t("Holo")}
                 </span>
               )}
             </span>

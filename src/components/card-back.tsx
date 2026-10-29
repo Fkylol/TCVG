@@ -2,7 +2,8 @@
 
 import { useId, type CSSProperties } from "react";
 
-import { backColorsFor } from "@/lib/card-back";
+import { PackEmblem } from "@/components/pack-art";
+import { backColorsFor, backOrnamentFor } from "@/lib/card-back";
 import type { Pack } from "@/lib/packs";
 
 /**
@@ -18,6 +19,12 @@ import type { Pack } from "@/lib/packs";
 
 /** Anneaux concentriques, du plus petit au plus grand ; le dernier déborde. */
 const RINGS = [69, 93, 120, 150];
+
+/** Maille du treillis : un losange, ou la maille croisée d'une toile. */
+const LATTICE_CELLS = {
+  standard: "M0 15L15 0L30 15L15 30Z",
+  halloween: "M0 15L15 0L30 15L15 30ZM15 0V30M0 15H30",
+} as const;
 
 /** Croix des quatre coins, posées sur le filet intérieur. */
 const TICKS: [number, number][] = [
@@ -47,6 +54,7 @@ export function CardBack({
   className?: string;
 }) {
   const colors = backColorsFor(pack);
+  const ornament = backOrnamentFor(pack);
   // Le treillis est un motif SVG : son identifiant doit être unique sur la
   // page, plusieurs dos cohabitent (la carte du dessus et les vignettes).
   const lattice = `card-back-lattice-${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
@@ -72,7 +80,7 @@ export function CardBack({
       >
         <defs>
           <pattern id={lattice} width="30" height="30" patternUnits="userSpaceOnUse">
-            <path d="M0 15L15 0L30 15L15 30Z" stroke="var(--cb-tx)" strokeWidth="1.5" />
+            <path d={LATTICE_CELLS[ornament]} stroke="var(--cb-tx)" strokeWidth="1.5" />
           </pattern>
         </defs>
 
@@ -117,19 +125,27 @@ export function CardBack({
       <span className="card-back-center">
         <span className="card-back-med">
           <span className="card-back-disc">
-            <svg viewBox="0 0 48 48" aria-hidden focusable="false">
-              <circle cx="24" cy="24" r="18" fill="none" stroke="currentColor" strokeWidth="3" />
-              <rect
-                x="14.5"
-                y="14.5"
-                width="19"
-                height="19"
-                rx="4"
-                transform="rotate(45 24 24)"
-                fill="currentColor"
-              />
-              <circle cx="24" cy="24" r="3.4" fill="#0b0b14" />
-            </svg>
+            {ornament === "halloween" ? (
+              /* Le médaillon de la saison : la citrouille du pack, évidée dans
+                 l'encre du disque. */
+              <svg viewBox="0 0 48 48" fill="currentColor" aria-hidden focusable="false">
+                <PackEmblem name="halloween" />
+              </svg>
+            ) : (
+              <svg viewBox="0 0 48 48" aria-hidden focusable="false">
+                <circle cx="24" cy="24" r="18" fill="none" stroke="currentColor" strokeWidth="3" />
+                <rect
+                  x="14.5"
+                  y="14.5"
+                  width="19"
+                  height="19"
+                  rx="4"
+                  transform="rotate(45 24 24)"
+                  fill="currentColor"
+                />
+                <circle cx="24" cy="24" r="3.4" fill="#0b0b14" />
+              </svg>
+            )}
           </span>
         </span>
         <span className="card-back-word">TCVG</span>

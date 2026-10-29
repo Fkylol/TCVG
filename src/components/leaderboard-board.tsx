@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import { AvatarFrame } from "@/components/avatar-frame";
 import { getCardArt } from "@/lib/card-art";
 import { podiumRank } from "@/lib/leaderboard-ranks";
@@ -266,13 +267,14 @@ function PodiumCard({
         />
       </div>
 
-      <p
-        className={`mt-3 max-w-full truncate font-display uppercase tracking-[0.06em] ${
+      <Link
+        href={`/joueur/${encodeURIComponent(row.username)}`}
+        className={`mt-3 max-w-full truncate font-display uppercase tracking-[0.06em] transition hover:text-cyan ${
           isFirst ? "text-xl text-white" : "text-base text-white/85"
         }`}
       >
         {row.username}
-      </p>
+      </Link>
       <p className="mt-1 flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.14em]">
         <span className={medal.text}>{albumShare(coverage)}</span>
         <span className="text-white/15">·</span>
@@ -292,7 +294,7 @@ function PodiumCard({
         </span>
 
         <p
-          className={`display tabular-nums ${isFirst ? `text-4xl ${medal.text}` : `text-2xl ${medal.text}`}`}
+          className={`display font-mono tabular-nums ${isFirst ? `text-4xl ${medal.text}` : `text-2xl ${medal.text}`}`}
         >
           {row.collection_score.toLocaleString("fr-FR")}
         </p>
@@ -345,7 +347,9 @@ function RankRow({
 
       <div className="min-w-0">
         <div className="flex items-center gap-2">
-          <span className="truncate text-sm text-white/85">{row.username}</span>
+          <Link href={`/joueur/${encodeURIComponent(row.username)}`} className="truncate text-sm text-white/85 transition hover:text-cyan">
+            {row.username}
+          </Link>
           {isViewer && (
             <span className="rounded-[var(--radius-sm)] border border-cyan/40 px-1 py-px font-mono text-[9px] uppercase tracking-[0.12em] text-cyan">
               toi

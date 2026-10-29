@@ -860,6 +860,125 @@ button:focus-visible .pack-poster[data-flat="true"] {
   will-change: transform;
 }
 
+.glass-showcase {
+  background:
+    radial-gradient(ellipse at 50% -25%, rgba(54, 226, 255, 0.12), transparent 65%),
+    linear-gradient(155deg, rgba(18, 34, 48, 0.92), rgba(6, 10, 18, 0.97));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 24px 70px -45px rgba(40, 210, 240, 0.7);
+}
+
+.glass-shelf-row {
+  padding: 0 0.2rem;
+}
+
+.glass-shelf-row + .glass-shelf-row {
+  margin-top: 1.25rem;
+}
+
+.showcase-slot {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: end;
+}
+
+.showcase-card {
+  position: relative;
+  z-index: 1;
+  margin-inline: auto;
+  width: min(100%, 10rem);
+  transform-origin: center bottom;
+  transition: transform 180ms ease, filter 180ms ease;
+}
+
+.showcase-card:hover {
+  z-index: 2;
+  transform: translateY(-4px) scale(1.025);
+  filter: brightness(1.1);
+}
+
+.showcase-card-art {
+  position: relative;
+  display: grid;
+  aspect-ratio: 3 / 4;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid color-mix(in oklab, var(--rarity, #36e2ff) 35%, rgba(255,255,255,0.28));
+  border-radius: 0.65rem 0.65rem 0.35rem 0.35rem;
+  box-shadow: 0 8px 18px -12px rgba(0,0,0,.9), inset 0 0 0 1px rgba(255,255,255,.08);
+}
+
+.showcase-card-art[data-rarity="L"] {
+  border-color: rgba(255, 79, 216, 0.8);
+  box-shadow: 0 0 18px -9px rgba(255, 79, 216, 0.9), inset 0 0 0 1px rgba(255,255,255,.15);
+}
+
+.showcase-card-art[data-holo="true"] .showcase-card-glass {
+  background: linear-gradient(125deg, rgba(255,255,255,.42), rgba(54,226,255,.16) 28%, transparent 55%, rgba(252,211,77,.18));
+}
+
+.showcase-card-art[data-variant="holo_blue"] .showcase-card-glass {
+  background: linear-gradient(125deg, rgba(185,225,255,.5), rgba(61,145,255,.2) 34%, transparent 64%, rgba(91,120,255,.25));
+}
+
+.showcase-card-glass {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(125deg, rgba(255,255,255,.2), transparent 30%, transparent 67%, rgba(160,230,255,.1));
+  pointer-events: none;
+}
+
+.showcase-empty {
+  display: flex;
+  aspect-ratio: 3 / 4;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed rgba(140, 205, 225, 0.18);
+  border-radius: 0.6rem;
+  background: rgba(110, 190, 220, 0.035);
+}
+
+.glass-shelf {
+  position: relative;
+  height: 0.8rem;
+  margin-top: 0.45rem;
+  border: 1px solid rgba(178, 235, 255, 0.36);
+  border-top: 2px solid rgba(222, 249, 255, 0.7);
+  background: linear-gradient(180deg, rgba(206, 244, 255, 0.25), rgba(63, 154, 190, 0.07));
+  box-shadow: 0 8px 13px -10px rgba(117, 228, 255, 0.85), inset 0 1px 0 rgba(255,255,255,.34);
+  backdrop-filter: blur(8px);
+  transform: perspective(160px) rotateX(4deg);
+}
+
+.glass-shelf > span {
+  position: absolute;
+  top: 0.7rem;
+  width: 0.25rem;
+  height: 0.75rem;
+  background: linear-gradient(90deg, rgba(152, 224, 245, .18), rgba(225, 249, 255, .58));
+}
+
+.glass-shelf > span:first-child { left: 5%; }
+.glass-shelf > span:last-child { right: 5%; }
+
+.showcase-edit-button {
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 999px;
+  padding: 0.15rem 0.48rem;
+  color: rgba(255,255,255,.56);
+  font-size: 0.6rem;
+  line-height: 1.3;
+  transition: color 150ms ease, border-color 150ms ease, background 150ms ease;
+}
+
+.showcase-edit-button:hover {
+  border-color: rgba(54,226,255,.45);
+  background: rgba(54,226,255,.08);
+  color: #8ceeff;
+}
+
 .card-face[data-size="sm"] {
   --radius: 0.625rem;
   --pad: 6px;
@@ -969,6 +1088,24 @@ button:focus-visible .pack-poster[data-flat="true"] {
   white-space: nowrap;
 }
 
+/* Carte saisonnière : l'étiquette dit la saison, sans crier plus fort que le
+   reste des étiquettes. */
+.card-season {
+  background: rgba(30, 8, 40, 0.85);
+  color: #ffb347;
+  box-shadow: inset 0 0 0 1px rgba(255, 179, 71, 0.45);
+}
+
+/* ————— Cartes d'Halloween —————
+
+   Une version spectrale garde le visuel du personnage, passé au violet
+   glacial : désaturé, puis retinté. Le filtre ne touche que l'image — le
+   carton, la rareté et les étiquettes gardent leurs couleurs. */
+.card-face[data-season="halloween"] .card-art img {
+  filter: grayscale(0.45) sepia(0.42) hue-rotate(212deg) saturate(1.9) brightness(0.86)
+    contrast(1.08);
+}
+
 /* Carte retirée : l'étiquette reste sobre, le visuel a déjà disparu. */
 .card-retired {
   background: rgba(8, 9, 10, 0.82);
@@ -1057,6 +1194,16 @@ button:focus-visible .pack-poster[data-flat="true"] {
   font-variant-numeric: tabular-nums;
 }
 
+/* Les trois étages de texte gardent leur hauteur, même dans une vignette trop
+   courte : ce qui cède, c'est l'illustration (`.card-art` est le seul étage
+   souple). Compressés, le nom et l'univers se coupaient en deux au lieu de
+   déborder franchement — une vignette de 80 px de large donnait ce rendu. */
+.card-head,
+.card-universe,
+.card-stats {
+  flex: 0 0 auto;
+}
+
 /* ————— Couleur de rareté —————
    Les clés de données (`UC`, `SR`, `UR`, `L`) diffèrent des suffixes de token
    (`U`, `E`, `L`, `M`) : la correspondance est posée ici, une seule fois. */
@@ -1139,10 +1286,12 @@ button:focus-visible .pack-poster[data-flat="true"] {
   border-radius: inherit;
   pointer-events: none;
   mix-blend-mode: color-dodge;
-  /* Les trois quarts de la pellicule restent au repos : sans pointeur —
-     vignette de collection, téléphone — une carte de rareté haute doit déjà
-     briller. Le quart restant s'allume au survol. */
-  opacity: calc(var(--ho, 0) * (0.75 + var(--intensity, 0) * 0.25));
+  /* Éteinte au repos, pleine sous la main : une pellicule allumée en
+     permanence voilait l'illustration d'une grille — les visuels paraissaient
+     délavés, et la carte brillait sans qu'on la touche. `--intensity` vaut 0
+     tant que le pointeur (ou un doigt) n'est pas sur la carte, et 1 pendant le
+     survol : la rareté se lit au carton, la brillance vient du geste. */
+  opacity: calc(var(--ho, 0) * var(--intensity, 0));
   background-image: var(--holo-bands), var(--holo-glitter), var(--holo-foil), var(--foil);
   background-size:
     190% 190%,
@@ -1182,7 +1331,10 @@ button:focus-visible .pack-poster[data-flat="true"] {
   border-radius: inherit;
   pointer-events: none;
   mix-blend-mode: overlay;
-  opacity: calc(0.32 + var(--intensity, 0) * 0.68);
+  /* Le reflet suit la même règle que la pellicule : rien au repos. En `overlay`
+     sur toute la surface, il poussait le contraste de chaque visuel (noirs
+     bouchés, hautes lumières écrasées) sans qu'aucune main ne passe dessus. */
+  opacity: var(--intensity, 0);
   background: radial-gradient(
     farthest-corner circle at calc(50% + var(--tx, 0) * 50%) calc(50% + var(--ty, 0) * 50%),
     rgba(255, 255, 255, 0.7),
@@ -1233,21 +1385,12 @@ button:focus-visible .pack-poster[data-flat="true"] {
   display: block;
 }
 
-/* La vignette d'une collection ne suit pas le pointeur : sans cette dérive,
-   une holo au repos avait exactement le rendu d'une carte normale. Les teintes
-   tournent lentement, en `filter` pour rester composées par le GPU. */
+/* Copie brillante : elle porte toute la pellicule (voir `--ho: 1` plus haut),
+   mais elle s'allume comme les autres, sous la main seulement. Dans une
+   collection, c'est l'étoile `✦` de la vignette qui annonce la copie — pas un
+   halo permanent sur l'illustration. */
 .card-face[data-holo="true"] .card-holo {
-  opacity: calc(0.9 + 0.1 * var(--intensity, 0));
-  animation: holo-drift 12s linear infinite;
-}
-
-@keyframes holo-drift {
-  from {
-    filter: hue-rotate(0deg) saturate(1.15);
-  }
-  to {
-    filter: hue-rotate(360deg) saturate(1.15);
-  }
+  opacity: var(--intensity, 0);
 }
 
 /* Dégradé métallique : la teinte de la rareté, du plus sombre au plus clair. */
@@ -1315,13 +1458,15 @@ button:focus-visible .pack-poster[data-flat="true"] {
 
 /* ————— Variantes misprint —————
    Purement cosmétiques : jamais d'effet sur les règles. */
-/* Le foil déborde : la pellicule est plus dense que sur une impression saine. */
+/* Le foil déborde : la pellicule est plus dense que sur une impression saine.
+   Elle obéit à la même règle que les autres : rien tant que la main n'est pas
+   sur la carte. C'est l'étiquette « Holo bleed » qui la distingue au repos. */
 .card-face[data-variant="holo_bleed"] .card-holo {
-  opacity: calc(0.75 + 0.25 * var(--intensity, 0));
+  opacity: var(--intensity, 0);
 }
 
 .card-face[data-variant="holo_bleed"] .card-glare {
-  opacity: calc(0.45 + 0.55 * var(--intensity, 0));
+  opacity: var(--intensity, 0);
 }
 
 .card-face[data-variant="off_center"] .card-art {
@@ -1355,7 +1500,8 @@ button:focus-visible .pack-poster[data-flat="true"] {
   border-radius: inherit;
   pointer-events: none;
   mix-blend-mode: color-dodge;
-  opacity: calc(0.6 + 0.4 * var(--intensity, 0));
+  /* Comme la pellicule de la fenêtre : allumée sous la main, éteinte sinon. */
+  opacity: var(--intensity, 0);
   /* Paillettes, grain de foil, dégradé métallique, puis un semis de points
      blancs — la trame du reverse, qui la distingue d'une holo classique. */
   background-image:
@@ -1809,6 +1955,9 @@ button:focus-visible .pack-poster[data-flat="true"] {
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+  /* La gerbe de l'ouverture déborde volontairement de la scène : sans cela,
+     l'écran gagnait une barre de défilement horizontale le temps du "boum". */
+  overflow-x: hidden;
   background:
     radial-gradient(120% 70% at 50% 0%, rgba(255, 255, 255, 0.055), transparent 62%),
     #06080a;
@@ -2152,7 +2301,7 @@ button:focus-visible .pack-poster[data-flat="true"] {
   pointer-events: none;
   background:
     repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.85) 0 1px, rgba(255, 255, 255, 0) 1px 5px),
-    repeating-linear-gradient(90deg, rgba(214, 255, 170, 0.6) 0 2px, rgba(214, 255, 170, 0) 2px 9px),
+    repeating-linear-gradient(90deg, rgba(54, 226, 255, 0.6) 0 2px, rgba(54, 226, 255, 0) 2px 9px),
     linear-gradient(180deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0));
   clip-path: polygon(
     0 40%,
@@ -2170,7 +2319,7 @@ button:focus-visible .pack-poster[data-flat="true"] {
     100% 100%,
     0 100%
   );
-  filter: blur(0.4px) drop-shadow(0 0 6px rgba(214, 255, 170, 0.8));
+  filter: blur(0.4px) drop-shadow(0 0 6px rgba(54, 226, 255, 0.75));
 }
 
 .pack-stage[data-torn="true"] .pack-fringe {
@@ -2206,7 +2355,7 @@ button:focus-visible .pack-poster[data-flat="true"] {
   background: radial-gradient(
     58% 20% at 50% 10%,
     rgba(255, 255, 255, 0.9),
-    rgba(226, 255, 190, 0.28) 46%,
+    rgba(207, 250, 255, 0.32) 46%,
     transparent 74%
   );
 }
@@ -2294,24 +2443,176 @@ button:focus-visible .pack-poster[data-flat="true"] {
   pointer-events: none;
 }
 
-/* Poussière lumineuse qui monte du pack ouvert. */
-.aura-motes {
+/* ————— L'explosion —————
+
+   Le sachet cède : une lumière blanche éclate au milieu de la soudure, trois
+   ondes de choc s'élargissent, des traînées de feu d'artifice filent vers
+   l'extérieur, puis les confettis culbutent et retombent. Tout part du même
+   point — le haut du sachet, là où la soudure s'ouvre — et tout tient en
+   `transform` et `opacity` : la gerbe reste sur le compositeur, comme les
+   étincelles des cartes rares.
+
+   La gerbe se pose devant le poster et ne dépend pas de l'aura : celle-ci
+   s'efface dès que les cartes sortent, l'explosion finit sa retombée. */
+
+.fx-stage {
   position: absolute;
-  inset: 0;
+  /* Plus large que la scène : la gerbe a de la place pour sortir du cadre du
+     poster sans qu'on voie la découpe d'une boîte. Ses bords horizontaux
+     tombent hors de l'écran, et ses bords haut et bas s'effacent dans le
+     masque — une gerbe coupée net au milieu de l'écran trahissait le calque. */
+  inset: -70px -50vw;
+  z-index: 30;
+  overflow: hidden;
   pointer-events: none;
+  -webkit-mask-image: linear-gradient(
+    180deg,
+    transparent 0%,
+    #000 8%,
+    #000 72%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(180deg, transparent 0%, #000 8%, #000 72%, transparent 100%);
 }
 
-.aura-mote {
+/* L'origine : le milieu de la soudure, en haut du sachet. */
+.fx-origin {
   position: absolute;
-  left: calc(50% + var(--mote-x, 0px));
-  bottom: 22%;
-  width: 3px;
-  height: 3px;
+  left: 50%;
+  top: 8.4%;
+  width: 0;
+  height: 0;
+}
+
+/* L'éclat blanc de l'instant, puis la lumière qu'il laisse derrière lui. */
+.fx-flash {
+  position: absolute;
+  width: 150px;
+  aspect-ratio: 1;
+  margin: -75px 0 0 -75px;
   border-radius: 9999px;
-  background: var(--aura);
-  box-shadow: 0 0 8px var(--aura);
+  background: radial-gradient(circle, #fff 0%, rgba(255, 255, 255, 0.5) 30%, transparent 68%);
   opacity: 0;
-  animation: aura-mote 1100ms var(--mote-delay, 0ms) ease-out both;
+  animation: fx-flash 440ms ease-out both;
+}
+
+.fx-bloom {
+  position: absolute;
+  width: 360px;
+  aspect-ratio: 1;
+  margin: -180px 0 0 -180px;
+  border-radius: 9999px;
+  background: radial-gradient(circle, var(--aura) 0%, transparent 58%);
+  filter: blur(12px);
+  opacity: 0;
+  animation: fx-bloom 680ms ease-out both;
+}
+
+/* Les ondes de choc : le « boum » qui s'élargit. */
+.fx-wave {
+  position: absolute;
+  width: 84px;
+  aspect-ratio: 1;
+  margin: -42px 0 0 -42px;
+  border-radius: 9999px;
+  border: 2px solid var(--aura);
+  box-shadow:
+    0 0 20px var(--aura-soft),
+    inset 0 0 18px -6px var(--aura);
+  opacity: 0;
+  animation: fx-wave 780ms var(--fx-delay, 0ms) cubic-bezier(0.16, 0.7, 0.3, 1) both;
+}
+
+/* Traînées du feu d'artifice : un trait naît à l'origine, s'allonge vers
+   l'extérieur en s'en éloignant, puis s'éteint. */
+.fx-trail {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--fx-w, 3px);
+  height: 1px;
+  margin-left: calc(var(--fx-w, 3px) / -2);
+  border-radius: 9999px;
+  background: linear-gradient(
+    180deg,
+    currentColor,
+    color-mix(in srgb, currentColor 15%, transparent)
+  );
+  box-shadow: 0 0 8px currentColor;
+  transform-origin: 50% 0;
+  opacity: 0;
+  animation: fx-trail 640ms var(--fx-delay, 0ms) cubic-bezier(0.12, 0.78, 0.24, 1) both;
+}
+
+/* Étincelles rondes, projetées moins loin : elles remplissent les vides. */
+.fx-spark {
+  position: absolute;
+  width: var(--fx-size, 3px);
+  aspect-ratio: 1;
+  margin: calc(var(--fx-size, 3px) / -2);
+  border-radius: 9999px;
+  background: currentColor;
+  box-shadow: 0 0 10px currentColor;
+  opacity: 0;
+  animation: fx-spark 800ms var(--fx-delay, 0ms) cubic-bezier(0.16, 0.84, 0.3, 1) both;
+}
+
+/* Les confettis : ils culbutent pendant leur vol — c'est le `scaleX` des
+   images clés — montent, puis retombent plus bas que leur trajectoire. */
+.fx-confetti {
+  position: absolute;
+  width: var(--fx-w, 6px);
+  height: var(--fx-h, 9px);
+  margin: calc(var(--fx-h, 9px) / -2) 0 0 calc(var(--fx-w, 6px) / -2);
+  border-radius: 1px;
+  background: currentColor;
+  box-shadow: 0 0 8px color-mix(in srgb, currentColor 60%, transparent);
+  opacity: 0;
+  animation: fx-confetti var(--fx-dur, 1500ms) var(--fx-delay, 0ms) cubic-bezier(0.18, 0.72, 0.28, 1)
+    both;
+}
+
+.fx-confetti[data-shape="dot"],
+.fx-confetti[data-shape="ribbon"] {
+  border-radius: 9999px;
+}
+
+/* Les tons : l'aura de la rareté tirée, le blanc et l'or des étincelles, et
+   les trois teintes de la marque. */
+.fx-trail[data-tone="aura"],
+.fx-spark[data-tone="aura"],
+.fx-confetti[data-tone="aura"] {
+  color: var(--aura);
+}
+
+.fx-trail[data-tone="cyan"],
+.fx-spark[data-tone="cyan"],
+.fx-confetti[data-tone="cyan"] {
+  color: var(--cyan);
+}
+
+.fx-trail[data-tone="violet"],
+.fx-spark[data-tone="violet"],
+.fx-confetti[data-tone="violet"] {
+  color: var(--violet);
+}
+
+.fx-trail[data-tone="pink"],
+.fx-spark[data-tone="pink"],
+.fx-confetti[data-tone="pink"] {
+  color: var(--pink);
+}
+
+.fx-trail[data-tone="white"],
+.fx-spark[data-tone="white"],
+.fx-confetti[data-tone="white"] {
+  color: #fff;
+}
+
+.fx-trail[data-tone="gold"],
+.fx-spark[data-tone="gold"],
+.fx-confetti[data-tone="gold"] {
+  color: #ffe9a8;
 }
 
 @keyframes aura-bloom {
@@ -2371,17 +2672,120 @@ button:focus-visible .pack-poster[data-flat="true"] {
   }
 }
 
-@keyframes aura-mote {
+@keyframes fx-flash {
   0% {
     opacity: 0;
-    transform: translateY(0) scale(0.5);
+    transform: scale(0.3);
   }
-  25% {
+  12% {
     opacity: 1;
   }
   100% {
     opacity: 0;
-    transform: translateY(-110px) scale(1);
+    transform: scale(1.9);
+  }
+}
+
+@keyframes fx-bloom {
+  0% {
+    opacity: 0;
+    transform: scale(0.35);
+  }
+  20% {
+    opacity: 0.66;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.15);
+  }
+}
+
+@keyframes fx-wave {
+  0% {
+    opacity: 0;
+    transform: scale(0.22);
+  }
+  15% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(3.6);
+  }
+}
+
+/* Les traînées s'allongent en s'éloignant : `--fx-len` multiplie une barre d'un
+   pixel, `--fx-reach` l'emporte plus loin que sa naissance. */
+@keyframes fx-trail {
+  0% {
+    opacity: 0;
+    transform: rotate(var(--fx-angle, 0deg)) translateY(0) scaleY(0.1);
+  }
+  10% {
+    opacity: 1;
+  }
+  72% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(var(--fx-angle, 0deg)) translateY(var(--fx-reach, 60px))
+      scaleY(var(--fx-len, 40));
+  }
+}
+
+@keyframes fx-spark {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0) scale(0.35);
+  }
+  10% {
+    opacity: 1;
+  }
+  58% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--fx-x, 0px), calc(var(--fx-y, 0px) + var(--fx-fall, 0px)), 0)
+      scale(1);
+  }
+}
+
+/* Le confetti culbute : le `scaleX` s'écrase et revient à chaque demi-tour,
+   sans rien sortir du compositeur. */
+@keyframes fx-confetti {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(0.4);
+  }
+  7% {
+    opacity: 1;
+  }
+  30% {
+    opacity: 1;
+    transform: translate3d(calc(var(--fx-x, 0px) * 0.58), calc(var(--fx-y, 0px) * 0.7), 0)
+      rotate(calc(var(--fx-spin, 360deg) * 0.36)) scaleX(0.95);
+  }
+  48% {
+    opacity: 1;
+    transform: translate3d(calc(var(--fx-x, 0px) * 0.86), calc(var(--fx-y, 0px) * 0.98), 0)
+      rotate(calc(var(--fx-spin, 360deg) * 0.56)) scaleX(0.22);
+  }
+  64% {
+    opacity: 1;
+    transform: translate3d(var(--fx-x, 0px), var(--fx-y, 0px), 0)
+      rotate(calc(var(--fx-spin, 360deg) * 0.74)) scaleX(1);
+  }
+  82% {
+    opacity: 1;
+    transform: translate3d(calc(var(--fx-x, 0px) * 1.05), calc(var(--fx-y, 0px) + var(--fx-fall, 0px) * 0.55), 0)
+      rotate(calc(var(--fx-spin, 360deg) * 0.9)) scaleX(0.28);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(calc(var(--fx-x, 0px) * 1.08), calc(var(--fx-y, 0px) + var(--fx-fall, 0px)), 0)
+      rotate(var(--fx-spin, 360deg)) scaleX(0.9);
   }
 }
 
@@ -2544,8 +2948,9 @@ button:focus-visible .pack-poster[data-flat="true"] {
   -webkit-backface-visibility: hidden;
 }
 
-/* Le dos : le même dessin pour toutes les cartes, aux couleurs du pack ouvert,
-   cerclé de la couleur de la rareté qu'il cache — sans la trahir. */
+/* Le dos : le même dessin pour toutes les cartes, aux couleurs du pack ouvert.
+   Le halo reste neutre tant que la carte est face cachée — coloré à la rareté,
+   il annonçait la valeur de la carte avant même qu'on la retourne. */
 .rip-face-back {
   transform: rotateY(180deg);
   background: #0a0c12;
@@ -2820,7 +3225,12 @@ button:focus-visible .pack-poster[data-flat="true"] {
   html:not([data-motion="full"]) .pack-rays,
   html:not([data-motion="full"]) .aura-seed,
   html:not([data-motion="full"]) .aura-ring,
-  html:not([data-motion="full"]) .aura-mote,
+  html:not([data-motion="full"]) .fx-flash,
+  html:not([data-motion="full"]) .fx-bloom,
+  html:not([data-motion="full"]) .fx-wave,
+  html:not([data-motion="full"]) .fx-trail,
+  html:not([data-motion="full"]) .fx-spark,
+  html:not([data-motion="full"]) .fx-confetti,
   html:not([data-motion="full"]) .reveal-spark,
   html:not([data-motion="full"]) .reveal-sparks .reveal-ring {
     animation: none;

@@ -10,6 +10,7 @@ import { getCardArt } from "@/lib/card-art";
 import { getCard, getCardNumber, type Rarity } from "@/lib/cards";
 import type { BuyOrder, GenreOption, MarketListing } from "@/lib/data";
 import { RARITY, RARITY_ORDER } from "@/lib/game";
+import { useLocale } from "@/components/locale-provider";
 
 type Note = { tone: "ok" | "bad"; text: string } | null;
 type Sort = "recent" | "price-asc" | "price-desc";
@@ -42,18 +43,18 @@ function formatDate(value: string | null): string {
 }
 
 /** « Expire dans 5 jours » — repère lisible sans dépendre de l'heure exacte. */
-function expiryLabel(value: string | null): string {
+function expiryLabel(value: string | null, t: (text: string) => string): string {
   if (!value) return "";
   const days = Math.ceil((Date.parse(value) - Date.now()) / 86_400_000);
-  if (days <= 0) return "Échéance dépassée";
-  if (days === 1) return "Expire demain";
-  return `Expire dans ${days} jours`;
+  if (days <= 0) return t("Expiration dépassée");
+  if (days === 1) return t("Expire demain");
+  return `${t("Expire dans ")}${days} ${t("jours")}`;
 }
 
 /** Une annulation pour expiration se lit « Expirée », pas « Annulée ». */
-function statusLabel(listing: MarketListing): string {
-  if (listing.status === "cancelled" && listing.cancelReason === "expired") return "Expirée";
-  return STATUS_LABEL[listing.status];
+function statusLabel(listing: MarketListing, t: (text: string) => string): string {
+  if (listing.status === "cancelled" && listing.cancelReason === "expired") return t("Expirée");
+  return t(STATUS_LABEL[listing.status]);
 }
 
 export function MarketBrowser({
@@ -77,6 +78,7 @@ export function MarketBrowser({
   owned: Record<string, OwnedCopy>;
 }) {
   const router = useRouter();
+  const { t } = useLocale();
   const [tab, setTab] = useState<"market" | "mine" | "orders">("market");
   const [rarity, setRarity] = useState<Rarity | "all">("all");
   const [genre, setGenre] = useState<string>("all");
@@ -265,28 +267,28 @@ export function MarketBrowser({
             onClick={() => setTab("market")}
             className={`tab px-3 py-1.5 ${tab === "market" ? "bg-cyan text-ink" : ""}`}
           >
-            Annonces ({active.length})
+            {t("Annonces")} ({active.length})
           </button>
           <button
             type="button"
             onClick={() => setTab("mine")}
             className={`tab px-3 py-1.5 ${tab === "mine" ? "bg-cyan text-ink" : ""}`}
           >
-            Mes annonces ({myActive.length})
+            {t("Mes annonces")} ({myActive.length})
           </button>
           <button
             type="button"
             onClick={() => setTab("orders")}
             className={`tab px-3 py-1.5 ${tab === "orders" ? "bg-cyan text-ink" : ""}`}
           >
-            Mes ordres ({activeOrders.length})
+            {t("Mes ordres")} ({activeOrders.length})
           </button>
         </div>
 
         <span className="chip ml-auto py-1.5 font-semibold text-cyan">◆ {currentPixels}</span>
         {reservedPixels > 0 && (
           <span className="chip py-1.5 text-white/45">
-            <span className="font-sans text-white/30">réservé</span> ◆ {reservedPixels}
+            <span className="font-sans text-white/30">{t("réservé")}</span> ◆ {reservedPixels}
           </span>
         )}
       </div>
@@ -326,7 +328,7 @@ export function MarketBrowser({
               onChange={(event) => setRarity(event.target.value as Rarity | "all")}
               className="field w-auto"
             >
-              <option value="all">Toutes les raretés</option>
+              <option value="all">{t("Toutes les raretés")}</option>
               {RARITY_ORDER.map((key) => (
                 <option key={key} value={key}>
                   {RARITY[key].label}
@@ -339,7 +341,7 @@ export function MarketBrowser({
               onChange={(event) => setGenre(event.target.value)}
               className="field w-auto"
             >
-              <option value="all">Tous les genres</option>
+              <option value="all">{t("Tous les genres")}</option>
               {genres.map((item) => (
                 <option key={item.slug} value={item.slug}>
                   {item.name}
@@ -353,7 +355,7 @@ export function MarketBrowser({
               inputMode="numeric"
               value={minPrice}
               onChange={(event) => setMinPrice(event.target.value)}
-              placeholder="Prix min"
+              placeholder={t("Prix min")}
               className="field w-24"
             />
             <input
@@ -362,7 +364,7 @@ export function MarketBrowser({
               inputMode="numeric"
               value={maxPrice}
               onChange={(event) => setMaxPrice(event.target.value)}
-              placeholder="Prix max"
+              placeholder={t("Prix max")}
               className="field w-24"
             />
 
@@ -371,23 +373,23 @@ export function MarketBrowser({
               onChange={(event) => setSort(event.target.value as Sort)}
               className="field w-auto"
             >
-              <option value="recent">Plus récentes</option>
-              <option value="price-asc">Prix croissant</option>
-              <option value="price-desc">Prix décroissant</option>
+              <option value="recent">{t("Plus récentes")}</option>
+              <option value="price-asc">{t("Prix croissant")}</option>
+              <option value="price-desc">{t("Prix décroissant")}</option>
             </select>
 
             <span className="ml-auto text-xs text-white/40">
-              {filtered.length} annonce{filtered.length > 1 ? "s" : ""}
+              {filtered.length} {t("annonces")}
             </span>
           </div>
 
           {filtered.length === 0 ? (
             <div className="mt-6 border border-dashed border-white/15 px-6 py-14 text-center text-sm text-white/50">
               {active.length === 0
-                ? "Le marché est vide pour le moment. Ouvre des boosters, puis mets un doublon en vente depuis sa fiche."
+                ? t("Le marché est vide pour le moment. Ouvre des boosters, puis mets un doublon en vente depuis sa fiche.")
                 : cardFilter !== "all"
-                  ? `Aucune annonce pour ${getCard(cardFilter)?.name ?? "cette carte"} pour le moment.`
-                  : "Aucune annonce ne correspond à ces filtres."}
+                  ? `${t("Aucune annonce pour ")}${getCard(cardFilter)?.name ?? t("cette carte")}${t(" pour le moment.")}`
+                  : t("Aucune annonce ne correspond à ces filtres.")}
             </div>
           ) : (
             <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -421,7 +423,7 @@ export function MarketBrowser({
                   >
                     <Link
                       href={`/card/${card.id}`}
-                      className="relative w-20 shrink-0 self-start sm:w-24"
+                      className="relative w-24 shrink-0 self-start"
                     >
                       <CardFace card={card} size="sm" className="aspect-[3/4]" />
                       {listing.holo && (
@@ -462,7 +464,7 @@ export function MarketBrowser({
                           frameId={listing.sellerFrame}
                         />
                         <p className="truncate text-[11px] text-white/40">
-                          Vendeur : <span className="text-white/60">{listing.sellerName}</span>
+                          {t("Vendeur : ")}<span className="text-white/60">{listing.sellerName}</span>
                         </p>
                       </div>
                       <p className="mt-1 font-mono text-lg font-bold text-cyan">◆ {listing.price}</p>
@@ -471,10 +473,7 @@ export function MarketBrowser({
                         <button
                           type="button"
                           onClick={() => setTab("mine")}
-                          className="btn btn-outline btn-sm mt-auto w-full"
-                        >
-                          Ton annonce
-                        </button>
+                          className="btn btn-outline btn-sm mt-auto w-full">{t("Ton annonce")}</button>
                       ) : (
                         <button
                           type="button"
@@ -482,7 +481,7 @@ export function MarketBrowser({
                           disabled={working || short}
                           className="btn btn-primary btn-sm mt-auto w-full"
                         >
-                          {working ? "Achat…" : short ? `Il manque ${listing.price - currentPixels} ◆` : "Acheter"}
+                          {working ? t("Achat…") : short ? `${t("Il manque ")}${listing.price - currentPixels} ◆` : t("Acheter")}
                         </button>
                       )}
                     </div>
@@ -522,7 +521,7 @@ export function MarketBrowser({
                         key={listing.id}
                         className="panel flex gap-3 p-3"
                       >
-                        <Link href={`/card/${card.id}`} className="relative w-20 shrink-0 self-start">
+                        <Link href={`/card/${card.id}`} className="relative w-24 shrink-0 self-start">
                           <CardFace card={card} size="sm" className="aspect-[3/4]" />
                           {listing.holo && (
                             <span className="chip absolute -top-1.5 right-1 z-10 bg-amber-300 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-amber-950">
@@ -542,7 +541,7 @@ export function MarketBrowser({
                           </p>
                           {listing.expiresAt && (
                             <p className="text-[11px] text-amber-200/60">
-                              {expiryLabel(listing.expiresAt)}
+                              {expiryLabel(listing.expiresAt, t)}
                             </p>
                           )}
 
@@ -625,7 +624,7 @@ export function MarketBrowser({
                           <span
                             className={`px-2 py-0.5 text-[10px] font-semibold ${STATUS_STYLE[listing.status]}`}
                           >
-                            {statusLabel(listing)}
+                            {statusLabel(listing, t)}
                           </span>
                           <span className="w-24 text-right text-[11px] text-white/35">
                             {listing.status === "sold"

@@ -8,6 +8,7 @@
  */
 
 import { ATELIER_LORE } from "./atelier-lore";
+import { cardEdit } from "./card-edits";
 
 export type CardLore = {
   tagline: string;
@@ -1885,6 +1886,11 @@ const BASE_CARD_LORE: Record<string, CardLore> = {
     quote: "On ne badine pas avec un Iop enragé !",
     bio: "Guerrier légendaire du Monde des Douze, il manie la colère comme une arme et cherche un adversaire à sa taille.",
   },
+  "comte-harebourg": {
+    tagline: "Le maître du temps de Frigost",
+    quote: "Il est toujours temps de remettre les pendules à l'heure.",
+    bio: "Xélor et demi-dieu de Frigost, il règne sur un hiver éternel et manipule le temps grâce à sa clepsydre et au Dofus des Glaces.",
+  },
   "dark-vlad": {
     tagline: "Le seigneur vampire",
     bio: "Chevalier de la nuit, nobliau vampire, il hante les ruines de son propre château en attendant de meilleurs invités.",
@@ -2849,6 +2855,109 @@ const BASE_CARD_LORE: Record<string, CardLore> = {
     quote: "Du pain ? Du pain pour tout le monde ! (Et de la bière, mais pas trop.)",
     bio: "Seigneur porcin à la couronne dorée, il règne sur un château famélique, comptant chaque archer et chaque ferme avant d'envoyer ses voisins au cachot.",
   },
+  // ——— Halloween (octobre 2026) ———
+  // Versions spectrales : la fiche raconte la métamorphose, jamais le
+  // personnage d'origine deux fois.
+  "luigi-halloween": {
+    tagline: "Le frère qu'on n'attendait pas de revoir",
+    power: "Apparition — revient une fois après avoir été vaincu.",
+    bio: "Il a enfilé son drap de fantôme pour de bon : Luigi hante désormais les manoirs qu'il nettoyait autrefois, plus vert que jamais.",
+  },
+  "yoshi-halloween": {
+    tagline: "Celui qui porte les âmes perdues",
+    power: "Bougie votive — éclaire les cartes cachées.",
+    bio: "Sa langue ne gobe plus les fruits mais les lucioles ; dans la brume, sa petite lanterne est le seul repère.",
+  },
+  "papyrus-halloween": {
+    tagline: "Grand chef des catacombes",
+    power: "Pansements — encaisse le premier coup sans broncher.",
+    bio: "Momifié par erreur pendant une sieste, il continue d'annoncer ses exploits à travers les bandelettes.",
+  },
+  "eggman-halloween": {
+    tagline: "La citrouille mécanique",
+    power: "Machine à bonbons — invoque un sbire à chaque tour.",
+    bio: "Il a remplacé sa moustache par un chapeau taillé dans un potiron, mais sa machine à voler les bonbons fonctionne toujours.",
+  },
+  "pikachu-halloween": {
+    tagline: "L'éclair qui traverse les murs",
+    power: "Charge spectrale — ignore les défenses.",
+    bio: "Un coup de tonnerre dans le cimetière : sa fourrure se hérisse et laisse passer une lumière froide.",
+  },
+  "knuckles-halloween": {
+    tagline: "Le gardien embaumé",
+    power: "Poings de pierre — brise les boucliers.",
+    bio: "Enveloppé de bandelettes pour protéger l'autel, il monte toujours la garde, même immobile.",
+  },
+  "cuphead-halloween": {
+    tagline: "La dette se paie en octobre",
+    power: "Tir de potiron — dégâts accrus sur les boss.",
+    bio: "Son âme est déjà au diable, alors il s'amuse : il a troqué sa tasse contre un potiron, canon compris.",
+  },
+  "crash-halloween": {
+    tagline: "Le marsupial d'outre-tombe",
+    power: "Masque hurlant — étourdit l'adversaire.",
+    bio: "Écrasé puis remonté, il ricane derrière un masque taillé dans une citrouille et continue de danser.",
+  },
+  "bowser-halloween": {
+    tagline: "Le roi du potiron moisi",
+    power: "Souffle cendré — brûle une carte en jeu.",
+    bio: "Il a troqué sa carapace contre une cucurbitacée géante, et son château sent la bougie fondue.",
+  },
+  "peach-halloween": {
+    tagline: "La princesse de la toile",
+    power: "Fil d'araignée — retient une carte ennemie.",
+    bio: "Retenue dans une tour envahie de toiles, Peach en a fait un trône et attend qu'on ose monter.",
+  },
+  "zelda-halloween": {
+    tagline: "L'oracle revenante",
+    power: "Sceau spectral — verrouille un pouvoir.",
+    bio: "Le sceau l'a gardée entre deux mondes : elle murmure des prophéties que seule la brume comprend.",
+  },
+  "alucard-halloween": {
+    tagline: "Le fils qui règne enfin la nuit",
+    power: "Forme de brume — esquive la prochaine attaque.",
+    bio: "Moitié humain, moitié vampire, entièrement à l'aise dans un cimetière en fête.",
+  },
+  "nemesis-halloween": {
+    tagline: "Il ne court plus, il rampe",
+    power: "Régénération — revient avec la moitié de ses points de vie.",
+    bio: "Muté, fondu, increvable : chaque nuit d'octobre il se traîne un peu plus près de toi.",
+  },
+  "doom-slayer-halloween": {
+    tagline: "L'enfer a rendu les clés",
+    power: "Trépas — double les dégâts sur les démons.",
+    bio: "Il a traversé tant de fois les portes de l'enfer qu'il y a ses habitudes, et désormais une clé.",
+  },
+  "master-chief-halloween": {
+    tagline: "Le casque vide qui marche encore",
+    power: "Bouclier spectral — absorbe un tiers des dégâts.",
+    bio: "Ses alliés sont tombés depuis longtemps ; le casque, lui, refuse de s'arrêter.",
+  },
+  "dante-halloween": {
+    tagline: "Chasseur de démons, deuxième service",
+    power: "Jackpot — un coup de pistolet qui fait toujours mouche.",
+    bio: "Pizza froide, facture impayée, démons qui grouillent : pour Dante, c'est un mardi soir comme les autres.",
+  },
+  "mario-halloween": {
+    tagline: "Le plombier qui hante les tuyaux",
+    power: "Saut spectral — traverse les murs et les ennemis.",
+    bio: "Il a bu par erreur la potion d'un autre monde : depuis, il parle aux Boos et sort des tuyaux en traversant la pierre.",
+  },
+  "link-halloween": {
+    tagline: "Le héros que le temps a oublié",
+    power: "Lame de l'ombre — ignore l'armure.",
+    bio: "Un siècle dans le sanctuaire, puis cent autres : son épée scintille encore quand la lune se lève.",
+  },
+  "sonic-halloween": {
+    tagline: "À pleine lune, il ne s'arrête plus",
+    power: "Course folle — joue deux fois avant l'adversaire.",
+    bio: "Mordu un soir de pleine lune, il file toujours aussi vite — mais en hurlant un peu.",
+  },
+  "kirby-halloween": {
+    tagline: "L'aspirateur de bonbons",
+    power: "Aspiration — vole la capacité de la carte adverse.",
+    bio: "Il a avalé tout le champ de citrouilles d'un coup : l'Étoile est orange, et elle sent la cannelle.",
+  },
 };
 
 /** Fiches du catalogue de base, complétées par celles de l'atelier. */
@@ -2859,5 +2968,14 @@ export const CARD_LORE: Record<string, CardLore> = {
 
 /** Contenu éditorial d'une carte, ou undefined si l'identifiant est inconnu. */
 export function getCardLore(id: string): CardLore | undefined {
+  const published = cardEdit(id);
+  if (published?.publishedCard) {
+    return {
+      tagline: published.publishedCard.tagline ?? "",
+      bio: published.publishedCard.bio ?? "",
+      ...(published.publishedCard.quote ? { quote: published.publishedCard.quote } : {}),
+      ...(published.publishedCard.power ? { power: published.publishedCard.power } : {}),
+    };
+  }
   return CARD_LORE[id];
 }

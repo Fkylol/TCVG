@@ -1,10 +1,11 @@
 import assert from "node:assert/strict";
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import test from "node:test";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
 const read = (file: string) => readFileSync(path.join(ROOT, file), "utf8");
+const readBytes = (file: string) => readFileSync(path.join(ROOT, file));
 
 /** Tous les fichiers de style et de rendu, pour les garde-fous d'identité. */
 function walk(dir: string, files: string[] = []): string[] {
@@ -128,4 +129,34 @@ test("identité : le logo est dessiné et la barre du haut est en verre", () => 
   assert.match(CSS, /--glass: rgba\(10, 13, 28, 0\.72\)/);
 
   assert.match(FOOTER, /<LogoMark id="footer"/);
+});
+
+test("identité : l'onglet porte le même logo que le site", () => {
+  // L'onglet lisait encore l'ancien logo lime : le dessin vient désormais du
+  // fichier d'icône `src/app/icon.svg`, au même tracé que `LogoMark`.
+  const ICON = read("src/app/icon.svg");
+  assert.match(ICON, /viewBox="0 0 34 34"/);
+  // Le fond du cadre et le dégradé de la marque (cyan vers rose).
+  assert.match(ICON, /fill="#080a16"/);
+  assert.match(ICON, /stop-color="#36e2ff"/);
+  assert.match(ICON, /stop-color="#ff4fd8"/);
+  // Mêmes formes que le logo de l'en-tête, à l'épaisseur de trait près.
+  assert.match(ICON, /<rect[^>]*width="30\.8"[^>]*rx="9"/);
+  assert.match(ICON, /<circle cx="17" cy="17" r="6\.5"/);
+
+  // Le favicon de secours (navigateurs sans SVG) garde les mêmes tailles :
+  // 16, 32 et 48 px, chacune encapsulée en PNG.
+  const ICO = readBytes("src/app/favicon.ico");
+  assert.equal(ICO.readUInt16LE(0), 0);
+  assert.equal(ICO.readUInt16LE(2), 1);
+  assert.equal(ICO.readUInt16LE(4), 3);
+  assert.deepEqual([...ICO.subarray(6, 12)], [16, 16, 0, 0, 1, 0]);
+  assert.deepEqual([...ICO.subarray(22, 28)], [32, 32, 0, 0, 1, 0]);
+  assert.deepEqual([...ICO.subarray(38, 44)], [48, 48, 0, 0, 1, 0]);
+  const firstPng = ICO.readUInt32LE(6 + 12);
+  assert.equal(ICO.subarray(firstPng, firstPng + 8).toString("latin1"), "\x89PNG\r\n\x1a\n");
+
+  // L'ancien logo lime a disparu : plus de PNG d'icône dans `src/app`.
+  assert.ok(existsSync(path.join(ROOT, "src/app/apple-icon.png")));
+  assert.ok(!existsSync(path.join(ROOT, "src/app/icon.png")));
 });

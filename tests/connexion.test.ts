@@ -31,7 +31,7 @@ test("connexion : un retour Discord raté ne renvoie pas dans le vide", () => {
 
   // L'écran de connexion explique l'échec au lieu de rester muet.
   assert.match(LOGIN, /erreur === "confirmation"/);
-  assert.match(LOGIN, /La connexion n&apos;a pas abouti/);
+  assert.match(LOGIN, /t\("La connexion n'a pas abouti/);
 });
 
 test("cadeau : 10 boosters pour les nouveaux comptes", () => {

@@ -214,9 +214,7 @@ export default async function CardPage({
         </div>
 
         <p className="relative mt-2 max-w-2xl text-sm leading-relaxed text-white/55 sm:text-base">
-          {lore
-            ? lore.tagline
-            : `Personnage de ${universe}${owned ? "." : ", à débloquer dans les boosters."}`}
+          {(owned ? lore?.tagline : undefined) ?? (owned ? cardProfile?.overview : null) ?? `Personnage de ${universe}${owned ? "." : ", à débloquer dans les boosters."}`}
         </p>
       </header>
 
@@ -306,20 +304,16 @@ export default async function CardPage({
                   <StatBar label="POW" value={stats.power} tone="cyan" />
                   <StatBar label="AURA" value={stats.aura} tone="white" />
                 </div>
-              </section>
-
-              {lore?.power && (
-                <section className="panel panel-accent mt-4 p-5">
-                  <p className="text-[10px] uppercase tracking-[0.2em] text-cyan/80">Pouvoir</p>
-                  <p className="mt-1.5 text-base font-medium text-white/90">{lore.power}</p>
-                </section>
-              )}
-
-              {lore?.quote && (
-                <blockquote className="mt-6 border-l-2 border-cyan/50 pl-5">
-                  <p className="text-lg italic leading-relaxed text-white/75">« {lore.quote} »</p>
-                </blockquote>
-              )}
+              </section>                  {(lore?.power ?? cardProfile?.power) && (
+                    <section className="panel panel-accent mt-4 p-5">
+                      <p className="text-[10px] uppercase tracking-[0.2em] text-cyan/80">Pouvoir</p>
+                      <p className="mt-1.5 text-base font-medium text-white/90">{lore?.power ?? cardProfile?.power}</p>
+                    </section>
+                  )}                  {(lore?.quote ?? cardProfile?.quote) && (
+                    <blockquote className="mt-6 border-l-2 border-cyan/50 pl-5">
+                      <p className="text-lg italic leading-relaxed text-white/75">« {lore?.quote ?? cardProfile?.quote} »</p>
+                    </blockquote>
+                  )}
 
               {cardProfile &&
                 (cardProfile.studio || cardProfile.voice || cardProfile.trivia) && (

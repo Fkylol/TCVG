@@ -237,37 +237,61 @@ function normalize(value: string): string {
     .toLowerCase();
 }
 
+/** Exécute des requêtes indépendantes en parallèle, avec une limite stable. */
+async function mapConcurrent<T, R>(
+  items: T[],
+  limit: number,
+  mapper: (item: T) => Promise<R>,
+): Promise<R[]> {
+  const results = new Array<R>(items.length);
+  let cursor = 0;
+  const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
+    while (cursor < items.length) {
+      const index = cursor++;
+      results[index] = await mapper(items[index]);
+    }
+  });
+  await Promise.all(workers);
+  return results;
+}
+
 /**
  * Cherche des visuels pour un personnage : wiki de la franchise (déduit des
  * cartes déjà présentes), puis Wikipédia français et anglais.
  */
 export async function searchPortraitCandidates({
   universe,
+  universeLabel: requestedLabel,
   name,
 }: {
   universe: string;
+  universeLabel?: string;
   name: string;
 }): Promise<PortraitSearch> {
   const notes: string[] = [];
-  const universeLabel = UNIVERSES[universe as keyof typeof UNIVERSES]?.label ?? universe;
+  const universeLabel = requestedLabel ?? UNIVERSES[universe as keyof typeof UNIVERSES]?.label ?? universe;
 
   const hosts = [...wikiHostsOfUniverse(universe)];
-  const guessed = await fandomHost(universeLabel);
-  if (guessed && !hosts.includes(guessed)) hosts.push(guessed);
+  // La recherche de domaine Fandom ne sert qu'aux franchises sans wiki connu.
+  // Pour les franchises déjà représentées, la devinette ajoutait plusieurs
+  // sondes réseau séquentielles à chaque création sans élargir les sources.
   if (hosts.length === 0) {
-    notes.push(`Aucun wiki Fandom connu pour ${universeLabel} : recherche limitée à Wikipédia.`);
+    const guessed = await fandomHost(universeLabel);
+    if (guessed) hosts.push(guessed);
+    else notes.push(`Aucun wiki Fandom connu pour ${universeLabel} : recherche limitée à Wikipédia.`);
   }
 
   const wikis = [...hosts, "https://fr.wikipedia.org", "https://en.wikipedia.org"];
-  const found: { wiki: string; title: string; url: string; sourceName: string; page: string; file: string; license?: string; credit?: string }[] = [];
-
-  for (const wiki of wikis) {
+  const foundByWiki = await Promise.all(wikis.map(async (wiki) => {
     const titles = await searchTitles(wiki, name, 4);
     const relevant = titles.filter((title) => normalize(title).includes(normalize(name))).slice(0, 2);
-    for (const title of relevant) {
-      const image = await pageImage(wiki, title, 800);
-      if (image) {
-        found.push({
+    const pageResults = await Promise.all(relevant.map(async (title) => {
+      const [image, files] = await Promise.all([
+        pageImage(wiki, title, 800),
+        pageFileCandidates(wiki, title, name),
+      ]);
+      return [
+        ...(image ? [{
           wiki,
           title,
           url: image.url,
@@ -276,11 +300,8 @@ export async function searchPortraitCandidates({
           file: image.file,
           license: image.license,
           credit: image.credit,
-        });
-      }
-
-      for (const file of await pageFileCandidates(wiki, title, name)) {
-        found.push({
+        }] : []),
+        ...files.map((file) => ({
           wiki,
           title,
           url: file.url,
@@ -289,18 +310,14 @@ export async function searchPortraitCandidates({
           file: file.file,
           license: file.license,
           credit: file.credit,
-        });
-      }
-    }
+        })),
+      ];
+    }));
 
-    // Renders officiels : les fichiers du wiki qui portent le nom du
-    // personnage, souvent absents de la page (qui liste captures et croquis).
-    if (wiki.includes("fandom")) {
-      for (const file of await allImageCandidates(wiki, name)) {
-        found.push({
+    // Renders officiels : fichiers du wiki qui portent le nom du personnage.
+    const renders = wiki.includes("fandom")
+      ? (await allImageCandidates(wiki, name)).map((file) => ({
           wiki,
-          // Pas de page de personnage pour un fichier : la fiche ne doit pas
-          // être rédigée depuis une page `File:`.
           title: "",
           url: file.url,
           sourceName: new URL(wiki).host,
@@ -308,10 +325,11 @@ export async function searchPortraitCandidates({
           file: file.file,
           license: file.license,
           credit: file.credit,
-        });
-      }
-    }
-  }
+        }))
+      : [];
+    return [...pageResults.flat(), ...renders];
+  }));
+  const found = foundByWiki.flat();
 
   // Doublons : même fichier servi par deux vignettes (fr/en, page + galerie).
   const seen = new Set<string>();
@@ -326,21 +344,16 @@ export async function searchPortraitCandidates({
   // les renders, et ils ne doivent pas être coupés par la limite de contrôle.
   unique.sort((a, b) => nameAffinity(b.file, name) - nameAffinity(a.file, name));
 
-  const candidates: PortraitCandidate[] = [];
   let rejected = 0;
-  for (const entry of unique.slice(0, 16)) {
+  const inspected = await mapConcurrent(unique.slice(0, 12), 8, async (entry) => {
     // Planches de BD, scans, captures et croquis : lisibles en illustration,
     // mais illisibles en vignette de carte.
     if (/(comic|manga|chapter|panel|scan)/i.test(entry.file) || NOISE_FILE.test(entry.file)) {
-      rejected += 1;
-      continue;
+      return null;
     }
     const verdict = await inspectImage(entry.url);
-    if (!verdict.ok) {
-      rejected += 1;
-      continue;
-    }
-    candidates.push({
+    if (!verdict.ok) return null;
+    const candidate: PortraitCandidate = {
       url: entry.url,
       source: entry.wiki.includes("fandom") ? "fandom" : "wikipedia",
       sourceName: entry.sourceName,
@@ -352,12 +365,15 @@ export async function searchPortraitCandidates({
       license: entry.license,
       credit: entry.credit,
       checkedAt: new Date().toISOString(),
-      confidence: "medium",
+      confidence: "medium" as const,
       pageTitle: entry.title,
       wiki: entry.wiki,
       named: namesCharacter(entry.url, name),
-    });
-  }
+    };
+    return candidate;
+  });
+  const candidates = inspected.filter((candidate) => candidate !== null);
+  rejected = Math.min(12, unique.length) - candidates.length;
 
   if (unique.length === 0) notes.push("Aucun visuel trouvé sur les wikis interrogés.");
   if (rejected > 0) {
@@ -529,13 +545,14 @@ export async function draftLore({
   candidate,
   name,
   universe,
+  universeLabel: requestedLabel,
 }: {
   candidate: PortraitCandidate | null;
   name: string;
   universe: string;
+  universeLabel?: string;
 }): Promise<CardLore> {
-  const universeLabel = UNIVERSES[universe as keyof typeof UNIVERSES]?.label ?? universe;
-  const extracts: string[] = [];
+  const universeLabel = requestedLabel ?? UNIVERSES[universe as keyof typeof UNIVERSES]?.label ?? universe;
 
   // Un article de jeu ou une page d'homonymie décrit l'œuvre, pas le
   // personnage : on l'écarte pour ne pas coller « est un jeu vidéo… » sur la
@@ -546,19 +563,19 @@ export async function draftLore({
     return cleaned.length > 40 && !unusable.test(cleaned.slice(0, 160)) ? cleaned : "";
   };
 
-  if (candidate) extracts.push(await pageExtract(candidate.wiki, candidate.pageTitle));
-  let clean = extracts.map(usable).find(Boolean) ?? "";
+  let clean = candidate?.pageTitle
+    ? usable(await pageExtract(candidate.wiki, candidate.pageTitle))
+    : "";
 
-  // Secours Wikipédia : on n'accepte que la page qui porte vraiment le nom,
-  // sinon on récupérerait la fiche d'un studio ou d'une extension.
+  // Les recherches de secours sont indépendantes : interroger Wikipédia fr/en
+  // en parallèle évite d'attendre les délais d'une langue avant l'autre.
   if (!clean) {
-    for (const wiki of ["https://fr.wikipedia.org", "https://en.wikipedia.org"]) {
+    const fallbacks = await Promise.all(["https://fr.wikipedia.org", "https://en.wikipedia.org"].map(async (wiki) => {
       const titles = await searchTitles(wiki, name, 4);
       const match = titles.find((title) => normalize(title).includes(normalize(name)));
-      if (!match) continue;
-      clean = usable(await pageExtract(wiki, match));
-      if (clean) break;
-    }
+      return match ? usable(await pageExtract(wiki, match)) : "";
+    }));
+    clean = fallbacks.find(Boolean) ?? "";
   }
   if (!clean) {
     return {
@@ -649,30 +666,36 @@ function containsLabel(haystack: string, label: string): boolean {
  * vidéo (ou de personnage de jeu) pour être retenue : sans ce garde-fou, la
  * page « Ori » (concept yoruba) ferait croire à la franchise Ori.
  */
-export async function detectUniverse(name: string): Promise<UniverseGuess | null> {
-  const pages: { wiki: string; title: string }[] = [];
-  for (const wiki of ["https://fr.wikipedia.org", "https://en.wikipedia.org"]) {
+export async function detectUniverse(
+  name: string,
+  franchises: { slug: string; label: string }[] = Object.entries(UNIVERSES).map(([slug, universe]) => ({ slug, label: universe.label })),
+): Promise<UniverseGuess | null> {
+  const wikis = ["https://fr.wikipedia.org", "https://en.wikipedia.org"];
+  const pages = (await Promise.all(wikis.map(async (wiki) => {
     const titles = await searchTitles(wiki, name, 5);
-    const relevant = titles
+    return titles
       .filter((title) => normalize(title).includes(normalize(name)))
-      .slice(0, 3);
-    for (const title of relevant) pages.push({ wiki, title });
-  }
+      .slice(0, 3)
+      .map((title) => ({ wiki, title }));
+  }))).flat();
 
+  const extracts = await Promise.all(pages.map(async (page) => ({
+    ...page,
+    extract: await pageExtract(page.wiki, page.title),
+  })));
   const matches: { universe: string; label: string; score: number; page: string }[] = [];
-  for (const page of pages) {
-    const extract = await pageExtract(page.wiki, page.title);
-    if (!extract || !MEDIA_HINT.test(extract)) continue;
-    const text = normalize(extract);
-    for (const [slug, universe] of Object.entries(UNIVERSES)) {
-      const names = [universe.label, ...(FRANCHISE_ALIASES[slug] ?? [])]
+  for (const page of extracts) {
+    if (!page.extract || !MEDIA_HINT.test(page.extract)) continue;
+    const text = normalize(page.extract);
+    for (const franchise of franchises) {
+      const names = [franchise.label, ...(FRANCHISE_ALIASES[franchise.slug] ?? [])]
         .map((value) => normalize(value))
         .filter((value) => value.length >= 3);
       const hit = names.find((value) => containsLabel(text, value));
       if (!hit) continue;
       const title = normalize(page.title);
       const bonus = title === hit ? 40 : title.startsWith(hit) ? 30 : 0;
-      matches.push({ universe: slug, label: universe.label, score: hit.length + bonus, page: page.title });
+      matches.push({ universe: franchise.slug, label: franchise.label, score: hit.length + bonus, page: page.title });
     }
   }
 
@@ -773,13 +796,13 @@ async function languageTitles(wiki: string, title: string, lang: string): Promis
 
 /** Page Wikipédia qui porte le nom du personnage, en anglais puis en français. */
 async function findWikipediaPage(name: string): Promise<{ wiki: string; lang: string; title: string } | null> {
-  for (const lang of ["en", "fr"]) {
+  const matches = await Promise.all((["en", "fr"] as const).map(async (lang) => {
     const wiki = `https://${lang}.wikipedia.org`;
     const hits = await searchTitles(wiki, name, 5);
-    const match = hits.find((title) => normalize(title).includes(normalize(name)));
-    if (match) return { wiki, lang, title: match };
-  }
-  return null;
+    const title = hits.find((item) => normalize(item).includes(normalize(name)));
+    return title ? { wiki, lang, title } : null;
+  }));
+  return matches[0] ?? matches[1] ?? null;
 }
 
 export type RarityEstimate = {
@@ -820,11 +843,13 @@ export async function estimateRarity({
   const seed = await findWikipediaPage(name);
   const titlesByLang = seed ? await languageTitles(seed.wiki, seed.title, seed.lang) : new Map<string, string>();
 
-  let pageviews = 0;
-  for (const lang of LANGUAGES) {
-    const title = titlesByLang.get(lang);
-    if (title) pageviews += await monthlyPageviews(lang, title);
-  }
+  const views = await Promise.all(
+    LANGUAGES.map((lang) => {
+      const title = titlesByLang.get(lang);
+      return title ? monthlyPageviews(lang, title) : 0;
+    }),
+  );
+  const pageviews = views.reduce((sum, value) => sum + value, 0);
   const languages = titlesByLang.size;
 
   const NEW_ID = "__atelier__";

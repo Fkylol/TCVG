@@ -1,14 +1,22 @@
 import type { GenreSlug } from "./card-genres";
+import { isHalloweenActive } from "./halloween/config";
 
 /**
- * Les 10 packs, tous ouvrables en permanence. Seul le seuil de personnages
- * actifs (`MIN_POOL_SIZE`, valeur qui fait foi en base) retient un pack qui
- * n'aurait pas encore assez de cartes.
+ * Les 10 packs de genre, ouvrables en permanence, plus les packs saisonniers.
+ * Seul le seuil de personnages actifs (`MIN_POOL_SIZE`, valeur qui fait foi en
+ * base) retient un pack qui n'aurait pas encore assez de cartes.
  *
  * Configuration purement déclarative : palettes ton sur ton, emblème et
  * texture. Les prix et les taux de rareté qui font foi vivent en base
  * (`booster_types`, `game_config`) pour être modifiables sans redéploiement ;
  * `pricePixels` ici n'est qu'un repli d'affichage.
+ *
+ * `titleSize` (en `cqw`) est la taille de *repos* du titre : chacun est réglé
+ * pour que le mot, à cette taille, tienne dans 80 % de la largeur du pack — la
+ * marge que `useFitTitle` ne fait que rogner en dernier recours. La largeur du
+ * titre étant proportionnelle à celle du pack, ce rapport est le même à toutes
+ * les tailles : un titre réglé ici est réglé partout, même si le calcul côté
+ * navigateur n'a pas encore tourné (premier rendu, JS indisponible).
  *
  * `genre: null` = pack Mix, pool = toutes les cartes actives.
  */
@@ -40,7 +48,15 @@ export type PackArtKey =
   | "inde"
   | "combat"
   | "horreur"
-  | "strategie";
+  | "strategie"
+  | "halloween";
+
+/**
+ * Saison d'un pack : absent = ouvrable toute l'année. Un pack saisonnier
+ * n'apparaît que dans sa fenêtre (`HALLOWEEN_START` → `HALLOWEEN_END` à Paris)
+ * et ses cartes ne s'obtiennent que là.
+ */
+export type PackSeason = "halloween";
 
 export type Pack = {
   id: string;
@@ -57,6 +73,8 @@ export type Pack = {
   emblem: PackArtKey;
   /** Clé de la texture SVG de fond. */
   texture: PackArtKey;
+  /** Saison du pack : il ne s'affiche qu'à cette période. */
+  season?: PackSeason;
 };
 
 /**
@@ -90,7 +108,8 @@ export const PACKS: Pack[] = [
     subtitle: "Exploration",
     genre: "action-aventure",
     pricePixels: 30,
-    titleSize: 12.5,
+    // 78 % de la largeur du pack (césure sur le tiret).
+    titleSize: 11.1,
     tilt: PACK_TILT,
     colors: {
       t1: "#86d9b0", t2: "#1f6e55", ink: "#06251c", gl: "#7ff0bc",
@@ -105,7 +124,8 @@ export const PACKS: Pack[] = [
     subtitle: "Sauts et pixels",
     genre: "plateforme",
     pricePixels: 30,
-    titleSize: 11.5,
+    // Le mot le plus large des onze packs : 104 % à 11,5 → 78 %.
+    titleSize: 8.6,
     tilt: PACK_TILT,
     colors: {
       t1: "#ffe27a", t2: "#ff6f61", ink: "#4a1608", gl: "#ffd95a",
@@ -180,7 +200,7 @@ export const PACKS: Pack[] = [
     subtitle: "Duels et arènes",
     genre: "combat",
     pricePixels: 30,
-    titleSize: 14,
+    titleSize: 11.6,
     tilt: PACK_TILT,
     colors: {
       t1: "#ff9fa6", t2: "#9c1d34", ink: "#fff0ee", gl: "#ff8c98",
@@ -195,7 +215,7 @@ export const PACKS: Pack[] = [
     subtitle: "Frissons garantis",
     genre: "horreur",
     pricePixels: 30,
-    titleSize: 13.5,
+    titleSize: 13.3,
     tilt: PACK_TILT,
     colors: {
       t1: "#5f7f6e", t2: "#0f1915", ink: "#e6f2e3", gl: "#a8ea9c",
@@ -210,7 +230,7 @@ export const PACKS: Pack[] = [
     subtitle: "Tactique, empires",
     genre: "strategie",
     pricePixels: 30,
-    titleSize: 12,
+    titleSize: 10.9,
     tilt: PACK_TILT,
     colors: {
       t1: "#e8c286", t2: "#7a4a1d", ink: "#fff3e0", gl: "#f6cb82",
@@ -219,7 +239,51 @@ export const PACKS: Pack[] = [
     emblem: "strategie",
     texture: "strategie",
   },
+  // Pack saisonnier : nuit violacée, citrouille et toile d'araignée. Il porte
+  // les cartes exclusives d'Halloween, qui ne sortent que de lui ; son pool et
+  // ses taux vivent en base comme ceux des autres packs. Hors de la vitrine :
+  // la citrouille de l'overlay est sa seule porte.
+  {
+    id: "halloween",
+    name: "Halloween",
+    subtitle: "Cartes exclusives",
+    genre: null,
+    season: "halloween",
+    pricePixels: 40,
+    titleSize: 9.3,
+    tilt: PACK_TILT,
+    colors: {
+      t1: "#5b2f9e", t2: "#0c0616", ink: "#ffd9a8", gl: "#ff8b3d",
+      tx: "rgba(255,255,255,0.2)", tx2: "rgba(255,139,61,0.4)", glow: "#0c061680",
+    },
+    emblem: "halloween",
+    texture: "halloween",
+  },
 ];
+
+/**
+ * Les packs de la vitrine : les dix packs de genre, jamais un pack saisonnier.
+ * Celui d'Halloween ne s'achète pas et ne se choisit pas là — sa seule porte est
+ * la citrouille de l'overlay, qui offre un booster d'Halloween (voir
+ * `isPackOpenNow` pour sa fenêtre).
+ */
+export function shopPacks(): Pack[] {
+  return PACKS.filter((pack) => !pack.season);
+}
+
+/**
+ * Le pack est-il dans sa fenêtre ? Un pack permanent l'est toute l'année, un
+ * pack saisonnier seulement pendant sa saison. `NEXT_PUBLIC_HALLOWEEN_FORCE=1`
+ * le garde ouvert hors saison, comme l'overlay, pour pouvoir le relire sans
+ * attendre octobre.
+ */
+export function isPackOpenNow(pack: Pack, now: Date = new Date()): boolean {
+  if (!pack.season) return true;
+  if (pack.season === "halloween") {
+    return isHalloweenActive(now) || process.env.NEXT_PUBLIC_HALLOWEEN_FORCE === "1";
+  }
+  return false;
+}
 
 /**
  * Seuil de personnages actifs en dessous duquel un pack est « Bientôt
@@ -228,12 +292,8 @@ export const PACKS: Pack[] = [
  */
 export const MIN_POOL_SIZE = 15;
 
-/**
- * Garantie « Rare ou mieux » : désactivée par défaut. Quand elle sera activée,
- * le tirage serveur devra l'appliquer réellement (compteur par joueur et par
- * pack) — l'interface n'affiche la tuile que si ce drapeau est vrai.
- */
-export const GUARANTEE_ENABLED = false;
+/** Les planchers de rareté et le pity sont appliqués côté serveur (migration 067). */
+export const GUARANTEE_ENABLED = true;
 
 export const PACKS_BY_ID: Record<string, Pack> = Object.fromEntries(
   PACKS.map((pack) => [pack.id, pack]),

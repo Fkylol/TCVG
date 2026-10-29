@@ -51,7 +51,11 @@ async function main() {
     // recopier, pour que `leaderboard()` puisse additionner sans importer
     // le barème en SQL.
     const quality = cardStats(card).quality;
-    return `(${quote(card.id)}, ${quote(card.name)}, ${quote(card.universe)}, ${quote(card.rarity)}, ${number}, ${quality}, ${franchise}, true, null)`;
+    // Saison d'une carte exclusive (Halloween) : `null` pour le catalogue
+    // permanent. Le tirage s'en sert pour ne jamais la faire sortir d'un pack
+    // permanent (migration 061).
+    const season = card.season ? quote(card.season) : "null";
+    return `(${quote(card.id)}, ${quote(card.name)}, ${quote(card.universe)}, ${quote(card.rarity)}, ${number}, ${quality}, ${franchise}, true, null, ${season})`;
   }).join(",\n  ");
 
   const ids = CARDS.map((card) => quote(card.id)).join(", ");
@@ -62,11 +66,12 @@ values
   ${franchises}
 on conflict (slug) do update set name = excluded.name;
 
-insert into public.cards (id, name, universe, rarity, number, quality, franchise_id, active, retired_reason)
+insert into public.cards (id, name, universe, rarity, number, quality, franchise_id, active, retired_reason, season)
 values
   ${values}
 on conflict (id) do update
   set name = excluded.name,
+      season = excluded.season,
       universe = excluded.universe,
       rarity = excluded.rarity,
       number = excluded.number,

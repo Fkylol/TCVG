@@ -14,6 +14,7 @@ import {
   formatPercent,
   projectedStock,
   rarestRarity,
+  sortByRarity,
 } from "../src/lib/game";
 import { PACKS } from "../src/lib/packs";
 
@@ -56,6 +57,21 @@ test("catalogue : chaque rareté possède au moins une carte", () => {
   }
 });
 
+test("tri de révélation : raretés croissantes et ordre stable à rareté égale", () => {
+  const items = [
+    { id: "rare", rarity: "R" as const },
+    { id: "commun-1", rarity: "C" as const },
+    { id: "mythique", rarity: "L" as const },
+    { id: "peu-commun", rarity: "UC" as const },
+    { id: "commun-2", rarity: "C" as const },
+  ];
+
+  assert.deepEqual(
+    sortByRarity(items, (item) => item.rarity).map((item) => item.id),
+    ["commun-1", "commun-2", "peu-commun", "rare", "mythique"],
+  );
+});
+
 test("rareté la plus haute d'un tirage", () => {
   assert.equal(rarestRarity([]), "C");
   assert.equal(rarestRarity(["C", "UC", "R"]), "R");
@@ -95,17 +111,25 @@ test("raretés : chances par booster de 5 cartes", () => {
   assert.ok(Math.abs(chance(RARITY.L.weight) - 0.00125) < 0.0005);
 });
 
-test("packs : 10 packs, 5 cartes chacun, un seul de chaque genre", () => {
+test("packs : dix packs de genre, plus le pack saisonnier d'Halloween", () => {
   assert.equal(CARDS_PER_BOOSTER, 5);
-  assert.equal(PACKS.length, 10);
-  assert.equal(new Set(PACKS.map((pack) => pack.id)).size, 10);
+  assert.equal(PACKS.length, 11);
+  assert.equal(new Set(PACKS.map((pack) => pack.id)).size, 11);
 
-  // Le premier est le Mix (aucun genre), les neuf autres couvrent les genres.
+  // Le premier est le Mix (aucun genre), les neuf suivants couvrent les genres,
+  // et le dernier est le pack saisonnier d'Halloween, lui aussi hors genre.
   assert.equal(PACKS[0].genre, null);
-  const genres = PACKS.slice(1).map((pack) => pack.genre);
+  const permanents = PACKS.filter((pack) => pack.season === undefined);
+  const genres = permanents.slice(1).map((pack) => pack.genre);
   assert.equal(new Set(genres).size, 9);
   assert.ok(PACKS.some((pack) => pack.id === "mmo" && pack.genre === "mmo"));
   assert.ok(genres.every((genre) => genre !== null));
+
+  // Le pack saisonnier ne sort qu'à sa fenêtre, et son pool n'est pas un genre.
+  const seasonal = PACKS.filter((pack) => pack.season === "halloween");
+  assert.equal(seasonal.length, 1);
+  assert.equal(seasonal[0].id, "halloween");
+  assert.equal(seasonal[0].genre, null, "un pack saisonnier n'a pas de genre");
 
   // Chaque pack a une palette complète, une taille de titre et une inclinaison.
   for (const pack of PACKS) {
@@ -121,8 +145,10 @@ test("packs : 10 packs, 5 cartes chacun, un seul de chaque genre", () => {
     if (pack.colors.tx2) {
       assert.match(pack.colors.tx2, /^rgba\(/, `${pack.id} : second trait invalide`);
     }
+    // Bornes larges : le vrai garde-fou est le rapport mesuré du titre sur la
+    // largeur du poster (voir `packs-visuels`), qui interdit qu'il déborde.
     assert.ok(
-      pack.titleSize >= 11 && pack.titleSize <= 16,
+      pack.titleSize >= 8 && pack.titleSize <= 16,
       `${pack.id} : taille de titre hors bornes`,
     );
     assert.ok(Math.abs(pack.tilt.bx) <= 5, `${pack.id} : inclinaison X hors bornes`);

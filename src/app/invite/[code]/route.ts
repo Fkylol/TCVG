@@ -19,7 +19,7 @@ export async function GET(
 ) {
   const { code: rawCode } = await params;
   const origin = new URL(request.url).origin;
-  const code = normalizeReferralCode(decodeURIComponent(rawCode));
+  const code = normalizeReferralCode(rawCode);
 
   if (!code) {
     return NextResponse.redirect(`${origin}/?invite=inconnu`);

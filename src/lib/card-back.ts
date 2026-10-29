@@ -38,6 +38,18 @@ export const STANDARD_BACK: CardBackColors = {
 };
 
 /**
+ * Ornement du médaillon : le dessin commun à tous les dos, ou celui de la
+ * saison. Le cadre, les anneaux et la mise en page, eux, ne changent jamais :
+ * un dos d'Halloween reste un dos de TCVG.
+ */
+export type CardBackOrnament = "standard" | "halloween";
+
+/** Le pack d'Halloween porte sa propre citrouille et son treillis en toile. */
+export function backOrnamentFor(pack: Pack | null | undefined): CardBackOrnament {
+  return pack?.season === "halloween" ? "halloween" : "standard";
+}
+
+/**
  * Trait du cadre et des coins, commun à tous les dos.
  *
  * Les traits du poster varient d'un pack à l'autre (`colors.tx`) ; le cadre du

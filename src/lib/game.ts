@@ -87,6 +87,18 @@ export const RARITY: Record<Rarity, RarityInfo> = {
 
 export const RARITY_ORDER: Rarity[] = ["L", "UR", "SR", "R", "UC", "C"];
 
+/** Trie de la rareté la plus commune à la plus rare, en conservant l'ordre des ex æquo. */
+export function sortByRarity<T>(items: readonly T[], rarityOf: (item: T) => Rarity): T[] {
+  return items
+    .map((item, index) => ({ item, index }))
+    .sort(
+      (left, right) =>
+        RARITY_ORDER.indexOf(rarityOf(right.item)) - RARITY_ORDER.indexOf(rarityOf(left.item)) ||
+        left.index - right.index,
+    )
+    .map(({ item }) => item);
+}
+
 /** Rareté la plus haute d'une liste (L > UR > SR > R > UC > C). */
 export function rarestRarity(rarities: Rarity[]): Rarity {
   let best: Rarity = "C";

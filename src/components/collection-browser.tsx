@@ -8,8 +8,8 @@ import { CardFlip } from "@/components/card-flip";
 import { ReportCardButton } from "@/components/report-card-button";
 import { SellCardButton } from "@/components/sell-card-button";
 import {
-  CARDS,
   UNIVERSES,
+  catalogCards,
   getCard,
   getCardGradient,
   type Card,
@@ -21,6 +21,7 @@ import { cardStats } from "@/lib/stats";
 import { RARITY, RARITY_ORDER } from "@/lib/game";
 import type { CardVariant } from "@/lib/variants";
 import { framingStyle } from "@/lib/framing";
+import { useLocale } from "@/components/locale-provider";
 
 export type CollectionEntry = {
   cardId: string;
@@ -74,6 +75,7 @@ export function CollectionBrowser({
   owners: Record<string, number>;
 }) {
   const router = useRouter();
+  const { t } = useLocale();
   const [view, setView] = useState<"cards" | "albums">("cards");
   const [query, setQuery] = useState("");
   const [rarity, setRarity] = useState<Rarity | "all">("all");
@@ -149,7 +151,7 @@ export function CollectionBrowser({
     }
 
     const totals = new Map<UniverseKey, number>();
-    for (const card of CARDS) totals.set(card.universe, (totals.get(card.universe) ?? 0) + 1);
+    for (const card of catalogCards()) totals.set(card.universe, (totals.get(card.universe) ?? 0) + 1);
 
     return Array.from(totals.entries())
       .map(([key, total]) => ({
@@ -157,9 +159,9 @@ export function CollectionBrowser({
         total,
         owned: ownedByUniverse.get(key) ?? 0,
         best: bestByUniverse.get(key) ?? null,
-        label: UNIVERSES[key].label,
-        from: UNIVERSES[key].from,
-        to: UNIVERSES[key].to,
+        label: UNIVERSES[key]?.label ?? key,
+        from: UNIVERSES[key]?.from ?? "#164e63",
+        to: UNIVERSES[key]?.to ?? "#0f172a",
       }))
       .sort(
         (a, b) =>
@@ -177,7 +179,7 @@ export function CollectionBrowser({
       if (!needle) return true;
       return (
         card.name.toLowerCase().includes(needle) ||
-        UNIVERSES[card.universe].label.toLowerCase().includes(needle) ||
+        (UNIVERSES[card.universe]?.label ?? card.universe).toLowerCase().includes(needle) ||
         entry.cardId.includes(needle)
       );
     });
@@ -189,7 +191,7 @@ export function CollectionBrowser({
   const universesInCollection = useMemo(
     () =>
       Array.from(new Set(owned.map(({ card }) => card.universe))).sort((a, b) =>
-        UNIVERSES[a].label.localeCompare(UNIVERSES[b].label, "fr"),
+        (UNIVERSES[a]?.label ?? a).localeCompare(UNIVERSES[b]?.label ?? b, "fr"),
       ),
     [owned],
   );
@@ -209,7 +211,7 @@ export function CollectionBrowser({
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Rechercher un personnage, un univers…"
+              placeholder={t("Rechercher un personnage, un univers…")}
               className="field min-w-[200px] flex-1"
             />
 
@@ -218,10 +220,10 @@ export function CollectionBrowser({
               onChange={(event) => setUniverse(event.target.value as UniverseKey | "all")}
               className="field w-auto"
             >
-              <option value="all">Tous les univers</option>
+              <option value="all">{t("Tous les univers")}</option>
               {universesInCollection.map((key) => (
                 <option key={key} value={key}>
-                  {UNIVERSES[key].label}
+                  {UNIVERSES[key]?.label ?? key}
                 </option>
               ))}
             </select>
@@ -231,14 +233,14 @@ export function CollectionBrowser({
               onChange={(event) => setSort(event.target.value as keyof typeof sorters)}
               className="field w-auto"
             >
-              <option value="recent">Plus récentes</option>
-              <option value="rarete">Rareté</option>
-              <option value="nom">Nom</option>
+              <option value="recent">{t("Plus récentes")}</option>
+              <option value="rarete">{t("Rareté")}</option>
+              <option value="nom">{t("Nom")}</option>
             </select>
           </>
         ) : (
           <p className="flex-1 text-sm text-white/45">
-            Progression par album — clique sur un univers pour l&apos;ouvrir.
+            {t("Progression par album — clique sur un univers pour l'ouvrir.")}
           </p>
         )}
 
@@ -246,17 +248,11 @@ export function CollectionBrowser({
           <button
             type="button"
             onClick={() => setView("albums")}
-            className={`tab px-3 py-1.5 ${view === "albums" ? "bg-cyan text-ink" : ""}`}
-          >
-            Albums
-          </button>
+            className={`tab px-3 py-1.5 ${view === "albums" ? "bg-cyan text-ink" : ""}`}>{t("Albums")}</button>
           <button
             type="button"
             onClick={() => setView("cards")}
-            className={`tab px-3 py-1.5 ${view === "cards" ? "bg-cyan text-ink" : ""}`}
-          >
-            Cartes
-          </button>
+            className={`tab px-3 py-1.5 ${view === "cards" ? "bg-cyan text-ink" : ""}`}>{t("Cartes")}</button>
         </div>
       </div>
 
@@ -265,10 +261,7 @@ export function CollectionBrowser({
           <button
             type="button"
             onClick={() => setRarity("all")}
-            className={`btn btn-sm ${rarity === "all" ? "btn-primary" : "btn-outline"}`}
-          >
-            Toutes ({owned.length})
-          </button>
+            className={`btn btn-sm ${rarity === "all" ? "btn-primary" : "btn-outline"}`}>{t("Toutes")} ({owned.length})</button>
           {RARITY_ORDER.map((key) => {
             const info = RARITY[key];
             const count = owned.filter(({ card }) => card.rarity === key).length;
@@ -285,8 +278,7 @@ export function CollectionBrowser({
           })}
 
           <span className="ml-auto text-xs text-white/40">
-            {totalCopies} carte{totalCopies > 1 ? "s" : ""} · {duplicates} doublon
-            {duplicates > 1 ? "s" : ""} · {filtered.length} affichée{filtered.length > 1 ? "s" : ""}
+            {totalCopies} {t("cartes")} · {duplicates} {t("doublons")} · {filtered.length} {t("affichée")}
           </span>
 
           {bulk.cards > 0 && (
@@ -297,8 +289,8 @@ export function CollectionBrowser({
               className="btn btn-sm btn-cyan"
             >
               {bulkBusy
-                ? "Recyclage…"
-                : `Recycler les doublons · +${bulk.amount} ◆`}
+                ? t("Recyclage…")
+                : `${t("Recycler les doublons")} · +${bulk.amount} ◆`}
             </button>
           )}
         </div>
@@ -353,8 +345,8 @@ export function CollectionBrowser({
       ) : filtered.length === 0 ? (
         <div className="border border-dashed border-white/15 px-6 py-16 text-center text-white/50">
           {owned.length === 0
-            ? "Ta collection est vide. Ouvre ton premier booster pour commencer."
-            : "Aucune carte ne correspond à ces filtres."}
+            ? t("Ta collection est vide. Ouvre ton premier booster pour commencer.")
+            : t("Aucune carte ne correspond à ces filtres.")}
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">

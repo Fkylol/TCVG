@@ -9,19 +9,17 @@ export const SUBTITLE_MIN_PX = 11;
  * Ajuste la taille du titre et du sous-titre d'un booster pour qu'ils ne
  * touchent jamais les bords.
  *
- * Chaque ligne garde sa taille cible (en `cqw`) tant qu'elle tient dans
- * `maxRatio` de la largeur du pack. Au-delà, la police est réduite
- * proportionnellement : la ligne la plus large atteint exactement ce ratio.
- * Le sous-titre ne descend pas sous `SUBTITLE_MIN_PX` ; s'il déborde encore à
- * cette taille, le CSS l'abrège avec des points de suspension.
- *
+ * Le titre et le sous-titre gardent leur taille cible (en `cqw`) tant qu'ils
+ * tiennent dans `maxRatio` de la largeur du pack. Au-delà, la police est
+ * réduite proportionnellement ; le sous-titre a une taille minimale et est
+ * abrégé par le CSS s'il déborde encore.
  * La mesure se fait sur la mise en page (`offsetWidth` / `scrollWidth`), jamais
  * sur la largeur transformée : l'inclinaison 3D et le `scale` du survol ne
  * déclenchent donc aucune re-mesure. Syne arrive après le premier rendu : le
  * hook remesure dès que `document.fonts.ready` est résolu, puis à chaque
  * changement de largeur.
  */
-export function useFitTitle(maxRatio = 0.8) {
+export function useFitTitle(maxRatio = 0.8, contentKey?: string) {
   const frameRef = useRef<HTMLSpanElement | null>(null);
   const titleRef = useRef<HTMLSpanElement | null>(null);
   const subtitleRef = useRef<HTMLSpanElement | null>(null);
@@ -57,7 +55,7 @@ export function useFitTitle(maxRatio = 0.8) {
 
     fitLine(titleRef.current, 0);
     fitLine(subtitleRef.current, SUBTITLE_MIN_PX);
-  }, [maxRatio]);
+  }, [maxRatio, contentKey]);
 
   useLayoutEffect(() => {
     fit();

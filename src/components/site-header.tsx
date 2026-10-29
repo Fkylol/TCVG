@@ -5,8 +5,10 @@ import { BoosterBadge } from "@/components/booster-badge";
 import { LogoMark } from "@/components/logo-mark";
 import { NavLink } from "@/components/nav-link";
 import { getCardArt } from "@/lib/card-art";
+import { LanguageSwitcher } from "@/components/language-switcher";
+import { getLocale, translate } from "@/lib/locale";
 
-export function SiteHeader({
+export async function SiteHeader({
   username,
   avatarCardId,
   frame,
@@ -40,10 +42,12 @@ export function SiteHeader({
 }) {
   const initial = username?.trim().charAt(0).toUpperCase() ?? "?";
   const avatar = avatarCardId ? getCardArt(avatarCardId) : null;
+  const locale = await getLocale();
+  const t = (text: string) => translate(text, locale);
 
   return (
     <header className="sticky top-0 z-40 px-2 pt-2 sm:px-4 sm:pt-3">
-      <div className="topbar mx-auto flex max-w-6xl flex-wrap items-center gap-1.5 px-3 py-2 sm:flex-nowrap sm:gap-2 sm:px-5">
+      <div className="topbar mx-auto flex max-w-6xl flex-wrap items-center gap-1.5 rounded-2xl px-3 py-2 sm:flex-nowrap sm:gap-2 sm:rounded-full sm:px-5">
         <Link href="/" className="flex shrink-0 items-center gap-2 pr-1 sm:gap-2.5 sm:pr-2">
           {/* Le logo est dessiné : carré arrondi et cercle, dans le dégradé. */}
           <LogoMark id="header" className="h-7 w-7 shrink-0 sm:h-8 sm:w-8" />
@@ -70,6 +74,7 @@ export function SiteHeader({
         )}
 
         <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2">
+          <LanguageSwitcher locale={locale} />
           {username ? (
             <>
               {typeof boosterStock === "number" && typeof serverNow === "number" && (
@@ -82,23 +87,25 @@ export function SiteHeader({
               )}
               {typeof pixels === "number" && (
                 <span
-                  title="Pixels disponibles"
+                  title={t("Pixels disponibles")}
                   className="chip gap-1 py-1 text-cyan sm:px-2.5"
                 >
                   <span aria-hidden className="text-[9px]">
                     ◆
                   </span>
-                  <span className="sr-only">Solde : </span>
+                  <span className="sr-only">{t("Solde : ")}</span>
                   {pixels}
-                  <span className="sr-only"> Pixels</span>
+                  <span className="sr-only">{t(" Pixels")}</span>
                 </span>
               )}
               <Link
                 href="/notifications"
                 title={
                   unread > 0
-                    ? `${unread} notification${unread > 1 ? "s" : ""} non lue${unread > 1 ? "s" : ""}`
-                    : "Notifications"
+                    ? locale === "fr"
+                      ? `${unread} notification${unread > 1 ? "s" : ""} non lue${unread > 1 ? "s" : ""}`
+                      : `${unread} unread notification${unread === 1 ? "" : "s"}`
+                    : t("Notifications")
                 }
                 className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white/55 transition hover:bg-white/5 hover:text-cyan"
               >
@@ -118,13 +125,13 @@ export function SiteHeader({
                 {unread > 0 && (
                   <span className="absolute -right-0.5 -top-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-cyan px-1 font-mono text-[9px] font-bold text-ink">
                     {unread > 9 ? "9+" : unread}
-                    <span className="sr-only"> notifications non lues</span>
+                    <span className="sr-only">{t(" notifications non lues")}</span>
                   </span>
                 )}
               </Link>
               <Link
                 href="/profil"
-                title="Mon profil"
+                title={t("Mon profil")}
                 className="flex shrink-0 items-center gap-2 py-1 pl-1 pr-1 transition hover:opacity-80 sm:pr-2"
               >
                 <AvatarFrame avatar={avatar} initial={initial} size={28} frameId={frame} />
@@ -135,11 +142,11 @@ export function SiteHeader({
               <form action={signOut} className="shrink-0">
                 <button
                   type="submit"
-                  aria-label="Déconnexion"
-                  title="Déconnexion"
+                  aria-label={t("Déconnexion")}
+                  title={t("Déconnexion")}
                   className="btn btn-outline btn-sm h-8 w-8 px-0 sm:h-auto sm:w-auto sm:px-3"
                 >
-                  <span className="hidden sm:inline">Déconnexion</span>
+                  <span className="hidden sm:inline">{t("Déconnexion")}</span>
                   <svg
                     aria-hidden
                     viewBox="0 0 24 24"
@@ -160,10 +167,10 @@ export function SiteHeader({
           ) : (
             <>
               <Link href="/login" className="tab text-[11px] sm:text-[13px]">
-                Connexion
+                {t("Connexion")}
               </Link>
               <Link href="/signup" className="btn btn-primary btn-sm">
-                S&apos;inscrire
+                {t("S'inscrire")}
               </Link>
             </>
           )}

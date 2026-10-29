@@ -61,11 +61,15 @@ export function getCardArt(cardId: string): CardArt | null {
   const edit = cardEdit(cardId);
   // Visuel choisi dans l'atelier en ligne : il passe avant le manifeste.
   if (edit?.imageUrl) {
-    return {
+    const art: CardArt = {
       src: edit.imageUrl,
       local: false,
       framing: edit.framing ?? getPortraitFraming(cardId),
     };
+    if (edit.imageCredit) art.credit = edit.imageCredit;
+    if (edit.imageLicense) art.license = edit.imageLicense;
+    if (edit.imageSourceName) art.sourceLabel = edit.imageSourceName;
+    return art;
   }
   const art = resolveCardArt(cardId, LOCAL[cardId]);
   // Cadrage recadré dans l'atelier : il s'applique aussi au visuel du catalogue,

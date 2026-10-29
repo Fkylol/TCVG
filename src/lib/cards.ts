@@ -7,7 +7,8 @@
  * renommer/retirer un personnage ici suffit à le retirer du jeu.
  */
 
-import { applyCardEdit, applyCardEdits, cardEditsVersion, isHiddenCard } from "@/lib/card-edits";
+import { applyCardEdit, applyCardEdits, applyPublishedCardEdit, cardEditsVersion, isHiddenCard, publishedCardEdits, publishedCards } from "@/lib/card-edits";
+import type { PackSeason } from "@/lib/packs";
 
 /**
  * Paliers de rareté, du plus courant au plus rare.
@@ -210,6 +211,14 @@ export type Card = {
    * de boosters (via `cards.active`) et n'affiche plus son visuel.
    */
   retired?: boolean;
+  /**
+   * Carte saisonnière : elle n'apparaît que dans le pack de sa saison, jamais
+   * dans les boosters de genre ni dans le Mix, et son visuel de catalogue est
+   * teinté par le CSS (`[data-season]`). Voir le pack Halloween.
+   */
+  season?: PackSeason;
+  /** Numéro de catalogue attribué à la publication en ligne. */
+  number?: number;
 };
 
 const BASE_CARDS: Card[] = [
@@ -1512,6 +1521,9 @@ const BASE_CARDS: Card[] = [
     id: "goultard", name: "Goultard", universe: "dofus", emoji: "⚔️", rarity: "L",
   },
   {
+    id: "comte-harebourg", name: "Comte Harebourg", universe: "dofus", emoji: "⏳", rarity: "UR",
+  },
+  {
     id: "dark-vlad", name: "Dark Vlad", universe: "dofus", emoji: "🦇", rarity: "SR",
   },
   {
@@ -2181,6 +2193,76 @@ const BASE_CARDS: Card[] = [
   {
     id: "duc-de-paille", name: "Le Duc de Paille", universe: "stronghold", emoji: "🐷", rarity: "R",
   },
+
+  // ——— Halloween (octobre 2026) ———
+  // Vingt cartes exclusives : des versions spectrales de personnages du
+  // catalogue, à collectionner en plus de leur carte normale. `season` les
+  // rattache à la saison : elles ne sortent que du pack d'Halloween (la
+  // citrouille de l'overlay) et n'appartiennent à aucun pack de genre — voir
+  // `card-genres` et le tirage en base (migration 061). Leur visuel est celui
+  // du personnage d'origine, teinté de violet par le CSS `[data-season]` ; leur
+  // identifiant finit par `-halloween` et leur nom ne reprend jamais celui de
+  // la carte dont elles sont la version.
+  {
+    id: "luigi-halloween", name: "Luigi spectral", universe: "mario", emoji: "👻", rarity: "C", season: "halloween",
+  },
+  {
+    id: "yoshi-halloween", name: "Yoshi des brumes", universe: "mario", emoji: "🕯️", rarity: "C", season: "halloween",
+  },
+  {
+    id: "papyrus-halloween", name: "Papyrus momie", universe: "undertale", emoji: "🧟", rarity: "C", season: "halloween",
+  },
+  {
+    id: "eggman-halloween", name: "Eggman citrouille", universe: "sonic", emoji: "🎃", rarity: "C", season: "halloween",
+  },
+  {
+    id: "pikachu-halloween", name: "Pikachu fantôme", universe: "pokemon", emoji: "👻", rarity: "UC", season: "halloween",
+  },
+  {
+    id: "knuckles-halloween", name: "Knuckles momie", universe: "sonic", emoji: "🧟", rarity: "UC", season: "halloween",
+  },
+  {
+    id: "cuphead-halloween", name: "Cuphead démoniaque", universe: "cuphead", emoji: "😈", rarity: "UC", season: "halloween",
+  },
+  {
+    id: "crash-halloween", name: "Crash citrouille", universe: "crash", emoji: "🎃", rarity: "UC", season: "halloween",
+  },
+  {
+    id: "bowser-halloween", name: "Bowser citrouille", universe: "mario", emoji: "🎃", rarity: "R", season: "halloween",
+  },
+  {
+    id: "peach-halloween", name: "Peach ensorcelée", universe: "mario", emoji: "🕸️", rarity: "R", season: "halloween",
+  },
+  {
+    id: "zelda-halloween", name: "Zelda revenante", universe: "zelda", emoji: "🦇", rarity: "R", season: "halloween",
+  },
+  {
+    id: "alucard-halloween", name: "Alucard vampire", universe: "castlevania", emoji: "🧛", rarity: "R", season: "halloween",
+  },
+  {
+    id: "nemesis-halloween", name: "Nemesis rampant", universe: "residentevil", emoji: "🧟", rarity: "SR", season: "halloween",
+  },
+  {
+    id: "doom-slayer-halloween", name: "Doom Slayer infernal", universe: "doom", emoji: "💀", rarity: "SR", season: "halloween",
+  },
+  {
+    id: "master-chief-halloween", name: "Master Chief hanté", universe: "halo", emoji: "👽", rarity: "SR", season: "halloween",
+  },
+  {
+    id: "dante-halloween", name: "Dante démoniaque", universe: "dmc", emoji: "😈", rarity: "SR", season: "halloween",
+  },
+  {
+    id: "mario-halloween", name: "Mario fantôme", universe: "mario", emoji: "👻", rarity: "UR", season: "halloween",
+  },
+  {
+    id: "link-halloween", name: "Link d'outre-tombe", universe: "zelda", emoji: "💀", rarity: "UR", season: "halloween",
+  },
+  {
+    id: "sonic-halloween", name: "Sonic loup-garou", universe: "sonic", emoji: "🐺", rarity: "UR", season: "halloween",
+  },
+  {
+    id: "kirby-halloween", name: "Kirby citrouille", universe: "kirby", emoji: "🎃", rarity: "L", season: "halloween",
+  },
 ];
 
 // Index des ajouts et corrections de l'atelier, par identifiant.
@@ -2200,6 +2282,12 @@ export const CARDS: Card[] = [
   ...BASE_CARDS.map((card) => ATELIER_BY_ID.get(card.id) ?? card),
   ...ATELIER_CARDS.filter((card) => !BASE_IDS.has(card.id)),
 ];
+
+/** Cartes approuvées dans l'admin, disponibles immédiatement après publication. */
+function allCards(): Card[] {
+  const known = new Set(CARDS.map((card) => card.id));
+  return [...CARDS, ...publishedCards().filter((card) => !known.has(card.id))];
+}
 
 /**
  * Contrôle d'unicité du catalogue.
@@ -2253,7 +2341,25 @@ export function isRetiredCard(id: string): boolean {
  * et les corrections faites en ligne (nom, rareté…) sont appliquées.
  */
 export function catalogCards(): Card[] {
-  return applyCardEdits(CARDS).filter((card) => card.retired !== true);
+  const published = publishedCardEdits().map((edit) => ({
+    cardId: edit.cardId,
+    number: edit.publishedCard?.number,
+  }));
+  const byId = new Map(published.map((edit) => [edit.cardId, edit]));
+  return applyCardEdits(allCards())
+    .filter((card) => card.retired !== true)
+    .map((card) => {
+      const edit = byId.get(card.id);
+      return edit ? { ...card, number: edit.number } : card;
+    });
+}
+
+/** Cartes du catalogue triées par le numéro persistant de l'album. */
+export function catalogNumberedCards(): Card[] {
+  return catalogCards().sort((a, b) =>
+    (a.number ?? CARD_NUMBERS.get(a.id) ?? Number.MAX_SAFE_INTEGER)
+      - (b.number ?? CARD_NUMBERS.get(b.id) ?? Number.MAX_SAFE_INTEGER),
+  );
 }
 
 /**
@@ -2279,18 +2385,22 @@ export function getCard(id: string): Card | undefined {
   // Une carte retirée depuis l'atelier en ligne n'existe plus pour le site.
   if (isHiddenCard(id)) return undefined;
   const card = CARDS_BY_ID.get(id);
-  return card ? applyCardEdit(card) : undefined;
+  if (card) return applyCardEdit(card);
+  const published = publishedCards().find((entry) => entry.id === id);
+  return published ? applyPublishedCardEdit(published) : undefined;
 }
 
 export function getCardNumber(id: string): number | undefined {
-  return CARD_NUMBERS.get(id);
+  return CARD_NUMBERS.get(id) ?? publishedCards().find((card) => card.id === id)?.number;
 }
 
-export function getUniverseLabel(key: UniverseKey): string {
-  return UNIVERSES[key].label;
+export function getUniverseLabel(key: UniverseKey | string): string {
+  return UNIVERSES[key as UniverseKey]?.label ?? key;
 }
 
 export function getCardGradient(card: Card): { from: string; to: string } {
   const universe = UNIVERSES[card.universe];
-  return { from: universe.from, to: universe.to };
+  if (universe) return { from: universe.from, to: universe.to };
+  const hue = [...String(card.universe)].reduce((sum, char) => (sum * 31 + char.charCodeAt(0)) % 360, 0);
+  return { from: `hsl(${hue} 55% 28%)`, to: `hsl(${(hue + 42) % 360} 55% 12%)` };
 }

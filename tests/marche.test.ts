@@ -104,6 +104,17 @@ test("annonce : une nouvelle annonce sert les ordres en attente", () => {
   assert.match(MIGRATION, /perform public\.match_card_orders\(new\.card_id, new\.holo\)/);
 });
 
+test("appariement : un ordre incompatible ne bloque pas les autres acheteurs", () => {
+  const fix = fs.readFileSync(path.join(process.cwd(), "supabase/migrations/060_appariement_ordres.sql"), "utf8");
+  assert.match(fix, /v_skipped bigint\[\] := '\{\}'/);
+  assert.match(fix, /not \(id = any \(v_skipped\)\)/);
+  assert.match(fix, /seller_id <> v_order\.buyer_id/);
+  assert.match(fix, /if not found then\s*v_skipped := array_append\(v_skipped, v_order\.id\);\s*continue;/);
+  assert.match(fix, /order by max_price desc, created_at asc/);
+  assert.match(fix, /order by price_pixels asc, created_at asc/);
+  assert.equal(fix.match(/for update skip locked/g)?.length, 2);
+});
+
 test("réglages et rollback sont documentés", () => {
   assert.match(MIGRATION, /\('market_max_orders', '20'::jsonb\)/);
   assert.match(MIGRATION, /ROLLBACK/);

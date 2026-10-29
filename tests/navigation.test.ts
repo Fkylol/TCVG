@@ -24,13 +24,20 @@ test("navigation : la barre passe à la ligne au lieu de défiler", () => {
   assert.doesNotMatch(nav, /overflow-x-auto/);
 });
 
+test("navigation mobile : la barre multi-rangée garde des coins compacts", () => {
+  const topbar = HEADER.match(/className="topbar ([^"]+)"/)?.[1] ?? "";
+  assert.match(topbar, /rounded-2xl/);
+  assert.match(topbar, /sm:rounded-full/);
+});
+
 test("navigation : l'accueil garde les onglets d'administration", () => {
   // La barre ne change pas d'onglets d'une page à l'autre : l'accueil oubliait
   // `admin` et `atelier`, donc un administrateur ne voyait plus « Admin » en
   // revenant sur la landing.
   assert.match(ACCUEIL, /rpc\("is_admin"\)/);
   assert.match(ACCUEIL, /admin=\{admin\}/);
-  assert.match(ACCUEIL, /atelier=\{canUseAtelier\(profile\?\.username\)\}/);
+  assert.match(ACCUEIL, /canUseAtelier\(session\.supabase\)/);
+  assert.match(ACCUEIL, /atelier=\{atelier\}/);
 });
 
 test("navigation : l'Agora vit dans le marché, plus dans l'en-tête", () => {

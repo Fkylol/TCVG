@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { SiteFooter } from "@/components/site-footer";
+import { getLocale, translate } from "@/lib/locale";
 import { SiteHeader } from "@/components/site-header";
 import { CardFace } from "@/components/card-face";
 import { canUseAtelier } from "@/lib/atelier-access";
@@ -23,15 +24,20 @@ const SHOWCASE = ["kratos", "mario", "sonic", "link", "samus", "kirby"]
   .filter((card): card is NonNullable<typeof card> => Boolean(card));
 
 export default async function Home() {
+  const locale = await getLocale();
+  const t = (text: string) => translate(text, locale);
   // La landing est publique, mais elle doit refléter la session : sinon le header
   // affiche « Connexion » à un joueur connecté venu cliquer sur le logo.
   const session = await getSession();
   const profile = session ? await getProfile(session.supabase, session.user) : null;
   // Le drapeau d'administration et l'atelier se calculent ici aussi : sans eux,
   // la barre du haut perdait ses onglets en revenant sur l'accueil.
-  const admin = session
-    ? (await session.supabase.rpc("is_admin")).data === true
-    : false;
+  const [admin, atelier] = session
+    ? await Promise.all([
+        session.supabase.rpc("is_admin").then(({ data }) => data === true),
+        canUseAtelier(session.supabase),
+      ])
+    : [false, false];
 
   // Bandeau d'invitation : le cookie a été déposé par /invite/<code>. Il ne
   // s'affiche que pour un visiteur pas encore inscrit (un compte existant ne
@@ -49,7 +55,7 @@ export default async function Home() {
         avatarCardId={profile?.avatarCardId}
         frame={profile?.frame}
         admin={admin}
-        atelier={canUseAtelier(profile?.username)}
+        atelier={atelier}
       />
 
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-12 sm:py-16">
@@ -62,11 +68,10 @@ export default async function Home() {
               <span className="mr-2" aria-hidden>
                 🎟️
               </span>
-              <strong className="text-white">{invite.username}</strong> t&apos;invite sur TCVG —
-              crée ton compte avec Discord pour rejoindre son parrainage.
+              <strong className="text-white">{invite.username}</strong>{t(" t'invite sur TCVG — crée ton compte avec Discord pour rejoindre son parrainage.")}
             </p>
             <Link href="/signup" className="btn btn-primary btn-sm">
-              Rejoindre
+              {t("Rejoindre")}
             </Link>
           </div>
         )}
@@ -74,47 +79,45 @@ export default async function Home() {
         <section className="grid items-center gap-10 lg:grid-cols-[1.1fr_1fr]">
           <div>
             <span className="eyebrow">
-              Projet de fan · {catalogSize()} cartes
+              {t("Projet de fan · ")}{catalogSize()}{t(" cartes")}
             </span>
 
             {/* Titre à l'échelle de la vitrine (36 → 48 px) : Syne est large,
                 et à 72 px le titre se lisait comme étiré. */}
             <h1 className="display mt-4 text-4xl sm:text-5xl">
-              Le TCG des
-              <span className="text-cyan"> héros de jeux vidéo</span>.
+              {t("Le TCG des")}
+              <span className="text-cyan"> {t("héros de jeux vidéo")}</span>.
             </h1>
             <span className="title-rule" aria-hidden />
 
             <p className="mt-5 max-w-xl text-lg text-white/65">
-              Ouvre des boosters toutes les {Math.round(BOOSTER_COOLDOWN_MS / 60000)} minutes,
-              collectionne Kratos, Mario, Spyro et tout le reste, et complète un album de{" "}
-              {catalogSize()} personnages — du Commun au Mythique.
+              {t("Ouvre des boosters toutes les ")}{Math.round(BOOSTER_COOLDOWN_MS / 60000)}{t(" minutes, collectionne Kratos, Mario, Spyro et tout le reste, et complète un album de ")}{catalogSize()}{t(" personnages — du Commun au Mythique.")}
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3">
               {profile ? (
                 <>
                   <Link href="/boosters" className="btn btn-primary btn-lg">
-                    Continuer ma collection
+                    {t("Continuer ma collection")}
                   </Link>
                   <Link href="/collection" className="btn btn-outline btn-lg">
-                    Voir mes cartes
+                    {t("Voir mes cartes")}
                   </Link>
                 </>
               ) : (
                 <>
                   <Link href="/signup" className="btn btn-primary btn-lg">
-                    Créer mon compte — gratuit
+                    {t("Créer mon compte — gratuit")}
                   </Link>
                   <Link href="/login" className="btn btn-outline btn-lg">
-                    Se connecter
+                    {t("Se connecter")}
                   </Link>
                 </>
               )}
             </div>
 
             <p className="mt-6 text-xs text-white/35">
-              Pas de paiement, pas de pub, pas de hasard monétisé : uniquement des boosters gratuits.
+              {t("Pas de paiement, pas de pub, pas de hasard monétisé : uniquement des boosters gratuits.")}
             </p>
           </div>
 
@@ -132,18 +135,18 @@ export default async function Home() {
         <section className="grid gap-4 sm:grid-cols-3">
           <Step
             n="1"
-            title={`Ouvre un booster (×${CARDS_PER_BOOSTER} cartes)`}
-            text={`Un pack gratuit toutes les ${Math.round(BOOSTER_COOLDOWN_MS / 60000)} minutes. Chaque carte a sa propre rareté tirée au sort.`}
+            title={`${t("Ouvre un booster (×")}${CARDS_PER_BOOSTER}${t(" cartes)")}`}
+            text={`${t("Un pack gratuit toutes les ")}${Math.round(BOOSTER_COOLDOWN_MS / 60000)}${t(" minutes. Chaque carte a sa propre rareté tirée au sort.")}`}
           />
           <Step
             n="2"
-            title="Complète ta collection"
-            text="Chaque personnage existe en un seul exemplaire unique dans l'album ; les doublons renforcent ton total."
+            title={t("Complète ta collection")}
+            text={t("Chaque personnage existe en un seul exemplaire unique dans l'album ; les doublons renforcent ton total.")}
           />
           <Step
             n="3"
-            title="Explore les fiches"
-            text="Stats, pouvoir, citation et bio pour chaque personnage : la carte est aussi une page wiki."
+            title={t("Explore les fiches")}
+            text={t("Stats, pouvoir, citation et bio pour chaque personnage : la carte est aussi une page wiki.")}
           />
         </section>
 
@@ -152,11 +155,11 @@ export default async function Home() {
         <section id="raretes" className="panel panel-accent scroll-mt-20 p-6 sm:p-8">
           <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-2">
             <div>
-              <span className="eyebrow">Raretés</span>
-              <h2 className="display mt-2 text-2xl sm:text-3xl">De commune à mythique</h2>
+              <span className="eyebrow">{t("Raretés")}</span>
+              <h2 className="display mt-2 text-2xl sm:text-3xl">{t("De commune à mythique")}</h2>
             </div>
             <p className="max-w-xs text-sm leading-relaxed text-white/45">
-              Chances d&apos;apparition par carte, dans un booster.
+              {t("Chances d'apparition par carte, dans un booster.")}
             </p>
           </div>
 
@@ -181,7 +184,7 @@ export default async function Home() {
                       {info.short}
                     </span>
                     <span className="font-mono text-[11px] whitespace-nowrap text-white/35">
-                      {count} cartes
+                      {count}{t(" cartes")}
                     </span>
                   </div>
                   {/* Le nom porte la couleur de sa rareté : `font-display` donne

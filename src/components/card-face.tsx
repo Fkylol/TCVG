@@ -92,6 +92,7 @@ export function CardFace({
       data-muted={muted ? "true" : undefined}
       data-retired={gone ? "true" : undefined}
       data-holo={holo && !gone ? "true" : undefined}
+      data-season={card.season}
       className={`card-face ${className}`}
     >
       <div className="card-head">
@@ -131,11 +132,16 @@ export function CardFace({
           #{String(number ?? 0).padStart(2, "0")}/{total}
         </span>
 
-        {(variant !== "normal" || gone) && (
+        {(variant !== "normal" || gone || card.season === "halloween") && (
           <span className="card-tags">
             {variant !== "normal" && (
               <span className="card-misprint" title={VARIANT_HINTS[variant]}>
                 {VARIANT_LABELS[variant]}
+              </span>
+            )}
+            {card.season === "halloween" && (
+              <span className="card-misprint card-season" title="Carte exclusive d'Halloween">
+                Halloween
               </span>
             )}
             {gone && (

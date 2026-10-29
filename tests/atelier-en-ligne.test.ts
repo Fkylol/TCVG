@@ -8,6 +8,7 @@ const read = (file: string) => fs.readFileSync(path.join(process.cwd(), file), "
 const MIGRATION = read("supabase/migrations/054_cartes_edition_en_ligne.sql");
 const FRAMING_MIGRATION = read("supabase/migrations/056_cadrage_visuel_en_ligne.sql");
 const SAVE_MIGRATION = read("supabase/migrations/057_enregistrement_sans_reecriture.sql");
+const SECURITY_MIGRATION = read("supabase/migrations/058_securite_atelier_halloween.sql");
 const EDITS = read("src/lib/card-edits.ts");
 const SERVER = read("src/lib/card-edits.server.ts");
 const CARDS = read("src/lib/cards.ts");
@@ -56,11 +57,34 @@ test("catalogue en ligne : le visuel se recadre sans changer d'image", () => {
 
 test("catalogue en ligne : le serveur installe les éditions avant le rendu", () => {
   assert.match(SERVER, /from\("card_edits"\)/);
-  assert.match(SERVER, /setCardEdits\(cache\)/);
+  assert.match(SERVER, /publishCardEdits\(cache\)/);
   // Le layout racine les pose aussi dans la page, avant l'hydratation.
-  assert.match(LAYOUT, /await installCardEdits\(\)/);
+  assert.match(LAYOUT, /installCardEdits\(\)/);
+  assert.match(LAYOUT, /Promise\.all\(\[/);
   assert.match(LAYOUT, /globalThis\.__CARD_EDITS__=/);
   assert.match(EDITS, /__CARD_EDITS__/);
+});
+
+test("catalogue en ligne : le rendu serveur des composants clients relit la liste", () => {
+  // `card-face.tsx` est compilé deux fois (serveur et navigateur) : la copie
+  // du rendu serveur ne voyait jamais les éditions installées par le layout,
+  // d'où un total qui changeait à l'hydratation.
+  assert.match(
+    EDITS,
+    /export function publishCardEdits\(rows: CardEdit\[\]\): void \{\s*\n\s*\(globalThis as Boot\)\.__CARD_EDITS__ = rows;/,
+  );
+  assert.match(EDITS, /function syncBoot\(\): void \{/);
+  assert.match(EDITS, /if \(!Array\.isArray\(boot\) \|\| boot === BOOT\) return;/);
+
+  // La relecture se fait à l'usage, pas au chargement du module : l'ordre
+  // d'évaluation des deux copies n'est pas garanti.
+  for (const accessor of ["cardEditsVersion", "isHiddenCard", "applyCardEdit"]) {
+    assert.match(
+      EDITS.slice(EDITS.indexOf(`export function ${accessor}`)),
+      /syncBoot\(\);/,
+      `${accessor} ne relit pas la liste publiée`,
+    );
+  }
 });
 
 test("catalogue en ligne : écriture réservée à l'atelier", () => {
@@ -76,6 +100,14 @@ test("catalogue en ligne : écriture réservée à l'atelier", () => {
   }
   assert.match(ACTIONS, /atelier_save_card_edit/);
   assert.match(ACTIONS, /atelier_delete_card/);
+});
+
+test("atelier : les droits sont liés aux UUID et refusés par défaut", () => {
+  assert.match(SECURITY_MIGRATION, /user_id uuid primary key references auth\.users\(id\)/);
+  assert.match(SECURITY_MIGRATION, /revoke all on public\.atelier_members from public, anon, authenticated/);
+  assert.match(SECURITY_MIGRATION, /where user_id = auth\.uid\(\)/);
+  assert.doesNotMatch(SECURITY_MIGRATION.replace(/^\s*--.*$/gm, ""), /insert into public\.atelier_members/i);
+  assert.doesNotMatch(SECURITY_MIGRATION, /username/);
 });
 
 test("catalogue en ligne : suppression complète, copies comprises", () => {

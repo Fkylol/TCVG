@@ -10,16 +10,6 @@ type OverlayOptions = {
   boosterPumpkin?: boolean;
   boosterEndpoint?: string;
   zIndex?: number;
-  /** Éclairage à la torche sur une zone (voir `public/events/halloween-overlay.js`). */
-  torch?: boolean;
-  torchTarget?: string;
-  torchRadius?: number;
-  torchDarkness?: number;
-  /** Marge assombrie autour de la zone (px), voir `torchPadding` du script. */
-  torchPadding?: number;
-  /** Marge du haut, quand la zone doit en garder plus que les trois autres. */
-  torchPaddingTop?: number;
-  torchFlicker?: boolean;
   [key: string]: unknown;
 };
 
@@ -63,21 +53,9 @@ export function HalloweenOverlay({
       witch: false,
       boosterPumpkin: true,
       boosterEndpoint: "/api/halloween/booster",
-      // Les boosters baignent dans le noir : la souris fait office de torche et
-      // la pile flanche par instants. Uniquement au survol (pas de tactile).
-      torch: true,
-      torchTarget: "[data-hw-torch]",
-      torchRadius: 190,
-      torchDarkness: 0.9,
-      // 20 px sur les côtés et en bas : le cadre n'inclut pas les transformations
-      // des enfants, et le poster ne descend jamais plus bas que sa place.
-      torchPadding: 20,
-      // 36 px en haut : le poster flotte (8 px de battement), reste soulevé de
-      // 8 px, grossit de 4 % (8 px) et tourne de 1,4° — soit une trentaine de
-      // pixels au-dessus de la grille. La scène est descendue d'autant
-      // (`mt-14`) pour que le cadre garde la même distance au bandeau d'en haut.
-      torchPaddingTop: 36,
-      torchFlicker: true,
+      // Pas de voile sombre ni de torche : les boosters restent lisibles, la
+      // pénombre d'Halloween se limite au décor du fond.
+      torch: false,
       zIndex,
     };
 

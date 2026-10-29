@@ -13,18 +13,17 @@
  * ⚠️ Réservé au serveur : écrit sur le disque et lance un processus enfant.
  */
 
-import { exec } from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { promisify } from "node:util";
 
 import { type CardDraft, validateDraft } from "./atelier-core";
 import { GENRES } from "./card-genres";
 import { CARDS, UNIVERSES } from "./cards";
+import type { Card } from "./cards";
+import { cardStats } from "./stats";
+import { openRunner } from "../../scripts/lib/db-runner";
 import type { CardLore } from "./card-lore";
 import type { Portrait } from "./portraits";
-
-const run = promisify(exec);
 
 const CARDS_FILE = path.join(process.cwd(), "src", "data", "atelier-cards.json");
 const LORE_FILE = path.join(process.cwd(), "src", "data", "atelier-lore.json");
@@ -153,7 +152,9 @@ export async function saveDraft(draft: CardDraft): Promise<SaveResult> {
   await writeJson(LORE_FILE, { note: LORE_NOTE, lore: lore.lore });
 
   // Sans `.env`, la synchro échoue : la carte reste écrite, on le dit.
-  const sync = await syncDatabase();
+  // Synchronise uniquement cette entrée ; db:cards effectue une purge complète
+  // et serait à la fois lent et risqué pour un enregistrement unitaire.
+  const sync = await syncCard(candidate, payload.cards);
   const verb = editing ? "Carte mise à jour" : "Carte ajoutée";
   return {
     ok: true,
@@ -165,20 +166,86 @@ export async function saveDraft(draft: CardDraft): Promise<SaveResult> {
   };
 }
 
-/** Lance `npm run db:cards` (recopie du catalogue vers Supabase). */
-export async function syncDatabase(): Promise<{ ok: boolean; message: string }> {
+/** Synchronise une carte sans réécrire ni purger le reste du catalogue. */
+async function syncCard(
+  card: CardDraft,
+  atelierCards: CardsPayload["cards"],
+): Promise<{ ok: boolean; message: string }> {
+  let runner: Awaited<ReturnType<typeof openRunner>> | undefined;
   try {
-    const { stdout, stderr } = await run("npm run db:cards", {
-      cwd: process.cwd(),
-      timeout: 180_000,
-      maxBuffer: 4 * 1024 * 1024,
-      windowsHide: true,
-    });
-    const output = `${stdout}\n${stderr}`.trim().split("\n").filter(Boolean).slice(-3).join(" · ");
-    return { ok: true, message: output || "synchronisé" };
+    runner = await openRunner();
+    const franchise = UNIVERSES[card.universe as keyof typeof UNIVERSES];
+    const codeIndex = CARDS.findIndex((entry) => entry.id === card.id);
+    const atelierOnly = atelierCards
+      .filter((entry) => !CARDS.some((catalogCard) => catalogCard.id === entry.id))
+      .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+    const atelierIndex = atelierOnly.findIndex((entry) => entry.id === card.id);
+    const number = codeIndex >= 0 ? codeIndex + 1 : CARDS.length + atelierIndex + 1;
+    const quality = cardStats({
+      id: card.id,
+      name: card.name,
+      universe: card.universe as Card["universe"],
+      emoji: card.emoji,
+      rarity: card.rarity,
+    }).quality;
+    const quote = (value: string) => `'${value.replace(/'/g, "''")}'`;
+    const genres = card.genres
+      .map((slug) => {
+        const genre = GENRES.find((entry) => entry.slug === slug);
+        if (!genre) throw new Error(`Genre inconnu : ${slug}`);
+        return `(${quote(genre.slug)}, ${quote(genre.name)})`;
+      })
+      .join(", ");
+    if (!genres) throw new Error("La carte doit avoir au moins un genre.");
+    const id = quote(card.id);
+    const universe = quote(card.universe);
+
+    const sql = `
+with franchise as (
+  insert into public.franchises (slug, name)
+  values (${universe}, ${quote(franchise.label)})
+  on conflict (slug) do update set name = excluded.name
+  returning id
+), upsert_card as (
+  insert into public.cards (id, name, universe, rarity, number, quality, franchise_id, active, retired_reason)
+  select ${id}, ${quote(card.name)}, ${universe}, ${quote(card.rarity)}, ${number}, ${quality}, franchise.id, true, null
+    from franchise
+  on conflict (id) do update
+    set name = excluded.name,
+        universe = excluded.universe,
+        rarity = excluded.rarity,
+        number = excluded.number,
+        quality = excluded.quality,
+        franchise_id = excluded.franchise_id,
+        active = true,
+        retired_at = null,
+        retired_reason = null,
+        updated_at = now()
+  returning id
+), upsert_genres as (
+  insert into public.genres (slug, name)
+  values ${genres}
+  on conflict (slug) do update set name = excluded.name
+  returning id, slug
+), deleted_genres as (
+  delete from public.card_genres
+   where card_id = (select id from upsert_card)
+  returning card_id
+), inserted_genres as (
+  insert into public.card_genres (card_id, genre_id)
+  select upsert_card.id, upsert_genres.id
+    from upsert_card
+    cross join upsert_genres
+    cross join (select count(*) from deleted_genres) as deletion_done
+  on conflict (card_id, genre_id) do nothing
+  returning card_id
+)
+select count(*)::int as genres_linked from inserted_genres;`;
+    await runner.query(sql);
+    return { ok: true, message: runner.label };
   } catch (error) {
-    const failure = error as { message?: string; stdout?: string; stderr?: string };
-    const detail = `${failure.stderr ?? ""}${failure.stdout ?? ""}`.trim().split("\n").filter(Boolean).slice(-3).join(" · ");
-    return { ok: false, message: detail || failure.message || "échec inconnu" };
+    return { ok: false, message: error instanceof Error ? error.message : "échec inconnu" };
+  } finally {
+    await runner?.close();
   }
 }
