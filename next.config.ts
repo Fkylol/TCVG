@@ -42,6 +42,12 @@ const nextConfig: NextConfig = {
       "./node_modules/pg-cloudflare/esm/**",
     ],
   },
+  // Le cache HTTP d'images est uniquement destiné aux outils locaux. L'inclure
+  // dans les traces de l'atelier ferait analyser et copier des milliers de
+  // fichiers sans utilité dans le Worker de production.
+  outputFileTracingExcludes: {
+    "/atelier/**": ["./.images/cache/**"],
+  },
   images: {
     // Les visuels sont hotlinkés depuis Wikipédia : aucune copie n'est stockée ni servie
     // par l'optimiseur d'images de Next (voir `unoptimized` dans CardFace).

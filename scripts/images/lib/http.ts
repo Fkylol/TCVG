@@ -13,7 +13,14 @@ import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
 
-const CACHE_DIR = path.join(process.cwd(), ".images", "cache");
+// Le cache disque sert aux scripts et à l'atelier local. En production, les
+// routes de l'atelier sont désactivées : utiliser un chemin distinct évite
+// que le bundler inspecte le gros cache de développement du dépôt.
+const CACHE_DIR = path.join(
+  process.cwd(),
+  ".images",
+  process.env.NODE_ENV === "production" ? "runtime-cache" : "cache",
+);
 const CONTACT = process.env.SITE_CONTACT ?? "https://tcvg.fun";
 export const CONTACT_FALLBACK = !process.env.SITE_CONTACT;
 
