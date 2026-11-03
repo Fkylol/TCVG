@@ -293,8 +293,11 @@ export function BoosterReveal({
   const soundOn = useSoundOn();
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
   const frame = useRef<number | null>(null);
+  /** Déchirure en attente d'écriture : une seule mise à jour par frame. */
+  const pending = useRef<number | null>(null);
+  const progressFrame = useRef<number | null>(null);
   const stage = useRef<HTMLDivElement>(null);
-  const drag = useRef({ active: false, startX: 0, moved: 0, lastX: 0 });
+  const drag = useRef({ active: false, startX: 0, moved: 0, lastX: 0, reached: 0 });
   // Les visuels sont hotlinkés : sans préchargement, chaque carte révélée
   // attend son aller-retour réseau et s'affiche vide d'abord. On profite donc
   // du pack scellé et de la déchirure pour télécharger tout le tirage.
@@ -320,6 +323,7 @@ export function BoosterReveal({
     () => () => {
       for (const timer of timers.current) clearTimeout(timer);
       if (frame.current !== null) cancelAnimationFrame(frame.current);
+      if (progressFrame.current !== null) cancelAnimationFrame(progressFrame.current);
       sfx.stopRip();
     },
     [],
@@ -362,6 +366,11 @@ export function BoosterReveal({
   /** Le sachet cède : le son part, la bande s'envole, les cartes arrivent. */
   function finishOpen() {
     if (phase === "done" || phase === "fan") return;
+    pending.current = null;
+    if (progressFrame.current !== null) {
+      cancelAnimationFrame(progressFrame.current);
+      progressFrame.current = null;
+    }
     setProgress(1);
     setPhase("tearing");
     sfx.stopRip();
@@ -420,6 +429,24 @@ export function BoosterReveal({
     frame.current = requestAnimationFrame(step);
   }
 
+  /**
+   * Écrit l'avancée de la déchirure une fois par frame.
+   *
+   * Un écran tactile émet plusieurs `pointermove` par frame : chaque
+   * `setProgress` re-rendait les trois posters du sachet, et le geste
+   * saccadait. On ne garde que la dernière position du doigt.
+   */
+  function queueProgress(next: number) {
+    pending.current = next;
+    if (progressFrame.current !== null) return;
+    progressFrame.current = requestAnimationFrame(() => {
+      progressFrame.current = null;
+      const value = pending.current;
+      pending.current = null;
+      if (value !== null) setProgress(value);
+    });
+  }
+
   /** Abscisse du geste, rapportée au poster (5:8) et non au cadre (3:4). */
   function packX(clientX: number, bounds: DOMRect): number {
     const width = bounds.height * (5 / 8);
@@ -432,9 +459,16 @@ export function BoosterReveal({
     const bounds = stage.current.getBoundingClientRect();
     // Seul le haut du sachet se déchire : plus bas, le geste ne fait rien.
     if (event.clientY - bounds.top > bounds.height * 0.26) return;
-    drag.current = { active: true, startX: event.clientX, moved: 0, lastX: event.clientX };
+    const opening = Math.min(0.1, packX(event.clientX, bounds));
+    drag.current = {
+      active: true,
+      startX: event.clientX,
+      moved: 0,
+      lastX: event.clientX,
+      reached: opening,
+    };
     stage.current.setPointerCapture(event.pointerId);
-    setProgress(Math.min(0.1, packX(event.clientX, bounds)));
+    setProgress(opening);
   }
 
   function onPointerMove(event: ReactPointerEvent<HTMLDivElement>) {
@@ -443,10 +477,13 @@ export function BoosterReveal({
     const moved = Math.abs(event.clientX - drag.current.startX);
     drag.current.moved = Math.max(drag.current.moved, moved);
 
-    const next = Math.max(progress, packX(event.clientX, bounds));
+    // La soudure ne se referme jamais sous le doigt : on garde l'avancée
+    // maximale atteinte pendant ce geste.
+    const next = Math.max(drag.current.reached, packX(event.clientX, bounds));
     const speed = Math.min(1, Math.abs(event.clientX - drag.current.lastX) / 28);
     drag.current.lastX = event.clientX;
-    if (next > progress && next < 1) sfx.rip(speed);
+    if (next > drag.current.reached && next < 1) sfx.rip(speed);
+    drag.current.reached = next;
 
     if (next >= 0.97) {
       drag.current.active = false;
@@ -454,7 +491,7 @@ export function BoosterReveal({
       finishOpen();
       return;
     }
-    setProgress(next);
+    queueProgress(next);
   }
 
   function onPointerUp() {
@@ -496,6 +533,11 @@ export function BoosterReveal({
     timers.current = [];
     if (frame.current !== null) cancelAnimationFrame(frame.current);
     frame.current = null;
+    pending.current = null;
+    if (progressFrame.current !== null) {
+      cancelAnimationFrame(progressFrame.current);
+      progressFrame.current = null;
+    }
     sfx.stopRip();
     setFlipped(null);
     setFaceRevealed(false);
@@ -968,7 +1010,14 @@ export function BoosterReveal({
                 </div>
 
                 <p className="text-[11px] text-white/35">
-                  {t("Touche la carte")} <span className="text-white/20">·</span> {t("Espace / Entrée")} <span className="text-white/20">·</span> {t("retourner")}
+                  {t("Touche la carte")}
+                  {/* L'aide clavier ne sert à rien au doigt et coûtait une ligne
+                      entière au pied de la carte sur les petits écrans. */}
+                  <span className="hidden sm:inline">
+                    {" "}
+                    <span className="text-white/20">·</span> {t("Espace / Entrée")}{" "}
+                    <span className="text-white/20">·</span> {t("retourner")}
+                  </span>
                 </p>
               </>
             )}

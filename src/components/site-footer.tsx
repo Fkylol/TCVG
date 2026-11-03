@@ -9,7 +9,9 @@ export async function SiteFooter() {
   const t = (text: string) => translate(text, locale);
   return (
     <footer className="mt-10 border-t border-white/10">
-      <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-8 sm:flex-row sm:items-center sm:justify-between">
+      {/* Marge basse sur téléphone : le bouton flottant de l'Agora passait
+          par-dessus les derniers liens du pied de page. */}
+      <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 pb-24 pt-8 sm:flex-row sm:items-center sm:justify-between sm:pb-8">
         <p className="flex max-w-md items-start gap-2 text-[11px] leading-relaxed text-[color:var(--muted)]">
           <LogoMark id="footer" className="mt-px h-5 w-5 shrink-0" />
           <span>

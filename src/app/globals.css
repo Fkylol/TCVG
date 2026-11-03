@@ -46,6 +46,9 @@
 
 html {
   color-scheme: dark;
+  /* Sans cela, iOS gonfle le texte des blocs étroits (pastilles, fiches). */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
@@ -58,6 +61,15 @@ body {
   background-repeat: no-repeat;
   color: var(--text);
   font-family: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Tactile : le tap répond au premier contact — pas de double-tap zoom ni de
+   halo gris sur les commandes. Le défilement de la page n'est pas touché. */
+a,
+button,
+[role="button"] {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* Les classes d'identité vivent dans la couche `components` : les utilitaires
@@ -550,6 +562,8 @@ button:focus-visible .pack-poster[data-flat="true"] {
   letter-spacing: 0;
   text-transform: none;
   line-height: 1.1;
+  /* Cible tactile confortable au doigt. */
+  min-height: 38px;
   cursor: pointer;
   transition:
     transform 150ms ease,
@@ -602,6 +616,7 @@ button:focus-visible .pack-poster[data-flat="true"] {
 }
 
 .btn-sm {
+  min-height: 32px;
   padding: 0.38rem 0.7rem;
   font-size: 0.75rem;
 }
@@ -1958,6 +1973,9 @@ button:focus-visible .pack-poster[data-flat="true"] {
   /* La gerbe de l'ouverture déborde volontairement de la scène : sans cela,
      l'écran gagnait une barre de défilement horizontale le temps du "boum". */
   overflow-x: hidden;
+  /* Le rebond élastique du téléphone reste dans l'écran d'ouverture : le geste
+     de déchirure ne fait plus trembler la page derrière. */
+  overscroll-behavior: contain;
   background:
     radial-gradient(120% 70% at 50% 0%, rgba(255, 255, 255, 0.055), transparent 62%),
     #06080a;
@@ -2013,9 +2031,14 @@ button:focus-visible .pack-poster[data-flat="true"] {
   display: grid;
   place-items: center;
   width: min(86vw, 380px, 52vh);
+  /* `svh` : la scène ne se redimensionne plus quand la barre d'adresse du
+     téléphone se replie — c'était un sursaut en pleine ouverture. */
+  width: min(86vw, 380px, 52svh);
   aspect-ratio: 3 / 4;
   margin-bottom: 10px;
-  touch-action: none;
+  /* La déchirure est un geste horizontal : le défilement vertical reste
+     possible, pour atteindre les commandes sous la scène. */
+  touch-action: pan-y;
 }
 
 .reveal-stage > * {
@@ -2137,7 +2160,8 @@ button:focus-visible .pack-poster[data-flat="true"] {
   background: none;
   cursor: pointer;
   outline: none;
-  touch-action: none;
+  /* Horizontal au doigt, vertical pour faire défiler l'écran d'ouverture. */
+  touch-action: pan-y;
   animation: pack-hover 4.6s ease-in-out infinite;
   transition:
     transform 500ms cubic-bezier(0.5, 0, 0.8, 0.4),
@@ -2234,25 +2258,13 @@ button:focus-visible .pack-poster[data-flat="true"] {
     opacity 450ms ease-in;
 }
 
-/* Le pack tremble brièvement pendant que la soudure cède. */
+/* La soudure cède : le flottement se met en pause au lieu d'être remplacé par
+   une secousse. Deux animations de `transform` sur le même élément faisaient
+   sauter le poster de quelques pixels au moment du geste — d'où le tremblement
+   aperçu sur téléphone. Le mouvement de la déchirure suffit à dire que le
+   sachet cède. */
 .pack-stage[data-tearing="true"] {
-  animation: pack-shake 220ms ease-in-out;
-}
-
-@keyframes pack-shake {
-  0%,
-  100% {
-    transform: none;
-  }
-  20% {
-    transform: translate3d(-3px, 0, 0) rotate(-0.5deg);
-  }
-  45% {
-    transform: translate3d(3px, -1px, 0) rotate(0.6deg);
-  }
-  70% {
-    transform: translate3d(-2px, 1px, 0) rotate(-0.3deg);
-  }
+  animation-play-state: paused;
 }
 
 /* Ligne de soudure : elle n'apparaît que derrière le doigt, sur la partie
@@ -3361,5 +3373,51 @@ button:focus-visible .pack-poster[data-flat="true"] {
      (`data-motion="full"` par défaut : les animations tournent). */
   html:not([data-motion="full"]) .frame-spin-layer {
     animation: none !important;
+  }
+}
+
+/* ————— Confort sur téléphone —————
+
+   Rien ne change sur ordinateur. Trois réglages qui se sentent au doigt : les
+   barres de verre perdent leur flou d'arrière-plan (recalculé à chaque image
+   pendant le défilement), la scène d'ouverture se dimensionne sur la hauteur
+   réellement visible, et les commandes gardent une cible tactile confortable. */
+
+@media (max-width: 640px) {
+  .topbar {
+    background: rgba(10, 13, 28, 0.94);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .reveal-bar {
+    gap: 8px;
+    padding: 10px 12px;
+    background: rgba(6, 8, 10, 0.96);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .reveal-body {
+    padding: 12px 12px 14px;
+  }
+
+  /* La scène garde son ratio 3:4, mais tient compte du pied : sur un écran de
+     667 px de haut, elle laissait sinon le bouton « Déchirer » sous la ligne
+     de flottaison, et il fallait faire défiler pour ouvrir son booster. */
+  .reveal-stage {
+    /* 300 px réservés au pied de carte : nom, rareté, vignettes et boutons
+       tiennent alors sans défilement sur un écran de 667 px de haut. */
+    width: min(88vw, 380px, 52svh, calc((100svh - 300px) * 0.75));
+    margin-bottom: 6px;
+  }
+
+  .reveal-foot {
+    min-height: 148px;
+    gap: 4px;
+  }
+
+  .btn-sm {
+    min-height: 36px;
   }
 }

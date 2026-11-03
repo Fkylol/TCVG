@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { DM_Sans, IBM_Plex_Mono, Syne } from "next/font/google";
 import Script from "next/script";
 import { cookies } from "next/headers";
@@ -59,6 +59,9 @@ export const metadata: Metadata = {
     description,
   },
 };
+
+// Barre du navigateur mobile aux couleurs de la nuit du site.
+export const viewport: Viewport = { themeColor: "#080a16", colorScheme: "dark" };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   // Le catalogue édité en ligne est chargé avant tout rendu : le serveur et le

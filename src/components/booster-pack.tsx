@@ -1,6 +1,6 @@
 "use client";
 
-import type { CSSProperties } from "react";
+import { memo, type CSSProperties } from "react";
 
 import { PackEmblem, PackTexture } from "@/components/pack-art";
 import { CARDS_PER_BOOSTER } from "@/lib/game";
@@ -36,7 +36,12 @@ function hasLightInk(hex: string): boolean {
  * lui-même focusable (planche `/dev/packs`), à n'utiliser que hors d'un bouton
  * parent pour ne pas imbriquer deux contrôles.
  */
-export function BoosterPack({
+/**
+ * Mémoïsé : la scène de révélation re-rend à chaque frame pendant le geste de
+ * déchirure. Les propriétés du poster ne changent pas, il n'a donc aucune
+ * raison d'être reconstruit à chaque mouvement du doigt.
+ */
+export const BoosterPack = memo(function BoosterPack({
   pack,
   locked = false,
   float = false,
@@ -152,4 +157,4 @@ export function BoosterPack({
       {showPrice && <span className="pack-price">Gratuit</span>}
     </span>
   );
-}
+});
